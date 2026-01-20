@@ -46,16 +46,20 @@ attest:
    permissions:
      id-token: write
      attestations: write
+     artifact-metadata: write
    ```
 
    The `id-token` permission gives the action the ability to mint the OIDC token
    necessary to request a Sigstore signing certificate. The `attestations`
    permission is necessary to persist the attestation.
+   The `artifact-metadata` permission is required to generate artifact
+   metadata storage records. If this permission is not included, the action
+   will continue without creating the record.
 
 1. Add the following to your workflow after your artifact has been built:
 
    ```yaml
-   - uses: actions/attest-build-provenance@v2
+   - uses: actions/attest-build-provenance@v3
      with:
        subject-path: '<PATH TO ARTIFACT>'
    ```
@@ -68,7 +72,7 @@ attest:
 See [action.yml](action.yml)
 
 ```yaml
-- uses: actions/attest-build-provenance@v2
+- uses: actions/attest-build-provenance@v3
   with:
     # Path to the artifact serving as the subject of the attestation. Must
     # specify exactly one of "subject-path", "subject-digest", or
@@ -95,6 +99,12 @@ See [action.yml](action.yml)
     # the "subject-digest" parameter be specified. Defaults to false.
     push-to-registry:
 
+    # Whether to create a storage record for the artifact.
+    # Requires that push-to-registry is set to true.
+    # Requires that the "subject-name" parameter specify the fully-qualified
+    # image name. Defaults to true.
+    create-storage-record:
+
     # Whether to attach a list of generated attestations to the workflow run
     # summary page. Defaults to true.
     show-summary:
@@ -120,6 +130,10 @@ Attestations are saved in the JSON-serialized [Sigstore bundle][6] format.
 
 If multiple subjects are being attested at the same time, a single attestation
 will be created with references to each of the supplied subjects.
+
+The absolute path to the generated attestation is appended to the file
+`${RUNNER_TEMP}/created_attestation_paths.txt`. This file will accumulate the
+paths to all attestations created over the course of a single workflow.
 
 ## Attestation Limits
 
@@ -155,7 +169,7 @@ jobs:
       - name: Build artifact
         run: make my-app
       - name: Attest
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@v3
         with:
           subject-path: '${{ github.workspace }}/my-app'
 ```
@@ -166,7 +180,7 @@ If you are generating multiple artifacts, you can attest all of them at the same
 time by using a wildcard in the `subject-path` input.
 
 ```yaml
-- uses: actions/attest-build-provenance@v2
+- uses: actions/attest-build-provenance@v3
   with:
     subject-path: 'dist/**/my-bin-*'
 ```
@@ -178,13 +192,13 @@ Alternatively, you can explicitly list multiple subjects with either a comma or
 newline delimited list:
 
 ```yaml
-- uses: actions/attest-build-provenance@v2
+- uses: actions/attest-build-provenance@v3
   with:
     subject-path: 'dist/foo, dist/bar'
 ```
 
 ```yaml
-- uses: actions/attest-build-provenance@v2
+- uses: actions/attest-build-provenance@v3
   with:
     subject-path: |
       dist/foo
@@ -205,7 +219,7 @@ attestation.
 - name: Calculate artifact digests
   run: |
     shasum -a 256 foo_0.0.1_* > subject.checksums.txt
-- uses: actions/attest-build-provenance@v2
+- uses: actions/attest-build-provenance@v3
   with:
     subject-checksums: subject.checksums.txt
 ```
@@ -278,13 +292,32 @@ jobs:
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
       - name: Attest
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@v3
         id: attest
         with:
           subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
 ```
+
+#### Artifact Metadata Storage Records
+
+If the `push-to-registry` option is set to true, the Action will also
+emit an [Artifact Metadata Storage Record](https://docs.github.com/en/rest/orgs/artifact-metadata?apiVersion=2022-11-28#create-artifact-metadata-storage-record).
+Storage records enrich artifact metadata by capturing storage
+related details, such as which registry an image is hosted on
+and whether it's marked as active.
+
+If you do not want to emit a storage record, set `create-storage-record` to `false`.
+
+> **NOTE**: Storage records can only be created for artifacts
+> built from [organization-owned](https://docs.github.com/en/organizations/collaborating-with-groups-in-organizations/about-organizations)
+> repositories.
+
+Artifacts associated with a storage record can be viewed by navigating to
+the `Linked Artifacts` page in your organization:
+`https://github.com/orgs/YOUR_ORG/artifacts`
+(replace `YOUR_ORG` with your organization name).
 
 ### Integration with `actions/upload-artifact`
 
@@ -300,7 +333,7 @@ artifact directly into the `subject-digest` input of the attestation action.
     path: dist/*
     name: artifact.zip
 
-- uses: actions/attest-build-provenance@v2
+- uses: actions/attest-build-provenance@v3
   with:
     subject-name: artifact.zip
     subject-digest: sha256:${{ steps.upload.outputs.artifact-digest }}

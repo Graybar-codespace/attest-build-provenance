@@ -1,6 +1,106 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
+/***/ 33354:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.createStorageRecord = createStorageRecord;
+const github = __importStar(__nccwpck_require__(93228));
+const plugin_retry_1 = __nccwpck_require__(33450);
+const CREATE_STORAGE_RECORD_REQUEST = 'POST /orgs/{owner}/artifacts/metadata/storage-record';
+const DEFAULT_RETRY_COUNT = 5;
+/**
+ * Writes a storage record on behalf of an artifact that has been attested
+ * @param artifactOptions - parameters for the storage record API request.
+ * @param packageRegistryOptions - parameters for the package registry API request.
+ * @param token - GitHub token used to authenticate the request.
+ * @param retryAttempts - The number of retries to attempt if the request fails.
+ * @param headers - Additional headers to include in the request.
+ *
+ * @returns The ID of the storage record.
+ * @throws Error if the storage record fails to persist.
+ */
+function createStorageRecord(artifactOptions, packageRegistryOptions, token, retryAttempts, headers) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const retries = retryAttempts !== null && retryAttempts !== void 0 ? retryAttempts : DEFAULT_RETRY_COUNT;
+        const octokit = github.getOctokit(token, { retry: { retries } }, plugin_retry_1.retry);
+        try {
+            const response = yield octokit.request(CREATE_STORAGE_RECORD_REQUEST, Object.assign({ owner: github.context.repo.owner, headers }, buildRequestParams(artifactOptions, packageRegistryOptions)));
+            const data = typeof response.data == 'string'
+                ? JSON.parse(response.data)
+                : response.data;
+            return data === null || data === void 0 ? void 0 : data.storage_records.map((r) => r.id);
+        }
+        catch (err) {
+            const message = err instanceof Error ? err.message : err;
+            throw new Error(`Failed to persist storage record: ${message}`);
+        }
+    });
+}
+function buildRequestParams(artifactOptions, packageRegistryOptions) {
+    const { registryUrl, artifactUrl } = packageRegistryOptions, rest = __rest(packageRegistryOptions, ["registryUrl", "artifactUrl"]);
+    return Object.assign(Object.assign(Object.assign({}, artifactOptions), { registry_url: registryUrl, artifact_url: artifactUrl }), rest);
+}
+//# sourceMappingURL=artifactMetadata.js.map
+
+/***/ }),
+
 /***/ 17492:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -16,7 +116,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.attest = void 0;
+exports.attest = attest;
 const bundle_1 = __nccwpck_require__(61040);
 const crypto_1 = __nccwpck_require__(76982);
 const endpoints_1 = __nccwpck_require__(60223);
@@ -63,7 +163,6 @@ function attest(options) {
         return toAttestation(bundle, attestationID);
     });
 }
-exports.attest = attest;
 function toAttestation(bundle, attestationID) {
     let certBytes;
     switch (bundle.verificationMaterial.content.$case) {
@@ -114,13 +213,23 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.signingEndpoints = exports.SIGSTORE_PUBLIC_GOOD = void 0;
 const github = __importStar(__nccwpck_require__(93228));
@@ -175,7 +284,9 @@ function buildGitHubEndpoints() {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.buildSLSAProvenancePredicate = exports.attestProvenance = exports.attest = void 0;
+exports.buildSLSAProvenancePredicate = exports.attestProvenance = exports.attest = exports.createStorageRecord = void 0;
+var artifactMetadata_1 = __nccwpck_require__(33354);
+Object.defineProperty(exports, "createStorageRecord", ({ enumerable: true, get: function () { return artifactMetadata_1.createStorageRecord; } }));
 var attest_1 = __nccwpck_require__(17492);
 Object.defineProperty(exports, "attest", ({ enumerable: true, get: function () { return attest_1.attest; } }));
 var provenance_1 = __nccwpck_require__(13042);
@@ -233,13 +344,23 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -251,7 +372,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getIDTokenClaims = void 0;
-const core_1 = __nccwpck_require__(37484);
+const core_1 = __nccwpck_require__(73121);
 const http_client_1 = __nccwpck_require__(54844);
 const jose = __importStar(__nccwpck_require__(21608));
 const OIDC_AUDIENCE = 'nobody';
@@ -357,7 +478,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.attestProvenance = exports.buildSLSAProvenancePredicate = void 0;
+exports.buildSLSAProvenancePredicate = void 0;
+exports.attestProvenance = attestProvenance;
 const attest_1 = __nccwpck_require__(17492);
 const oidc_1 = __nccwpck_require__(85292);
 const SLSA_PREDICATE_V1_TYPE = 'https://slsa.dev/provenance/v1';
@@ -435,7 +557,6 @@ function attestProvenance(options) {
         return (0, attest_1.attest)(Object.assign(Object.assign({}, options), { predicateType: predicate.type, predicate: predicate.params }));
     });
 }
-exports.attestProvenance = attestProvenance;
 //# sourceMappingURL=provenance.js.map
 
 /***/ }),
@@ -532,13 +653,23 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -561,7 +692,7 @@ const DEFAULT_RETRY_COUNT = 5;
  * @returns The ID of the attestation.
  * @throws Error if the attestation fails to persist.
  */
-const writeAttestation = (attestation, token, options = {}) => __awaiter(void 0, void 0, void 0, function* () {
+const writeAttestation = (attestation_1, token_1, ...args_1) => __awaiter(void 0, [attestation_1, token_1, ...args_1], void 0, function* (attestation, token, options = {}) {
     var _a;
     const retries = (_a = options.retry) !== null && _a !== void 0 ? _a : DEFAULT_RETRY_COUNT;
     const octokit = github.getOctokit(token, { retry: { retries } }, plugin_retry_1.retry);
@@ -570,7 +701,7 @@ const writeAttestation = (attestation, token, options = {}) => __awaiter(void 0,
             owner: github.context.repo.owner,
             repo: github.context.repo.repo,
             headers: options.headers,
-            data: { bundle: attestation }
+            bundle: attestation
         });
         const data = typeof response.data == 'string'
             ? JSON.parse(response.data)
@@ -587,7 +718,7 @@ exports.writeAttestation = writeAttestation;
 
 /***/ }),
 
-/***/ 44914:
+/***/ 8893:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -618,7 +749,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.issue = exports.issueCommand = void 0;
 const os = __importStar(__nccwpck_require__(70857));
-const utils_1 = __nccwpck_require__(30302);
+const utils_1 = __nccwpck_require__(86257);
 /**
  * Commands
  *
@@ -690,7 +821,7 @@ function escapeProperty(s) {
 
 /***/ }),
 
-/***/ 37484:
+/***/ 73121:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -729,12 +860,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.platform = exports.toPlatformPath = exports.toWin32Path = exports.toPosixPath = exports.markdownSummary = exports.summary = exports.getIDToken = exports.getState = exports.saveState = exports.group = exports.endGroup = exports.startGroup = exports.info = exports.notice = exports.warning = exports.error = exports.debug = exports.isDebug = exports.setFailed = exports.setCommandEcho = exports.setOutput = exports.getBooleanInput = exports.getMultilineInput = exports.getInput = exports.addPath = exports.setSecret = exports.exportVariable = exports.ExitCode = void 0;
-const command_1 = __nccwpck_require__(44914);
-const file_command_1 = __nccwpck_require__(24753);
-const utils_1 = __nccwpck_require__(30302);
+const command_1 = __nccwpck_require__(8893);
+const file_command_1 = __nccwpck_require__(9296);
+const utils_1 = __nccwpck_require__(86257);
 const os = __importStar(__nccwpck_require__(70857));
 const path = __importStar(__nccwpck_require__(16928));
-const oidc_utils_1 = __nccwpck_require__(35306);
+const oidc_utils_1 = __nccwpck_require__(35351);
 /**
  * The code to exit an action
  */
@@ -1019,29 +1150,29 @@ exports.getIDToken = getIDToken;
 /**
  * Summary exports
  */
-var summary_1 = __nccwpck_require__(71847);
+var summary_1 = __nccwpck_require__(41424);
 Object.defineProperty(exports, "summary", ({ enumerable: true, get: function () { return summary_1.summary; } }));
 /**
  * @deprecated use core.summary
  */
-var summary_2 = __nccwpck_require__(71847);
+var summary_2 = __nccwpck_require__(41424);
 Object.defineProperty(exports, "markdownSummary", ({ enumerable: true, get: function () { return summary_2.markdownSummary; } }));
 /**
  * Path exports
  */
-var path_utils_1 = __nccwpck_require__(31976);
+var path_utils_1 = __nccwpck_require__(27005);
 Object.defineProperty(exports, "toPosixPath", ({ enumerable: true, get: function () { return path_utils_1.toPosixPath; } }));
 Object.defineProperty(exports, "toWin32Path", ({ enumerable: true, get: function () { return path_utils_1.toWin32Path; } }));
 Object.defineProperty(exports, "toPlatformPath", ({ enumerable: true, get: function () { return path_utils_1.toPlatformPath; } }));
 /**
  * Platform utilities exports
  */
-exports.platform = __importStar(__nccwpck_require__(18968));
+exports.platform = __importStar(__nccwpck_require__(38101));
 //# sourceMappingURL=core.js.map
 
 /***/ }),
 
-/***/ 24753:
+/***/ 9296:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -1077,7 +1208,7 @@ exports.prepareKeyValueMessage = exports.issueFileCommand = void 0;
 const crypto = __importStar(__nccwpck_require__(76982));
 const fs = __importStar(__nccwpck_require__(79896));
 const os = __importStar(__nccwpck_require__(70857));
-const utils_1 = __nccwpck_require__(30302);
+const utils_1 = __nccwpck_require__(86257);
 function issueFileCommand(command, message) {
     const filePath = process.env[`GITHUB_${command}`];
     if (!filePath) {
@@ -1110,7 +1241,7 @@ exports.prepareKeyValueMessage = prepareKeyValueMessage;
 
 /***/ }),
 
-/***/ 35306:
+/***/ 35351:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -1128,7 +1259,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.OidcClient = void 0;
 const http_client_1 = __nccwpck_require__(54844);
 const auth_1 = __nccwpck_require__(44552);
-const core_1 = __nccwpck_require__(37484);
+const core_1 = __nccwpck_require__(73121);
 class OidcClient {
     static createHttpClient(allowRetry = true, maxRetry = 10) {
         const requestOptions = {
@@ -1194,7 +1325,7 @@ exports.OidcClient = OidcClient;
 
 /***/ }),
 
-/***/ 31976:
+/***/ 27005:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -1263,7 +1394,7 @@ exports.toPlatformPath = toPlatformPath;
 
 /***/ }),
 
-/***/ 18968:
+/***/ 38101:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -1306,7 +1437,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getDetails = exports.isLinux = exports.isMacOS = exports.isWindows = exports.arch = exports.platform = void 0;
 const os_1 = __importDefault(__nccwpck_require__(70857));
-const exec = __importStar(__nccwpck_require__(95236));
+const exec = __importStar(__nccwpck_require__(72809));
 const getWindowsInfo = () => __awaiter(void 0, void 0, void 0, function* () {
     const { stdout: version } = yield exec.getExecOutput('powershell -command "(Get-CimInstance -ClassName Win32_OperatingSystem).Version"', undefined, {
         silent: true
@@ -1364,7 +1495,7 @@ exports.getDetails = getDetails;
 
 /***/ }),
 
-/***/ 71847:
+/***/ 41424:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -1654,7 +1785,7 @@ exports.summary = _summary;
 
 /***/ }),
 
-/***/ 30302:
+/***/ 86257:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -1701,7 +1832,7 @@ exports.toCommandProperties = toCommandProperties;
 
 /***/ }),
 
-/***/ 95236:
+/***/ 72809:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -1737,7 +1868,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getExecOutput = exports.exec = void 0;
 const string_decoder_1 = __nccwpck_require__(13193);
-const tr = __importStar(__nccwpck_require__(6665));
+const tr = __importStar(__nccwpck_require__(63296));
 /**
  * Exec a command.
  * Output will be streamed to the live console.
@@ -1811,7 +1942,7 @@ exports.getExecOutput = getExecOutput;
 
 /***/ }),
 
-/***/ 6665:
+/***/ 63296:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -1850,8 +1981,8 @@ const os = __importStar(__nccwpck_require__(70857));
 const events = __importStar(__nccwpck_require__(24434));
 const child = __importStar(__nccwpck_require__(35317));
 const path = __importStar(__nccwpck_require__(16928));
-const io = __importStar(__nccwpck_require__(94994));
-const ioUtil = __importStar(__nccwpck_require__(75207));
+const io = __importStar(__nccwpck_require__(55299));
+const ioUtil = __importStar(__nccwpck_require__(9756));
 const timers_1 = __nccwpck_require__(53557);
 /* eslint-disable @typescript-eslint/unbound-method */
 const IS_WINDOWS = process.platform === 'win32';
@@ -2427,6 +2558,3387 @@ class ExecState extends events.EventEmitter {
         if (!state.processClosed && state.processExited) {
             const message = `The STDIO streams did not close within ${state.delay /
                 1000} seconds of the exit event from process '${state.toolPath}'. This may indicate a child process inherited the STDIO streams and has not yet exited.`;
+            state._debug(message);
+        }
+        state._setResult();
+    }
+}
+//# sourceMappingURL=toolrunner.js.map
+
+/***/ }),
+
+/***/ 9756:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getCmdPath = exports.tryGetExecutablePath = exports.isRooted = exports.isDirectory = exports.exists = exports.READONLY = exports.UV_FS_O_EXLOCK = exports.IS_WINDOWS = exports.unlink = exports.symlink = exports.stat = exports.rmdir = exports.rm = exports.rename = exports.readlink = exports.readdir = exports.open = exports.mkdir = exports.lstat = exports.copyFile = exports.chmod = void 0;
+const fs = __importStar(__nccwpck_require__(79896));
+const path = __importStar(__nccwpck_require__(16928));
+_a = fs.promises
+// export const {open} = 'fs'
+, exports.chmod = _a.chmod, exports.copyFile = _a.copyFile, exports.lstat = _a.lstat, exports.mkdir = _a.mkdir, exports.open = _a.open, exports.readdir = _a.readdir, exports.readlink = _a.readlink, exports.rename = _a.rename, exports.rm = _a.rm, exports.rmdir = _a.rmdir, exports.stat = _a.stat, exports.symlink = _a.symlink, exports.unlink = _a.unlink;
+// export const {open} = 'fs'
+exports.IS_WINDOWS = process.platform === 'win32';
+// See https://github.com/nodejs/node/blob/d0153aee367422d0858105abec186da4dff0a0c5/deps/uv/include/uv/win.h#L691
+exports.UV_FS_O_EXLOCK = 0x10000000;
+exports.READONLY = fs.constants.O_RDONLY;
+function exists(fsPath) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            yield exports.stat(fsPath);
+        }
+        catch (err) {
+            if (err.code === 'ENOENT') {
+                return false;
+            }
+            throw err;
+        }
+        return true;
+    });
+}
+exports.exists = exists;
+function isDirectory(fsPath, useStat = false) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const stats = useStat ? yield exports.stat(fsPath) : yield exports.lstat(fsPath);
+        return stats.isDirectory();
+    });
+}
+exports.isDirectory = isDirectory;
+/**
+ * On OSX/Linux, true if path starts with '/'. On Windows, true for paths like:
+ * \, \hello, \\hello\share, C:, and C:\hello (and corresponding alternate separator cases).
+ */
+function isRooted(p) {
+    p = normalizeSeparators(p);
+    if (!p) {
+        throw new Error('isRooted() parameter "p" cannot be empty');
+    }
+    if (exports.IS_WINDOWS) {
+        return (p.startsWith('\\') || /^[A-Z]:/i.test(p) // e.g. \ or \hello or \\hello
+        ); // e.g. C: or C:\hello
+    }
+    return p.startsWith('/');
+}
+exports.isRooted = isRooted;
+/**
+ * Best effort attempt to determine whether a file exists and is executable.
+ * @param filePath    file path to check
+ * @param extensions  additional file extensions to try
+ * @return if file exists and is executable, returns the file path. otherwise empty string.
+ */
+function tryGetExecutablePath(filePath, extensions) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let stats = undefined;
+        try {
+            // test file exists
+            stats = yield exports.stat(filePath);
+        }
+        catch (err) {
+            if (err.code !== 'ENOENT') {
+                // eslint-disable-next-line no-console
+                console.log(`Unexpected error attempting to determine if executable file exists '${filePath}': ${err}`);
+            }
+        }
+        if (stats && stats.isFile()) {
+            if (exports.IS_WINDOWS) {
+                // on Windows, test for valid extension
+                const upperExt = path.extname(filePath).toUpperCase();
+                if (extensions.some(validExt => validExt.toUpperCase() === upperExt)) {
+                    return filePath;
+                }
+            }
+            else {
+                if (isUnixExecutable(stats)) {
+                    return filePath;
+                }
+            }
+        }
+        // try each extension
+        const originalFilePath = filePath;
+        for (const extension of extensions) {
+            filePath = originalFilePath + extension;
+            stats = undefined;
+            try {
+                stats = yield exports.stat(filePath);
+            }
+            catch (err) {
+                if (err.code !== 'ENOENT') {
+                    // eslint-disable-next-line no-console
+                    console.log(`Unexpected error attempting to determine if executable file exists '${filePath}': ${err}`);
+                }
+            }
+            if (stats && stats.isFile()) {
+                if (exports.IS_WINDOWS) {
+                    // preserve the case of the actual file (since an extension was appended)
+                    try {
+                        const directory = path.dirname(filePath);
+                        const upperName = path.basename(filePath).toUpperCase();
+                        for (const actualName of yield exports.readdir(directory)) {
+                            if (upperName === actualName.toUpperCase()) {
+                                filePath = path.join(directory, actualName);
+                                break;
+                            }
+                        }
+                    }
+                    catch (err) {
+                        // eslint-disable-next-line no-console
+                        console.log(`Unexpected error attempting to determine the actual case of the file '${filePath}': ${err}`);
+                    }
+                    return filePath;
+                }
+                else {
+                    if (isUnixExecutable(stats)) {
+                        return filePath;
+                    }
+                }
+            }
+        }
+        return '';
+    });
+}
+exports.tryGetExecutablePath = tryGetExecutablePath;
+function normalizeSeparators(p) {
+    p = p || '';
+    if (exports.IS_WINDOWS) {
+        // convert slashes on Windows
+        p = p.replace(/\//g, '\\');
+        // remove redundant slashes
+        return p.replace(/\\\\+/g, '\\');
+    }
+    // remove redundant slashes
+    return p.replace(/\/\/+/g, '/');
+}
+// on Mac/Linux, test the execute bit
+//     R   W  X  R  W X R W X
+//   256 128 64 32 16 8 4 2 1
+function isUnixExecutable(stats) {
+    return ((stats.mode & 1) > 0 ||
+        ((stats.mode & 8) > 0 && stats.gid === process.getgid()) ||
+        ((stats.mode & 64) > 0 && stats.uid === process.getuid()));
+}
+// Get the path of cmd.exe in windows
+function getCmdPath() {
+    var _a;
+    return (_a = process.env['COMSPEC']) !== null && _a !== void 0 ? _a : `cmd.exe`;
+}
+exports.getCmdPath = getCmdPath;
+//# sourceMappingURL=io-util.js.map
+
+/***/ }),
+
+/***/ 55299:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.findInPath = exports.which = exports.mkdirP = exports.rmRF = exports.mv = exports.cp = void 0;
+const assert_1 = __nccwpck_require__(42613);
+const path = __importStar(__nccwpck_require__(16928));
+const ioUtil = __importStar(__nccwpck_require__(9756));
+/**
+ * Copies a file or folder.
+ * Based off of shelljs - https://github.com/shelljs/shelljs/blob/9237f66c52e5daa40458f94f9565e18e8132f5a6/src/cp.js
+ *
+ * @param     source    source path
+ * @param     dest      destination path
+ * @param     options   optional. See CopyOptions.
+ */
+function cp(source, dest, options = {}) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const { force, recursive, copySourceDirectory } = readCopyOptions(options);
+        const destStat = (yield ioUtil.exists(dest)) ? yield ioUtil.stat(dest) : null;
+        // Dest is an existing file, but not forcing
+        if (destStat && destStat.isFile() && !force) {
+            return;
+        }
+        // If dest is an existing directory, should copy inside.
+        const newDest = destStat && destStat.isDirectory() && copySourceDirectory
+            ? path.join(dest, path.basename(source))
+            : dest;
+        if (!(yield ioUtil.exists(source))) {
+            throw new Error(`no such file or directory: ${source}`);
+        }
+        const sourceStat = yield ioUtil.stat(source);
+        if (sourceStat.isDirectory()) {
+            if (!recursive) {
+                throw new Error(`Failed to copy. ${source} is a directory, but tried to copy without recursive flag.`);
+            }
+            else {
+                yield cpDirRecursive(source, newDest, 0, force);
+            }
+        }
+        else {
+            if (path.relative(source, newDest) === '') {
+                // a file cannot be copied to itself
+                throw new Error(`'${newDest}' and '${source}' are the same file`);
+            }
+            yield copyFile(source, newDest, force);
+        }
+    });
+}
+exports.cp = cp;
+/**
+ * Moves a path.
+ *
+ * @param     source    source path
+ * @param     dest      destination path
+ * @param     options   optional. See MoveOptions.
+ */
+function mv(source, dest, options = {}) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (yield ioUtil.exists(dest)) {
+            let destExists = true;
+            if (yield ioUtil.isDirectory(dest)) {
+                // If dest is directory copy src into dest
+                dest = path.join(dest, path.basename(source));
+                destExists = yield ioUtil.exists(dest);
+            }
+            if (destExists) {
+                if (options.force == null || options.force) {
+                    yield rmRF(dest);
+                }
+                else {
+                    throw new Error('Destination already exists');
+                }
+            }
+        }
+        yield mkdirP(path.dirname(dest));
+        yield ioUtil.rename(source, dest);
+    });
+}
+exports.mv = mv;
+/**
+ * Remove a path recursively with force
+ *
+ * @param inputPath path to remove
+ */
+function rmRF(inputPath) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (ioUtil.IS_WINDOWS) {
+            // Check for invalid characters
+            // https://docs.microsoft.com/en-us/windows/win32/fileio/naming-a-file
+            if (/[*"<>|]/.test(inputPath)) {
+                throw new Error('File path must not contain `*`, `"`, `<`, `>` or `|` on Windows');
+            }
+        }
+        try {
+            // note if path does not exist, error is silent
+            yield ioUtil.rm(inputPath, {
+                force: true,
+                maxRetries: 3,
+                recursive: true,
+                retryDelay: 300
+            });
+        }
+        catch (err) {
+            throw new Error(`File was unable to be removed ${err}`);
+        }
+    });
+}
+exports.rmRF = rmRF;
+/**
+ * Make a directory.  Creates the full path with folders in between
+ * Will throw if it fails
+ *
+ * @param   fsPath        path to create
+ * @returns Promise<void>
+ */
+function mkdirP(fsPath) {
+    return __awaiter(this, void 0, void 0, function* () {
+        assert_1.ok(fsPath, 'a path argument must be provided');
+        yield ioUtil.mkdir(fsPath, { recursive: true });
+    });
+}
+exports.mkdirP = mkdirP;
+/**
+ * Returns path of a tool had the tool actually been invoked.  Resolves via paths.
+ * If you check and the tool does not exist, it will throw.
+ *
+ * @param     tool              name of the tool
+ * @param     check             whether to check if tool exists
+ * @returns   Promise<string>   path to tool
+ */
+function which(tool, check) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (!tool) {
+            throw new Error("parameter 'tool' is required");
+        }
+        // recursive when check=true
+        if (check) {
+            const result = yield which(tool, false);
+            if (!result) {
+                if (ioUtil.IS_WINDOWS) {
+                    throw new Error(`Unable to locate executable file: ${tool}. Please verify either the file path exists or the file can be found within a directory specified by the PATH environment variable. Also verify the file has a valid extension for an executable file.`);
+                }
+                else {
+                    throw new Error(`Unable to locate executable file: ${tool}. Please verify either the file path exists or the file can be found within a directory specified by the PATH environment variable. Also check the file mode to verify the file is executable.`);
+                }
+            }
+            return result;
+        }
+        const matches = yield findInPath(tool);
+        if (matches && matches.length > 0) {
+            return matches[0];
+        }
+        return '';
+    });
+}
+exports.which = which;
+/**
+ * Returns a list of all occurrences of the given tool on the system path.
+ *
+ * @returns   Promise<string[]>  the paths of the tool
+ */
+function findInPath(tool) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (!tool) {
+            throw new Error("parameter 'tool' is required");
+        }
+        // build the list of extensions to try
+        const extensions = [];
+        if (ioUtil.IS_WINDOWS && process.env['PATHEXT']) {
+            for (const extension of process.env['PATHEXT'].split(path.delimiter)) {
+                if (extension) {
+                    extensions.push(extension);
+                }
+            }
+        }
+        // if it's rooted, return it if exists. otherwise return empty.
+        if (ioUtil.isRooted(tool)) {
+            const filePath = yield ioUtil.tryGetExecutablePath(tool, extensions);
+            if (filePath) {
+                return [filePath];
+            }
+            return [];
+        }
+        // if any path separators, return empty
+        if (tool.includes(path.sep)) {
+            return [];
+        }
+        // build the list of directories
+        //
+        // Note, technically "where" checks the current directory on Windows. From a toolkit perspective,
+        // it feels like we should not do this. Checking the current directory seems like more of a use
+        // case of a shell, and the which() function exposed by the toolkit should strive for consistency
+        // across platforms.
+        const directories = [];
+        if (process.env.PATH) {
+            for (const p of process.env.PATH.split(path.delimiter)) {
+                if (p) {
+                    directories.push(p);
+                }
+            }
+        }
+        // find all matches
+        const matches = [];
+        for (const directory of directories) {
+            const filePath = yield ioUtil.tryGetExecutablePath(path.join(directory, tool), extensions);
+            if (filePath) {
+                matches.push(filePath);
+            }
+        }
+        return matches;
+    });
+}
+exports.findInPath = findInPath;
+function readCopyOptions(options) {
+    const force = options.force == null ? true : options.force;
+    const recursive = Boolean(options.recursive);
+    const copySourceDirectory = options.copySourceDirectory == null
+        ? true
+        : Boolean(options.copySourceDirectory);
+    return { force, recursive, copySourceDirectory };
+}
+function cpDirRecursive(sourceDir, destDir, currentDepth, force) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // Ensure there is not a run away recursive copy
+        if (currentDepth >= 255)
+            return;
+        currentDepth++;
+        yield mkdirP(destDir);
+        const files = yield ioUtil.readdir(sourceDir);
+        for (const fileName of files) {
+            const srcFile = `${sourceDir}/${fileName}`;
+            const destFile = `${destDir}/${fileName}`;
+            const srcFileStat = yield ioUtil.lstat(srcFile);
+            if (srcFileStat.isDirectory()) {
+                // Recurse
+                yield cpDirRecursive(srcFile, destFile, currentDepth, force);
+            }
+            else {
+                yield copyFile(srcFile, destFile, force);
+            }
+        }
+        // Change the mode for the newly created directory
+        yield ioUtil.chmod(destDir, (yield ioUtil.stat(sourceDir)).mode);
+    });
+}
+// Buffered file copy
+function copyFile(srcFile, destFile, force) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if ((yield ioUtil.lstat(srcFile)).isSymbolicLink()) {
+            // unlink/re-link it
+            try {
+                yield ioUtil.lstat(destFile);
+                yield ioUtil.unlink(destFile);
+            }
+            catch (e) {
+                // Try to override file permission
+                if (e.code === 'EPERM') {
+                    yield ioUtil.chmod(destFile, '0666');
+                    yield ioUtil.unlink(destFile);
+                }
+                // other errors = it doesn't exist, no work to do
+            }
+            // Copy over symlink
+            const symlinkFull = yield ioUtil.readlink(srcFile);
+            yield ioUtil.symlink(symlinkFull, destFile, ioUtil.IS_WINDOWS ? 'junction' : null);
+        }
+        else if (!(yield ioUtil.exists(destFile)) || force) {
+            yield ioUtil.copyFile(srcFile, destFile);
+        }
+    });
+}
+//# sourceMappingURL=io.js.map
+
+/***/ }),
+
+/***/ 44914:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.issueCommand = issueCommand;
+exports.issue = issue;
+const os = __importStar(__nccwpck_require__(70857));
+const utils_1 = __nccwpck_require__(30302);
+/**
+ * Issues a command to the GitHub Actions runner
+ *
+ * @param command - The command name to issue
+ * @param properties - Additional properties for the command (key-value pairs)
+ * @param message - The message to include with the command
+ * @remarks
+ * This function outputs a specially formatted string to stdout that the Actions
+ * runner interprets as a command. These commands can control workflow behavior,
+ * set outputs, create annotations, mask values, and more.
+ *
+ * Command Format:
+ *   ::name key=value,key=value::message
+ *
+ * @example
+ * ```typescript
+ * // Issue a warning annotation
+ * issueCommand('warning', {}, 'This is a warning message');
+ * // Output: ::warning::This is a warning message
+ *
+ * // Set an environment variable
+ * issueCommand('set-env', { name: 'MY_VAR' }, 'some value');
+ * // Output: ::set-env name=MY_VAR::some value
+ *
+ * // Add a secret mask
+ * issueCommand('add-mask', {}, 'secretValue123');
+ * // Output: ::add-mask::secretValue123
+ * ```
+ *
+ * @internal
+ * This is an internal utility function that powers the public API functions
+ * such as setSecret, warning, error, and exportVariable.
+ */
+function issueCommand(command, properties, message) {
+    const cmd = new Command(command, properties, message);
+    process.stdout.write(cmd.toString() + os.EOL);
+}
+function issue(name, message = '') {
+    issueCommand(name, {}, message);
+}
+const CMD_STRING = '::';
+class Command {
+    constructor(command, properties, message) {
+        if (!command) {
+            command = 'missing.command';
+        }
+        this.command = command;
+        this.properties = properties;
+        this.message = message;
+    }
+    toString() {
+        let cmdStr = CMD_STRING + this.command;
+        if (this.properties && Object.keys(this.properties).length > 0) {
+            cmdStr += ' ';
+            let first = true;
+            for (const key in this.properties) {
+                if (this.properties.hasOwnProperty(key)) {
+                    const val = this.properties[key];
+                    if (val) {
+                        if (first) {
+                            first = false;
+                        }
+                        else {
+                            cmdStr += ',';
+                        }
+                        cmdStr += `${key}=${escapeProperty(val)}`;
+                    }
+                }
+            }
+        }
+        cmdStr += `${CMD_STRING}${escapeData(this.message)}`;
+        return cmdStr;
+    }
+}
+function escapeData(s) {
+    return (0, utils_1.toCommandValue)(s)
+        .replace(/%/g, '%25')
+        .replace(/\r/g, '%0D')
+        .replace(/\n/g, '%0A');
+}
+function escapeProperty(s) {
+    return (0, utils_1.toCommandValue)(s)
+        .replace(/%/g, '%25')
+        .replace(/\r/g, '%0D')
+        .replace(/\n/g, '%0A')
+        .replace(/:/g, '%3A')
+        .replace(/,/g, '%2C');
+}
+//# sourceMappingURL=command.js.map
+
+/***/ }),
+
+/***/ 37484:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.platform = exports.toPlatformPath = exports.toWin32Path = exports.toPosixPath = exports.markdownSummary = exports.summary = exports.ExitCode = void 0;
+exports.exportVariable = exportVariable;
+exports.setSecret = setSecret;
+exports.addPath = addPath;
+exports.getInput = getInput;
+exports.getMultilineInput = getMultilineInput;
+exports.getBooleanInput = getBooleanInput;
+exports.setOutput = setOutput;
+exports.setCommandEcho = setCommandEcho;
+exports.setFailed = setFailed;
+exports.isDebug = isDebug;
+exports.debug = debug;
+exports.error = error;
+exports.warning = warning;
+exports.notice = notice;
+exports.info = info;
+exports.startGroup = startGroup;
+exports.endGroup = endGroup;
+exports.group = group;
+exports.saveState = saveState;
+exports.getState = getState;
+exports.getIDToken = getIDToken;
+const command_1 = __nccwpck_require__(44914);
+const file_command_1 = __nccwpck_require__(24753);
+const utils_1 = __nccwpck_require__(30302);
+const os = __importStar(__nccwpck_require__(70857));
+const path = __importStar(__nccwpck_require__(16928));
+const oidc_utils_1 = __nccwpck_require__(35306);
+/**
+ * The code to exit an action
+ */
+var ExitCode;
+(function (ExitCode) {
+    /**
+     * A code indicating that the action was successful
+     */
+    ExitCode[ExitCode["Success"] = 0] = "Success";
+    /**
+     * A code indicating that the action was a failure
+     */
+    ExitCode[ExitCode["Failure"] = 1] = "Failure";
+})(ExitCode || (exports.ExitCode = ExitCode = {}));
+//-----------------------------------------------------------------------
+// Variables
+//-----------------------------------------------------------------------
+/**
+ * Sets env variable for this action and future actions in the job
+ * @param name the name of the variable to set
+ * @param val the value of the variable. Non-string values will be converted to a string via JSON.stringify
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function exportVariable(name, val) {
+    const convertedVal = (0, utils_1.toCommandValue)(val);
+    process.env[name] = convertedVal;
+    const filePath = process.env['GITHUB_ENV'] || '';
+    if (filePath) {
+        return (0, file_command_1.issueFileCommand)('ENV', (0, file_command_1.prepareKeyValueMessage)(name, val));
+    }
+    (0, command_1.issueCommand)('set-env', { name }, convertedVal);
+}
+/**
+ * Registers a secret which will get masked from logs
+ *
+ * @param secret - Value of the secret to be masked
+ * @remarks
+ * This function instructs the Actions runner to mask the specified value in any
+ * logs produced during the workflow run. Once registered, the secret value will
+ * be replaced with asterisks (***) whenever it appears in console output, logs,
+ * or error messages.
+ *
+ * This is useful for protecting sensitive information such as:
+ * - API keys
+ * - Access tokens
+ * - Authentication credentials
+ * - URL parameters containing signatures (SAS tokens)
+ *
+ * Note that masking only affects future logs; any previous appearances of the
+ * secret in logs before calling this function will remain unmasked.
+ *
+ * @example
+ * ```typescript
+ * // Register an API token as a secret
+ * const apiToken = "abc123xyz456";
+ * setSecret(apiToken);
+ *
+ * // Now any logs containing this value will show *** instead
+ * console.log(`Using token: ${apiToken}`); // Outputs: "Using token: ***"
+ * ```
+ */
+function setSecret(secret) {
+    (0, command_1.issueCommand)('add-mask', {}, secret);
+}
+/**
+ * Prepends inputPath to the PATH (for this action and future actions)
+ * @param inputPath
+ */
+function addPath(inputPath) {
+    const filePath = process.env['GITHUB_PATH'] || '';
+    if (filePath) {
+        (0, file_command_1.issueFileCommand)('PATH', inputPath);
+    }
+    else {
+        (0, command_1.issueCommand)('add-path', {}, inputPath);
+    }
+    process.env['PATH'] = `${inputPath}${path.delimiter}${process.env['PATH']}`;
+}
+/**
+ * Gets the value of an input.
+ * Unless trimWhitespace is set to false in InputOptions, the value is also trimmed.
+ * Returns an empty string if the value is not defined.
+ *
+ * @param     name     name of the input to get
+ * @param     options  optional. See InputOptions.
+ * @returns   string
+ */
+function getInput(name, options) {
+    const val = process.env[`INPUT_${name.replace(/ /g, '_').toUpperCase()}`] || '';
+    if (options && options.required && !val) {
+        throw new Error(`Input required and not supplied: ${name}`);
+    }
+    if (options && options.trimWhitespace === false) {
+        return val;
+    }
+    return val.trim();
+}
+/**
+ * Gets the values of an multiline input.  Each value is also trimmed.
+ *
+ * @param     name     name of the input to get
+ * @param     options  optional. See InputOptions.
+ * @returns   string[]
+ *
+ */
+function getMultilineInput(name, options) {
+    const inputs = getInput(name, options)
+        .split('\n')
+        .filter(x => x !== '');
+    if (options && options.trimWhitespace === false) {
+        return inputs;
+    }
+    return inputs.map(input => input.trim());
+}
+/**
+ * Gets the input value of the boolean type in the YAML 1.2 "core schema" specification.
+ * Support boolean input list: `true | True | TRUE | false | False | FALSE` .
+ * The return value is also in boolean type.
+ * ref: https://yaml.org/spec/1.2/spec.html#id2804923
+ *
+ * @param     name     name of the input to get
+ * @param     options  optional. See InputOptions.
+ * @returns   boolean
+ */
+function getBooleanInput(name, options) {
+    const trueValue = ['true', 'True', 'TRUE'];
+    const falseValue = ['false', 'False', 'FALSE'];
+    const val = getInput(name, options);
+    if (trueValue.includes(val))
+        return true;
+    if (falseValue.includes(val))
+        return false;
+    throw new TypeError(`Input does not meet YAML 1.2 "Core Schema" specification: ${name}\n` +
+        `Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
+}
+/**
+ * Sets the value of an output.
+ *
+ * @param     name     name of the output to set
+ * @param     value    value to store. Non-string values will be converted to a string via JSON.stringify
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function setOutput(name, value) {
+    const filePath = process.env['GITHUB_OUTPUT'] || '';
+    if (filePath) {
+        return (0, file_command_1.issueFileCommand)('OUTPUT', (0, file_command_1.prepareKeyValueMessage)(name, value));
+    }
+    process.stdout.write(os.EOL);
+    (0, command_1.issueCommand)('set-output', { name }, (0, utils_1.toCommandValue)(value));
+}
+/**
+ * Enables or disables the echoing of commands into stdout for the rest of the step.
+ * Echoing is disabled by default if ACTIONS_STEP_DEBUG is not set.
+ *
+ */
+function setCommandEcho(enabled) {
+    (0, command_1.issue)('echo', enabled ? 'on' : 'off');
+}
+//-----------------------------------------------------------------------
+// Results
+//-----------------------------------------------------------------------
+/**
+ * Sets the action status to failed.
+ * When the action exits it will be with an exit code of 1
+ * @param message add error issue message
+ */
+function setFailed(message) {
+    process.exitCode = ExitCode.Failure;
+    error(message);
+}
+//-----------------------------------------------------------------------
+// Logging Commands
+//-----------------------------------------------------------------------
+/**
+ * Gets whether Actions Step Debug is on or not
+ */
+function isDebug() {
+    return process.env['RUNNER_DEBUG'] === '1';
+}
+/**
+ * Writes debug message to user log
+ * @param message debug message
+ */
+function debug(message) {
+    (0, command_1.issueCommand)('debug', {}, message);
+}
+/**
+ * Adds an error issue
+ * @param message error issue message. Errors will be converted to string via toString()
+ * @param properties optional properties to add to the annotation.
+ */
+function error(message, properties = {}) {
+    (0, command_1.issueCommand)('error', (0, utils_1.toCommandProperties)(properties), message instanceof Error ? message.toString() : message);
+}
+/**
+ * Adds a warning issue
+ * @param message warning issue message. Errors will be converted to string via toString()
+ * @param properties optional properties to add to the annotation.
+ */
+function warning(message, properties = {}) {
+    (0, command_1.issueCommand)('warning', (0, utils_1.toCommandProperties)(properties), message instanceof Error ? message.toString() : message);
+}
+/**
+ * Adds a notice issue
+ * @param message notice issue message. Errors will be converted to string via toString()
+ * @param properties optional properties to add to the annotation.
+ */
+function notice(message, properties = {}) {
+    (0, command_1.issueCommand)('notice', (0, utils_1.toCommandProperties)(properties), message instanceof Error ? message.toString() : message);
+}
+/**
+ * Writes info to log with console.log.
+ * @param message info message
+ */
+function info(message) {
+    process.stdout.write(message + os.EOL);
+}
+/**
+ * Begin an output group.
+ *
+ * Output until the next `groupEnd` will be foldable in this group
+ *
+ * @param name The name of the output group
+ */
+function startGroup(name) {
+    (0, command_1.issue)('group', name);
+}
+/**
+ * End an output group.
+ */
+function endGroup() {
+    (0, command_1.issue)('endgroup');
+}
+/**
+ * Wrap an asynchronous function call in a group.
+ *
+ * Returns the same type as the function itself.
+ *
+ * @param name The name of the group
+ * @param fn The function to wrap in the group
+ */
+function group(name, fn) {
+    return __awaiter(this, void 0, void 0, function* () {
+        startGroup(name);
+        let result;
+        try {
+            result = yield fn();
+        }
+        finally {
+            endGroup();
+        }
+        return result;
+    });
+}
+//-----------------------------------------------------------------------
+// Wrapper action state
+//-----------------------------------------------------------------------
+/**
+ * Saves state for current action, the state can only be retrieved by this action's post job execution.
+ *
+ * @param     name     name of the state to store
+ * @param     value    value to store. Non-string values will be converted to a string via JSON.stringify
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function saveState(name, value) {
+    const filePath = process.env['GITHUB_STATE'] || '';
+    if (filePath) {
+        return (0, file_command_1.issueFileCommand)('STATE', (0, file_command_1.prepareKeyValueMessage)(name, value));
+    }
+    (0, command_1.issueCommand)('save-state', { name }, (0, utils_1.toCommandValue)(value));
+}
+/**
+ * Gets the value of an state set by this action's main execution.
+ *
+ * @param     name     name of the state to get
+ * @returns   string
+ */
+function getState(name) {
+    return process.env[`STATE_${name}`] || '';
+}
+function getIDToken(aud) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return yield oidc_utils_1.OidcClient.getIDToken(aud);
+    });
+}
+/**
+ * Summary exports
+ */
+var summary_1 = __nccwpck_require__(71847);
+Object.defineProperty(exports, "summary", ({ enumerable: true, get: function () { return summary_1.summary; } }));
+/**
+ * @deprecated use core.summary
+ */
+var summary_2 = __nccwpck_require__(71847);
+Object.defineProperty(exports, "markdownSummary", ({ enumerable: true, get: function () { return summary_2.markdownSummary; } }));
+/**
+ * Path exports
+ */
+var path_utils_1 = __nccwpck_require__(31976);
+Object.defineProperty(exports, "toPosixPath", ({ enumerable: true, get: function () { return path_utils_1.toPosixPath; } }));
+Object.defineProperty(exports, "toWin32Path", ({ enumerable: true, get: function () { return path_utils_1.toWin32Path; } }));
+Object.defineProperty(exports, "toPlatformPath", ({ enumerable: true, get: function () { return path_utils_1.toPlatformPath; } }));
+/**
+ * Platform utilities exports
+ */
+exports.platform = __importStar(__nccwpck_require__(18968));
+//# sourceMappingURL=core.js.map
+
+/***/ }),
+
+/***/ 24753:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+// For internal use, subject to change.
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.issueFileCommand = issueFileCommand;
+exports.prepareKeyValueMessage = prepareKeyValueMessage;
+// We use any as a valid input type
+/* eslint-disable @typescript-eslint/no-explicit-any */
+const crypto = __importStar(__nccwpck_require__(76982));
+const fs = __importStar(__nccwpck_require__(79896));
+const os = __importStar(__nccwpck_require__(70857));
+const utils_1 = __nccwpck_require__(30302);
+function issueFileCommand(command, message) {
+    const filePath = process.env[`GITHUB_${command}`];
+    if (!filePath) {
+        throw new Error(`Unable to find environment variable for file command ${command}`);
+    }
+    if (!fs.existsSync(filePath)) {
+        throw new Error(`Missing file at path: ${filePath}`);
+    }
+    fs.appendFileSync(filePath, `${(0, utils_1.toCommandValue)(message)}${os.EOL}`, {
+        encoding: 'utf8'
+    });
+}
+function prepareKeyValueMessage(key, value) {
+    const delimiter = `ghadelimiter_${crypto.randomUUID()}`;
+    const convertedValue = (0, utils_1.toCommandValue)(value);
+    // These should realistically never happen, but just in case someone finds a
+    // way to exploit uuid generation let's not allow keys or values that contain
+    // the delimiter.
+    if (key.includes(delimiter)) {
+        throw new Error(`Unexpected input: name should not contain the delimiter "${delimiter}"`);
+    }
+    if (convertedValue.includes(delimiter)) {
+        throw new Error(`Unexpected input: value should not contain the delimiter "${delimiter}"`);
+    }
+    return `${key}<<${delimiter}${os.EOL}${convertedValue}${os.EOL}${delimiter}`;
+}
+//# sourceMappingURL=file-command.js.map
+
+/***/ }),
+
+/***/ 35306:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.OidcClient = void 0;
+const http_client_1 = __nccwpck_require__(28163);
+const auth_1 = __nccwpck_require__(37481);
+const core_1 = __nccwpck_require__(37484);
+class OidcClient {
+    static createHttpClient(allowRetry = true, maxRetry = 10) {
+        const requestOptions = {
+            allowRetries: allowRetry,
+            maxRetries: maxRetry
+        };
+        return new http_client_1.HttpClient('actions/oidc-client', [new auth_1.BearerCredentialHandler(OidcClient.getRequestToken())], requestOptions);
+    }
+    static getRequestToken() {
+        const token = process.env['ACTIONS_ID_TOKEN_REQUEST_TOKEN'];
+        if (!token) {
+            throw new Error('Unable to get ACTIONS_ID_TOKEN_REQUEST_TOKEN env variable');
+        }
+        return token;
+    }
+    static getIDTokenUrl() {
+        const runtimeUrl = process.env['ACTIONS_ID_TOKEN_REQUEST_URL'];
+        if (!runtimeUrl) {
+            throw new Error('Unable to get ACTIONS_ID_TOKEN_REQUEST_URL env variable');
+        }
+        return runtimeUrl;
+    }
+    static getCall(id_token_url) {
+        return __awaiter(this, void 0, void 0, function* () {
+            var _a;
+            const httpclient = OidcClient.createHttpClient();
+            const res = yield httpclient
+                .getJson(id_token_url)
+                .catch(error => {
+                throw new Error(`Failed to get ID Token. \n 
+        Error Code : ${error.statusCode}\n 
+        Error Message: ${error.message}`);
+            });
+            const id_token = (_a = res.result) === null || _a === void 0 ? void 0 : _a.value;
+            if (!id_token) {
+                throw new Error('Response json body do not have ID Token field');
+            }
+            return id_token;
+        });
+    }
+    static getIDToken(audience) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                // New ID Token is requested from action service
+                let id_token_url = OidcClient.getIDTokenUrl();
+                if (audience) {
+                    const encodedAudience = encodeURIComponent(audience);
+                    id_token_url = `${id_token_url}&audience=${encodedAudience}`;
+                }
+                (0, core_1.debug)(`ID token url is ${id_token_url}`);
+                const id_token = yield OidcClient.getCall(id_token_url);
+                (0, core_1.setSecret)(id_token);
+                return id_token;
+            }
+            catch (error) {
+                throw new Error(`Error message: ${error.message}`);
+            }
+        });
+    }
+}
+exports.OidcClient = OidcClient;
+//# sourceMappingURL=oidc-utils.js.map
+
+/***/ }),
+
+/***/ 31976:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.toPosixPath = toPosixPath;
+exports.toWin32Path = toWin32Path;
+exports.toPlatformPath = toPlatformPath;
+const path = __importStar(__nccwpck_require__(16928));
+/**
+ * toPosixPath converts the given path to the posix form. On Windows, \\ will be
+ * replaced with /.
+ *
+ * @param pth. Path to transform.
+ * @return string Posix path.
+ */
+function toPosixPath(pth) {
+    return pth.replace(/[\\]/g, '/');
+}
+/**
+ * toWin32Path converts the given path to the win32 form. On Linux, / will be
+ * replaced with \\.
+ *
+ * @param pth. Path to transform.
+ * @return string Win32 path.
+ */
+function toWin32Path(pth) {
+    return pth.replace(/[/]/g, '\\');
+}
+/**
+ * toPlatformPath converts the given path to a platform-specific path. It does
+ * this by replacing instances of / and \ with the platform-specific path
+ * separator.
+ *
+ * @param pth The path to platformize.
+ * @return string The platform-specific path.
+ */
+function toPlatformPath(pth) {
+    return pth.replace(/[/\\]/g, path.sep);
+}
+//# sourceMappingURL=path-utils.js.map
+
+/***/ }),
+
+/***/ 18968:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.isLinux = exports.isMacOS = exports.isWindows = exports.arch = exports.platform = void 0;
+exports.getDetails = getDetails;
+const os_1 = __importDefault(__nccwpck_require__(70857));
+const exec = __importStar(__nccwpck_require__(95236));
+const getWindowsInfo = () => __awaiter(void 0, void 0, void 0, function* () {
+    const { stdout: version } = yield exec.getExecOutput('powershell -command "(Get-CimInstance -ClassName Win32_OperatingSystem).Version"', undefined, {
+        silent: true
+    });
+    const { stdout: name } = yield exec.getExecOutput('powershell -command "(Get-CimInstance -ClassName Win32_OperatingSystem).Caption"', undefined, {
+        silent: true
+    });
+    return {
+        name: name.trim(),
+        version: version.trim()
+    };
+});
+const getMacOsInfo = () => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b, _c, _d;
+    const { stdout } = yield exec.getExecOutput('sw_vers', undefined, {
+        silent: true
+    });
+    const version = (_b = (_a = stdout.match(/ProductVersion:\s*(.+)/)) === null || _a === void 0 ? void 0 : _a[1]) !== null && _b !== void 0 ? _b : '';
+    const name = (_d = (_c = stdout.match(/ProductName:\s*(.+)/)) === null || _c === void 0 ? void 0 : _c[1]) !== null && _d !== void 0 ? _d : '';
+    return {
+        name,
+        version
+    };
+});
+const getLinuxInfo = () => __awaiter(void 0, void 0, void 0, function* () {
+    const { stdout } = yield exec.getExecOutput('lsb_release', ['-i', '-r', '-s'], {
+        silent: true
+    });
+    const [name, version] = stdout.trim().split('\n');
+    return {
+        name,
+        version
+    };
+});
+exports.platform = os_1.default.platform();
+exports.arch = os_1.default.arch();
+exports.isWindows = exports.platform === 'win32';
+exports.isMacOS = exports.platform === 'darwin';
+exports.isLinux = exports.platform === 'linux';
+function getDetails() {
+    return __awaiter(this, void 0, void 0, function* () {
+        return Object.assign(Object.assign({}, (yield (exports.isWindows
+            ? getWindowsInfo()
+            : exports.isMacOS
+                ? getMacOsInfo()
+                : getLinuxInfo()))), { platform: exports.platform,
+            arch: exports.arch,
+            isWindows: exports.isWindows,
+            isMacOS: exports.isMacOS,
+            isLinux: exports.isLinux });
+    });
+}
+//# sourceMappingURL=platform.js.map
+
+/***/ }),
+
+/***/ 71847:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.summary = exports.markdownSummary = exports.SUMMARY_DOCS_URL = exports.SUMMARY_ENV_VAR = void 0;
+const os_1 = __nccwpck_require__(70857);
+const fs_1 = __nccwpck_require__(79896);
+const { access, appendFile, writeFile } = fs_1.promises;
+exports.SUMMARY_ENV_VAR = 'GITHUB_STEP_SUMMARY';
+exports.SUMMARY_DOCS_URL = 'https://docs.github.com/actions/using-workflows/workflow-commands-for-github-actions#adding-a-job-summary';
+class Summary {
+    constructor() {
+        this._buffer = '';
+    }
+    /**
+     * Finds the summary file path from the environment, rejects if env var is not found or file does not exist
+     * Also checks r/w permissions.
+     *
+     * @returns step summary file path
+     */
+    filePath() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (this._filePath) {
+                return this._filePath;
+            }
+            const pathFromEnv = process.env[exports.SUMMARY_ENV_VAR];
+            if (!pathFromEnv) {
+                throw new Error(`Unable to find environment variable for $${exports.SUMMARY_ENV_VAR}. Check if your runtime environment supports job summaries.`);
+            }
+            try {
+                yield access(pathFromEnv, fs_1.constants.R_OK | fs_1.constants.W_OK);
+            }
+            catch (_a) {
+                throw new Error(`Unable to access summary file: '${pathFromEnv}'. Check if the file has correct read/write permissions.`);
+            }
+            this._filePath = pathFromEnv;
+            return this._filePath;
+        });
+    }
+    /**
+     * Wraps content in an HTML tag, adding any HTML attributes
+     *
+     * @param {string} tag HTML tag to wrap
+     * @param {string | null} content content within the tag
+     * @param {[attribute: string]: string} attrs key-value list of HTML attributes to add
+     *
+     * @returns {string} content wrapped in HTML element
+     */
+    wrap(tag, content, attrs = {}) {
+        const htmlAttrs = Object.entries(attrs)
+            .map(([key, value]) => ` ${key}="${value}"`)
+            .join('');
+        if (!content) {
+            return `<${tag}${htmlAttrs}>`;
+        }
+        return `<${tag}${htmlAttrs}>${content}</${tag}>`;
+    }
+    /**
+     * Writes text in the buffer to the summary buffer file and empties buffer. Will append by default.
+     *
+     * @param {SummaryWriteOptions} [options] (optional) options for write operation
+     *
+     * @returns {Promise<Summary>} summary instance
+     */
+    write(options) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const overwrite = !!(options === null || options === void 0 ? void 0 : options.overwrite);
+            const filePath = yield this.filePath();
+            const writeFunc = overwrite ? writeFile : appendFile;
+            yield writeFunc(filePath, this._buffer, { encoding: 'utf8' });
+            return this.emptyBuffer();
+        });
+    }
+    /**
+     * Clears the summary buffer and wipes the summary file
+     *
+     * @returns {Summary} summary instance
+     */
+    clear() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.emptyBuffer().write({ overwrite: true });
+        });
+    }
+    /**
+     * Returns the current summary buffer as a string
+     *
+     * @returns {string} string of summary buffer
+     */
+    stringify() {
+        return this._buffer;
+    }
+    /**
+     * If the summary buffer is empty
+     *
+     * @returns {boolen} true if the buffer is empty
+     */
+    isEmptyBuffer() {
+        return this._buffer.length === 0;
+    }
+    /**
+     * Resets the summary buffer without writing to summary file
+     *
+     * @returns {Summary} summary instance
+     */
+    emptyBuffer() {
+        this._buffer = '';
+        return this;
+    }
+    /**
+     * Adds raw text to the summary buffer
+     *
+     * @param {string} text content to add
+     * @param {boolean} [addEOL=false] (optional) append an EOL to the raw text (default: false)
+     *
+     * @returns {Summary} summary instance
+     */
+    addRaw(text, addEOL = false) {
+        this._buffer += text;
+        return addEOL ? this.addEOL() : this;
+    }
+    /**
+     * Adds the operating system-specific end-of-line marker to the buffer
+     *
+     * @returns {Summary} summary instance
+     */
+    addEOL() {
+        return this.addRaw(os_1.EOL);
+    }
+    /**
+     * Adds an HTML codeblock to the summary buffer
+     *
+     * @param {string} code content to render within fenced code block
+     * @param {string} lang (optional) language to syntax highlight code
+     *
+     * @returns {Summary} summary instance
+     */
+    addCodeBlock(code, lang) {
+        const attrs = Object.assign({}, (lang && { lang }));
+        const element = this.wrap('pre', this.wrap('code', code), attrs);
+        return this.addRaw(element).addEOL();
+    }
+    /**
+     * Adds an HTML list to the summary buffer
+     *
+     * @param {string[]} items list of items to render
+     * @param {boolean} [ordered=false] (optional) if the rendered list should be ordered or not (default: false)
+     *
+     * @returns {Summary} summary instance
+     */
+    addList(items, ordered = false) {
+        const tag = ordered ? 'ol' : 'ul';
+        const listItems = items.map(item => this.wrap('li', item)).join('');
+        const element = this.wrap(tag, listItems);
+        return this.addRaw(element).addEOL();
+    }
+    /**
+     * Adds an HTML table to the summary buffer
+     *
+     * @param {SummaryTableCell[]} rows table rows
+     *
+     * @returns {Summary} summary instance
+     */
+    addTable(rows) {
+        const tableBody = rows
+            .map(row => {
+            const cells = row
+                .map(cell => {
+                if (typeof cell === 'string') {
+                    return this.wrap('td', cell);
+                }
+                const { header, data, colspan, rowspan } = cell;
+                const tag = header ? 'th' : 'td';
+                const attrs = Object.assign(Object.assign({}, (colspan && { colspan })), (rowspan && { rowspan }));
+                return this.wrap(tag, data, attrs);
+            })
+                .join('');
+            return this.wrap('tr', cells);
+        })
+            .join('');
+        const element = this.wrap('table', tableBody);
+        return this.addRaw(element).addEOL();
+    }
+    /**
+     * Adds a collapsable HTML details element to the summary buffer
+     *
+     * @param {string} label text for the closed state
+     * @param {string} content collapsable content
+     *
+     * @returns {Summary} summary instance
+     */
+    addDetails(label, content) {
+        const element = this.wrap('details', this.wrap('summary', label) + content);
+        return this.addRaw(element).addEOL();
+    }
+    /**
+     * Adds an HTML image tag to the summary buffer
+     *
+     * @param {string} src path to the image you to embed
+     * @param {string} alt text description of the image
+     * @param {SummaryImageOptions} options (optional) addition image attributes
+     *
+     * @returns {Summary} summary instance
+     */
+    addImage(src, alt, options) {
+        const { width, height } = options || {};
+        const attrs = Object.assign(Object.assign({}, (width && { width })), (height && { height }));
+        const element = this.wrap('img', null, Object.assign({ src, alt }, attrs));
+        return this.addRaw(element).addEOL();
+    }
+    /**
+     * Adds an HTML section heading element
+     *
+     * @param {string} text heading text
+     * @param {number | string} [level=1] (optional) the heading level, default: 1
+     *
+     * @returns {Summary} summary instance
+     */
+    addHeading(text, level) {
+        const tag = `h${level}`;
+        const allowedTag = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(tag)
+            ? tag
+            : 'h1';
+        const element = this.wrap(allowedTag, text);
+        return this.addRaw(element).addEOL();
+    }
+    /**
+     * Adds an HTML thematic break (<hr>) to the summary buffer
+     *
+     * @returns {Summary} summary instance
+     */
+    addSeparator() {
+        const element = this.wrap('hr', null);
+        return this.addRaw(element).addEOL();
+    }
+    /**
+     * Adds an HTML line break (<br>) to the summary buffer
+     *
+     * @returns {Summary} summary instance
+     */
+    addBreak() {
+        const element = this.wrap('br', null);
+        return this.addRaw(element).addEOL();
+    }
+    /**
+     * Adds an HTML blockquote to the summary buffer
+     *
+     * @param {string} text quote text
+     * @param {string} cite (optional) citation url
+     *
+     * @returns {Summary} summary instance
+     */
+    addQuote(text, cite) {
+        const attrs = Object.assign({}, (cite && { cite }));
+        const element = this.wrap('blockquote', text, attrs);
+        return this.addRaw(element).addEOL();
+    }
+    /**
+     * Adds an HTML anchor tag to the summary buffer
+     *
+     * @param {string} text link text/content
+     * @param {string} href hyperlink
+     *
+     * @returns {Summary} summary instance
+     */
+    addLink(text, href) {
+        const element = this.wrap('a', text, { href });
+        return this.addRaw(element).addEOL();
+    }
+}
+const _summary = new Summary();
+/**
+ * @deprecated use `core.summary`
+ */
+exports.markdownSummary = _summary;
+exports.summary = _summary;
+//# sourceMappingURL=summary.js.map
+
+/***/ }),
+
+/***/ 30302:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+// We use any as a valid input type
+/* eslint-disable @typescript-eslint/no-explicit-any */
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.toCommandValue = toCommandValue;
+exports.toCommandProperties = toCommandProperties;
+/**
+ * Sanitizes an input into a string so it can be passed into issueCommand safely
+ * @param input input to sanitize into a string
+ */
+function toCommandValue(input) {
+    if (input === null || input === undefined) {
+        return '';
+    }
+    else if (typeof input === 'string' || input instanceof String) {
+        return input;
+    }
+    return JSON.stringify(input);
+}
+/**
+ *
+ * @param annotationProperties
+ * @returns The command properties to send with the actual annotation command
+ * See IssueCommandProperties: https://github.com/actions/runner/blob/main/src/Runner.Worker/ActionCommandManager.cs#L646
+ */
+function toCommandProperties(annotationProperties) {
+    if (!Object.keys(annotationProperties).length) {
+        return {};
+    }
+    return {
+        title: annotationProperties.title,
+        file: annotationProperties.file,
+        line: annotationProperties.startLine,
+        endLine: annotationProperties.endLine,
+        col: annotationProperties.startColumn,
+        endColumn: annotationProperties.endColumn
+    };
+}
+//# sourceMappingURL=utils.js.map
+
+/***/ }),
+
+/***/ 37481:
+/***/ (function(__unused_webpack_module, exports) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.PersonalAccessTokenCredentialHandler = exports.BearerCredentialHandler = exports.BasicCredentialHandler = void 0;
+class BasicCredentialHandler {
+    constructor(username, password) {
+        this.username = username;
+        this.password = password;
+    }
+    prepareRequest(options) {
+        if (!options.headers) {
+            throw Error('The request has no headers');
+        }
+        options.headers['Authorization'] = `Basic ${Buffer.from(`${this.username}:${this.password}`).toString('base64')}`;
+    }
+    // This handler cannot handle 401
+    canHandleAuthentication() {
+        return false;
+    }
+    handleAuthentication() {
+        return __awaiter(this, void 0, void 0, function* () {
+            throw new Error('not implemented');
+        });
+    }
+}
+exports.BasicCredentialHandler = BasicCredentialHandler;
+class BearerCredentialHandler {
+    constructor(token) {
+        this.token = token;
+    }
+    // currently implements pre-authorization
+    // TODO: support preAuth = false where it hooks on 401
+    prepareRequest(options) {
+        if (!options.headers) {
+            throw Error('The request has no headers');
+        }
+        options.headers['Authorization'] = `Bearer ${this.token}`;
+    }
+    // This handler cannot handle 401
+    canHandleAuthentication() {
+        return false;
+    }
+    handleAuthentication() {
+        return __awaiter(this, void 0, void 0, function* () {
+            throw new Error('not implemented');
+        });
+    }
+}
+exports.BearerCredentialHandler = BearerCredentialHandler;
+class PersonalAccessTokenCredentialHandler {
+    constructor(token) {
+        this.token = token;
+    }
+    // currently implements pre-authorization
+    // TODO: support preAuth = false where it hooks on 401
+    prepareRequest(options) {
+        if (!options.headers) {
+            throw Error('The request has no headers');
+        }
+        options.headers['Authorization'] = `Basic ${Buffer.from(`PAT:${this.token}`).toString('base64')}`;
+    }
+    // This handler cannot handle 401
+    canHandleAuthentication() {
+        return false;
+    }
+    handleAuthentication() {
+        return __awaiter(this, void 0, void 0, function* () {
+            throw new Error('not implemented');
+        });
+    }
+}
+exports.PersonalAccessTokenCredentialHandler = PersonalAccessTokenCredentialHandler;
+//# sourceMappingURL=auth.js.map
+
+/***/ }),
+
+/***/ 28163:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.HttpClient = exports.HttpClientResponse = exports.HttpClientError = exports.MediaTypes = exports.Headers = exports.HttpCodes = void 0;
+exports.getProxyUrl = getProxyUrl;
+exports.isHttps = isHttps;
+const http = __importStar(__nccwpck_require__(58611));
+const https = __importStar(__nccwpck_require__(65692));
+const pm = __importStar(__nccwpck_require__(43695));
+const tunnel = __importStar(__nccwpck_require__(20770));
+const undici_1 = __nccwpck_require__(46752);
+var HttpCodes;
+(function (HttpCodes) {
+    HttpCodes[HttpCodes["OK"] = 200] = "OK";
+    HttpCodes[HttpCodes["MultipleChoices"] = 300] = "MultipleChoices";
+    HttpCodes[HttpCodes["MovedPermanently"] = 301] = "MovedPermanently";
+    HttpCodes[HttpCodes["ResourceMoved"] = 302] = "ResourceMoved";
+    HttpCodes[HttpCodes["SeeOther"] = 303] = "SeeOther";
+    HttpCodes[HttpCodes["NotModified"] = 304] = "NotModified";
+    HttpCodes[HttpCodes["UseProxy"] = 305] = "UseProxy";
+    HttpCodes[HttpCodes["SwitchProxy"] = 306] = "SwitchProxy";
+    HttpCodes[HttpCodes["TemporaryRedirect"] = 307] = "TemporaryRedirect";
+    HttpCodes[HttpCodes["PermanentRedirect"] = 308] = "PermanentRedirect";
+    HttpCodes[HttpCodes["BadRequest"] = 400] = "BadRequest";
+    HttpCodes[HttpCodes["Unauthorized"] = 401] = "Unauthorized";
+    HttpCodes[HttpCodes["PaymentRequired"] = 402] = "PaymentRequired";
+    HttpCodes[HttpCodes["Forbidden"] = 403] = "Forbidden";
+    HttpCodes[HttpCodes["NotFound"] = 404] = "NotFound";
+    HttpCodes[HttpCodes["MethodNotAllowed"] = 405] = "MethodNotAllowed";
+    HttpCodes[HttpCodes["NotAcceptable"] = 406] = "NotAcceptable";
+    HttpCodes[HttpCodes["ProxyAuthenticationRequired"] = 407] = "ProxyAuthenticationRequired";
+    HttpCodes[HttpCodes["RequestTimeout"] = 408] = "RequestTimeout";
+    HttpCodes[HttpCodes["Conflict"] = 409] = "Conflict";
+    HttpCodes[HttpCodes["Gone"] = 410] = "Gone";
+    HttpCodes[HttpCodes["TooManyRequests"] = 429] = "TooManyRequests";
+    HttpCodes[HttpCodes["InternalServerError"] = 500] = "InternalServerError";
+    HttpCodes[HttpCodes["NotImplemented"] = 501] = "NotImplemented";
+    HttpCodes[HttpCodes["BadGateway"] = 502] = "BadGateway";
+    HttpCodes[HttpCodes["ServiceUnavailable"] = 503] = "ServiceUnavailable";
+    HttpCodes[HttpCodes["GatewayTimeout"] = 504] = "GatewayTimeout";
+})(HttpCodes || (exports.HttpCodes = HttpCodes = {}));
+var Headers;
+(function (Headers) {
+    Headers["Accept"] = "accept";
+    Headers["ContentType"] = "content-type";
+})(Headers || (exports.Headers = Headers = {}));
+var MediaTypes;
+(function (MediaTypes) {
+    MediaTypes["ApplicationJson"] = "application/json";
+})(MediaTypes || (exports.MediaTypes = MediaTypes = {}));
+/**
+ * Returns the proxy URL, depending upon the supplied url and proxy environment variables.
+ * @param serverUrl  The server URL where the request will be sent. For example, https://api.github.com
+ */
+function getProxyUrl(serverUrl) {
+    const proxyUrl = pm.getProxyUrl(new URL(serverUrl));
+    return proxyUrl ? proxyUrl.href : '';
+}
+const HttpRedirectCodes = [
+    HttpCodes.MovedPermanently,
+    HttpCodes.ResourceMoved,
+    HttpCodes.SeeOther,
+    HttpCodes.TemporaryRedirect,
+    HttpCodes.PermanentRedirect
+];
+const HttpResponseRetryCodes = [
+    HttpCodes.BadGateway,
+    HttpCodes.ServiceUnavailable,
+    HttpCodes.GatewayTimeout
+];
+const RetryableHttpVerbs = ['OPTIONS', 'GET', 'DELETE', 'HEAD'];
+const ExponentialBackoffCeiling = 10;
+const ExponentialBackoffTimeSlice = 5;
+class HttpClientError extends Error {
+    constructor(message, statusCode) {
+        super(message);
+        this.name = 'HttpClientError';
+        this.statusCode = statusCode;
+        Object.setPrototypeOf(this, HttpClientError.prototype);
+    }
+}
+exports.HttpClientError = HttpClientError;
+class HttpClientResponse {
+    constructor(message) {
+        this.message = message;
+    }
+    readBody() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
+                let output = Buffer.alloc(0);
+                this.message.on('data', (chunk) => {
+                    output = Buffer.concat([output, chunk]);
+                });
+                this.message.on('end', () => {
+                    resolve(output.toString());
+                });
+            }));
+        });
+    }
+    readBodyBuffer() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
+                const chunks = [];
+                this.message.on('data', (chunk) => {
+                    chunks.push(chunk);
+                });
+                this.message.on('end', () => {
+                    resolve(Buffer.concat(chunks));
+                });
+            }));
+        });
+    }
+}
+exports.HttpClientResponse = HttpClientResponse;
+function isHttps(requestUrl) {
+    const parsedUrl = new URL(requestUrl);
+    return parsedUrl.protocol === 'https:';
+}
+class HttpClient {
+    constructor(userAgent, handlers, requestOptions) {
+        this._ignoreSslError = false;
+        this._allowRedirects = true;
+        this._allowRedirectDowngrade = false;
+        this._maxRedirects = 50;
+        this._allowRetries = false;
+        this._maxRetries = 1;
+        this._keepAlive = false;
+        this._disposed = false;
+        this.userAgent = userAgent;
+        this.handlers = handlers || [];
+        this.requestOptions = requestOptions;
+        if (requestOptions) {
+            if (requestOptions.ignoreSslError != null) {
+                this._ignoreSslError = requestOptions.ignoreSslError;
+            }
+            this._socketTimeout = requestOptions.socketTimeout;
+            if (requestOptions.allowRedirects != null) {
+                this._allowRedirects = requestOptions.allowRedirects;
+            }
+            if (requestOptions.allowRedirectDowngrade != null) {
+                this._allowRedirectDowngrade = requestOptions.allowRedirectDowngrade;
+            }
+            if (requestOptions.maxRedirects != null) {
+                this._maxRedirects = Math.max(requestOptions.maxRedirects, 0);
+            }
+            if (requestOptions.keepAlive != null) {
+                this._keepAlive = requestOptions.keepAlive;
+            }
+            if (requestOptions.allowRetries != null) {
+                this._allowRetries = requestOptions.allowRetries;
+            }
+            if (requestOptions.maxRetries != null) {
+                this._maxRetries = requestOptions.maxRetries;
+            }
+        }
+    }
+    options(requestUrl, additionalHeaders) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.request('OPTIONS', requestUrl, null, additionalHeaders || {});
+        });
+    }
+    get(requestUrl, additionalHeaders) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.request('GET', requestUrl, null, additionalHeaders || {});
+        });
+    }
+    del(requestUrl, additionalHeaders) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.request('DELETE', requestUrl, null, additionalHeaders || {});
+        });
+    }
+    post(requestUrl, data, additionalHeaders) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.request('POST', requestUrl, data, additionalHeaders || {});
+        });
+    }
+    patch(requestUrl, data, additionalHeaders) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.request('PATCH', requestUrl, data, additionalHeaders || {});
+        });
+    }
+    put(requestUrl, data, additionalHeaders) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.request('PUT', requestUrl, data, additionalHeaders || {});
+        });
+    }
+    head(requestUrl, additionalHeaders) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.request('HEAD', requestUrl, null, additionalHeaders || {});
+        });
+    }
+    sendStream(verb, requestUrl, stream, additionalHeaders) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.request(verb, requestUrl, stream, additionalHeaders);
+        });
+    }
+    /**
+     * Gets a typed object from an endpoint
+     * Be aware that not found returns a null.  Other errors (4xx, 5xx) reject the promise
+     */
+    getJson(requestUrl_1) {
+        return __awaiter(this, arguments, void 0, function* (requestUrl, additionalHeaders = {}) {
+            additionalHeaders[Headers.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.Accept, MediaTypes.ApplicationJson);
+            const res = yield this.get(requestUrl, additionalHeaders);
+            return this._processResponse(res, this.requestOptions);
+        });
+    }
+    postJson(requestUrl_1, obj_1) {
+        return __awaiter(this, arguments, void 0, function* (requestUrl, obj, additionalHeaders = {}) {
+            const data = JSON.stringify(obj, null, 2);
+            additionalHeaders[Headers.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.Accept, MediaTypes.ApplicationJson);
+            additionalHeaders[Headers.ContentType] =
+                this._getExistingOrDefaultContentTypeHeader(additionalHeaders, MediaTypes.ApplicationJson);
+            const res = yield this.post(requestUrl, data, additionalHeaders);
+            return this._processResponse(res, this.requestOptions);
+        });
+    }
+    putJson(requestUrl_1, obj_1) {
+        return __awaiter(this, arguments, void 0, function* (requestUrl, obj, additionalHeaders = {}) {
+            const data = JSON.stringify(obj, null, 2);
+            additionalHeaders[Headers.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.Accept, MediaTypes.ApplicationJson);
+            additionalHeaders[Headers.ContentType] =
+                this._getExistingOrDefaultContentTypeHeader(additionalHeaders, MediaTypes.ApplicationJson);
+            const res = yield this.put(requestUrl, data, additionalHeaders);
+            return this._processResponse(res, this.requestOptions);
+        });
+    }
+    patchJson(requestUrl_1, obj_1) {
+        return __awaiter(this, arguments, void 0, function* (requestUrl, obj, additionalHeaders = {}) {
+            const data = JSON.stringify(obj, null, 2);
+            additionalHeaders[Headers.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.Accept, MediaTypes.ApplicationJson);
+            additionalHeaders[Headers.ContentType] =
+                this._getExistingOrDefaultContentTypeHeader(additionalHeaders, MediaTypes.ApplicationJson);
+            const res = yield this.patch(requestUrl, data, additionalHeaders);
+            return this._processResponse(res, this.requestOptions);
+        });
+    }
+    /**
+     * Makes a raw http request.
+     * All other methods such as get, post, patch, and request ultimately call this.
+     * Prefer get, del, post and patch
+     */
+    request(verb, requestUrl, data, headers) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (this._disposed) {
+                throw new Error('Client has already been disposed.');
+            }
+            const parsedUrl = new URL(requestUrl);
+            let info = this._prepareRequest(verb, parsedUrl, headers);
+            // Only perform retries on reads since writes may not be idempotent.
+            const maxTries = this._allowRetries && RetryableHttpVerbs.includes(verb)
+                ? this._maxRetries + 1
+                : 1;
+            let numTries = 0;
+            let response;
+            do {
+                response = yield this.requestRaw(info, data);
+                // Check if it's an authentication challenge
+                if (response &&
+                    response.message &&
+                    response.message.statusCode === HttpCodes.Unauthorized) {
+                    let authenticationHandler;
+                    for (const handler of this.handlers) {
+                        if (handler.canHandleAuthentication(response)) {
+                            authenticationHandler = handler;
+                            break;
+                        }
+                    }
+                    if (authenticationHandler) {
+                        return authenticationHandler.handleAuthentication(this, info, data);
+                    }
+                    else {
+                        // We have received an unauthorized response but have no handlers to handle it.
+                        // Let the response return to the caller.
+                        return response;
+                    }
+                }
+                let redirectsRemaining = this._maxRedirects;
+                while (response.message.statusCode &&
+                    HttpRedirectCodes.includes(response.message.statusCode) &&
+                    this._allowRedirects &&
+                    redirectsRemaining > 0) {
+                    const redirectUrl = response.message.headers['location'];
+                    if (!redirectUrl) {
+                        // if there's no location to redirect to, we won't
+                        break;
+                    }
+                    const parsedRedirectUrl = new URL(redirectUrl);
+                    if (parsedUrl.protocol === 'https:' &&
+                        parsedUrl.protocol !== parsedRedirectUrl.protocol &&
+                        !this._allowRedirectDowngrade) {
+                        throw new Error('Redirect from HTTPS to HTTP protocol. This downgrade is not allowed for security reasons. If you want to allow this behavior, set the allowRedirectDowngrade option to true.');
+                    }
+                    // we need to finish reading the response before reassigning response
+                    // which will leak the open socket.
+                    yield response.readBody();
+                    // strip authorization header if redirected to a different hostname
+                    if (parsedRedirectUrl.hostname !== parsedUrl.hostname) {
+                        for (const header in headers) {
+                            // header names are case insensitive
+                            if (header.toLowerCase() === 'authorization') {
+                                delete headers[header];
+                            }
+                        }
+                    }
+                    // let's make the request with the new redirectUrl
+                    info = this._prepareRequest(verb, parsedRedirectUrl, headers);
+                    response = yield this.requestRaw(info, data);
+                    redirectsRemaining--;
+                }
+                if (!response.message.statusCode ||
+                    !HttpResponseRetryCodes.includes(response.message.statusCode)) {
+                    // If not a retry code, return immediately instead of retrying
+                    return response;
+                }
+                numTries += 1;
+                if (numTries < maxTries) {
+                    yield response.readBody();
+                    yield this._performExponentialBackoff(numTries);
+                }
+            } while (numTries < maxTries);
+            return response;
+        });
+    }
+    /**
+     * Needs to be called if keepAlive is set to true in request options.
+     */
+    dispose() {
+        if (this._agent) {
+            this._agent.destroy();
+        }
+        this._disposed = true;
+    }
+    /**
+     * Raw request.
+     * @param info
+     * @param data
+     */
+    requestRaw(info, data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return new Promise((resolve, reject) => {
+                function callbackForResult(err, res) {
+                    if (err) {
+                        reject(err);
+                    }
+                    else if (!res) {
+                        // If `err` is not passed, then `res` must be passed.
+                        reject(new Error('Unknown error'));
+                    }
+                    else {
+                        resolve(res);
+                    }
+                }
+                this.requestRawWithCallback(info, data, callbackForResult);
+            });
+        });
+    }
+    /**
+     * Raw request with callback.
+     * @param info
+     * @param data
+     * @param onResult
+     */
+    requestRawWithCallback(info, data, onResult) {
+        if (typeof data === 'string') {
+            if (!info.options.headers) {
+                info.options.headers = {};
+            }
+            info.options.headers['Content-Length'] = Buffer.byteLength(data, 'utf8');
+        }
+        let callbackCalled = false;
+        function handleResult(err, res) {
+            if (!callbackCalled) {
+                callbackCalled = true;
+                onResult(err, res);
+            }
+        }
+        const req = info.httpModule.request(info.options, (msg) => {
+            const res = new HttpClientResponse(msg);
+            handleResult(undefined, res);
+        });
+        let socket;
+        req.on('socket', sock => {
+            socket = sock;
+        });
+        // If we ever get disconnected, we want the socket to timeout eventually
+        req.setTimeout(this._socketTimeout || 3 * 60000, () => {
+            if (socket) {
+                socket.end();
+            }
+            handleResult(new Error(`Request timeout: ${info.options.path}`));
+        });
+        req.on('error', function (err) {
+            // err has statusCode property
+            // res should have headers
+            handleResult(err);
+        });
+        if (data && typeof data === 'string') {
+            req.write(data, 'utf8');
+        }
+        if (data && typeof data !== 'string') {
+            data.on('close', function () {
+                req.end();
+            });
+            data.pipe(req);
+        }
+        else {
+            req.end();
+        }
+    }
+    /**
+     * Gets an http agent. This function is useful when you need an http agent that handles
+     * routing through a proxy server - depending upon the url and proxy environment variables.
+     * @param serverUrl  The server URL where the request will be sent. For example, https://api.github.com
+     */
+    getAgent(serverUrl) {
+        const parsedUrl = new URL(serverUrl);
+        return this._getAgent(parsedUrl);
+    }
+    getAgentDispatcher(serverUrl) {
+        const parsedUrl = new URL(serverUrl);
+        const proxyUrl = pm.getProxyUrl(parsedUrl);
+        const useProxy = proxyUrl && proxyUrl.hostname;
+        if (!useProxy) {
+            return;
+        }
+        return this._getProxyAgentDispatcher(parsedUrl, proxyUrl);
+    }
+    _prepareRequest(method, requestUrl, headers) {
+        const info = {};
+        info.parsedUrl = requestUrl;
+        const usingSsl = info.parsedUrl.protocol === 'https:';
+        info.httpModule = usingSsl ? https : http;
+        const defaultPort = usingSsl ? 443 : 80;
+        info.options = {};
+        info.options.host = info.parsedUrl.hostname;
+        info.options.port = info.parsedUrl.port
+            ? parseInt(info.parsedUrl.port)
+            : defaultPort;
+        info.options.path =
+            (info.parsedUrl.pathname || '') + (info.parsedUrl.search || '');
+        info.options.method = method;
+        info.options.headers = this._mergeHeaders(headers);
+        if (this.userAgent != null) {
+            info.options.headers['user-agent'] = this.userAgent;
+        }
+        info.options.agent = this._getAgent(info.parsedUrl);
+        // gives handlers an opportunity to participate
+        if (this.handlers) {
+            for (const handler of this.handlers) {
+                handler.prepareRequest(info.options);
+            }
+        }
+        return info;
+    }
+    _mergeHeaders(headers) {
+        if (this.requestOptions && this.requestOptions.headers) {
+            return Object.assign({}, lowercaseKeys(this.requestOptions.headers), lowercaseKeys(headers || {}));
+        }
+        return lowercaseKeys(headers || {});
+    }
+    /**
+     * Gets an existing header value or returns a default.
+     * Handles converting number header values to strings since HTTP headers must be strings.
+     * Note: This returns string | string[] since some headers can have multiple values.
+     * For headers that must always be a single string (like Content-Type), use the
+     * specialized _getExistingOrDefaultContentTypeHeader method instead.
+     */
+    _getExistingOrDefaultHeader(additionalHeaders, header, _default) {
+        let clientHeader;
+        if (this.requestOptions && this.requestOptions.headers) {
+            const headerValue = lowercaseKeys(this.requestOptions.headers)[header];
+            if (headerValue) {
+                clientHeader =
+                    typeof headerValue === 'number' ? headerValue.toString() : headerValue;
+            }
+        }
+        const additionalValue = additionalHeaders[header];
+        if (additionalValue !== undefined) {
+            return typeof additionalValue === 'number'
+                ? additionalValue.toString()
+                : additionalValue;
+        }
+        if (clientHeader !== undefined) {
+            return clientHeader;
+        }
+        return _default;
+    }
+    /**
+     * Specialized version of _getExistingOrDefaultHeader for Content-Type header.
+     * Always returns a single string (not an array) since Content-Type should be a single value.
+     * Converts arrays to comma-separated strings and numbers to strings to ensure type safety.
+     * This was split from _getExistingOrDefaultHeader to provide stricter typing for callers
+     * that assign the result to places expecting a string (e.g., additionalHeaders[Headers.ContentType]).
+     */
+    _getExistingOrDefaultContentTypeHeader(additionalHeaders, _default) {
+        let clientHeader;
+        if (this.requestOptions && this.requestOptions.headers) {
+            const headerValue = lowercaseKeys(this.requestOptions.headers)[Headers.ContentType];
+            if (headerValue) {
+                if (typeof headerValue === 'number') {
+                    clientHeader = String(headerValue);
+                }
+                else if (Array.isArray(headerValue)) {
+                    clientHeader = headerValue.join(', ');
+                }
+                else {
+                    clientHeader = headerValue;
+                }
+            }
+        }
+        const additionalValue = additionalHeaders[Headers.ContentType];
+        // Return the first non-undefined value, converting numbers or arrays to strings if necessary
+        if (additionalValue !== undefined) {
+            if (typeof additionalValue === 'number') {
+                return String(additionalValue);
+            }
+            else if (Array.isArray(additionalValue)) {
+                return additionalValue.join(', ');
+            }
+            else {
+                return additionalValue;
+            }
+        }
+        if (clientHeader !== undefined) {
+            return clientHeader;
+        }
+        return _default;
+    }
+    _getAgent(parsedUrl) {
+        let agent;
+        const proxyUrl = pm.getProxyUrl(parsedUrl);
+        const useProxy = proxyUrl && proxyUrl.hostname;
+        if (this._keepAlive && useProxy) {
+            agent = this._proxyAgent;
+        }
+        if (!useProxy) {
+            agent = this._agent;
+        }
+        // if agent is already assigned use that agent.
+        if (agent) {
+            return agent;
+        }
+        const usingSsl = parsedUrl.protocol === 'https:';
+        let maxSockets = 100;
+        if (this.requestOptions) {
+            maxSockets = this.requestOptions.maxSockets || http.globalAgent.maxSockets;
+        }
+        // This is `useProxy` again, but we need to check `proxyURl` directly for TypeScripts's flow analysis.
+        if (proxyUrl && proxyUrl.hostname) {
+            const agentOptions = {
+                maxSockets,
+                keepAlive: this._keepAlive,
+                proxy: Object.assign(Object.assign({}, ((proxyUrl.username || proxyUrl.password) && {
+                    proxyAuth: `${proxyUrl.username}:${proxyUrl.password}`
+                })), { host: proxyUrl.hostname, port: proxyUrl.port })
+            };
+            let tunnelAgent;
+            const overHttps = proxyUrl.protocol === 'https:';
+            if (usingSsl) {
+                tunnelAgent = overHttps ? tunnel.httpsOverHttps : tunnel.httpsOverHttp;
+            }
+            else {
+                tunnelAgent = overHttps ? tunnel.httpOverHttps : tunnel.httpOverHttp;
+            }
+            agent = tunnelAgent(agentOptions);
+            this._proxyAgent = agent;
+        }
+        // if tunneling agent isn't assigned create a new agent
+        if (!agent) {
+            const options = { keepAlive: this._keepAlive, maxSockets };
+            agent = usingSsl ? new https.Agent(options) : new http.Agent(options);
+            this._agent = agent;
+        }
+        if (usingSsl && this._ignoreSslError) {
+            // we don't want to set NODE_TLS_REJECT_UNAUTHORIZED=0 since that will affect request for entire process
+            // http.RequestOptions doesn't expose a way to modify RequestOptions.agent.options
+            // we have to cast it to any and change it directly
+            agent.options = Object.assign(agent.options || {}, {
+                rejectUnauthorized: false
+            });
+        }
+        return agent;
+    }
+    _getProxyAgentDispatcher(parsedUrl, proxyUrl) {
+        let proxyAgent;
+        if (this._keepAlive) {
+            proxyAgent = this._proxyAgentDispatcher;
+        }
+        // if agent is already assigned use that agent.
+        if (proxyAgent) {
+            return proxyAgent;
+        }
+        const usingSsl = parsedUrl.protocol === 'https:';
+        proxyAgent = new undici_1.ProxyAgent(Object.assign({ uri: proxyUrl.href, pipelining: !this._keepAlive ? 0 : 1 }, ((proxyUrl.username || proxyUrl.password) && {
+            token: `Basic ${Buffer.from(`${proxyUrl.username}:${proxyUrl.password}`).toString('base64')}`
+        })));
+        this._proxyAgentDispatcher = proxyAgent;
+        if (usingSsl && this._ignoreSslError) {
+            // we don't want to set NODE_TLS_REJECT_UNAUTHORIZED=0 since that will affect request for entire process
+            // http.RequestOptions doesn't expose a way to modify RequestOptions.agent.options
+            // we have to cast it to any and change it directly
+            proxyAgent.options = Object.assign(proxyAgent.options.requestTls || {}, {
+                rejectUnauthorized: false
+            });
+        }
+        return proxyAgent;
+    }
+    _performExponentialBackoff(retryNumber) {
+        return __awaiter(this, void 0, void 0, function* () {
+            retryNumber = Math.min(ExponentialBackoffCeiling, retryNumber);
+            const ms = ExponentialBackoffTimeSlice * Math.pow(2, retryNumber);
+            return new Promise(resolve => setTimeout(() => resolve(), ms));
+        });
+    }
+    _processResponse(res, options) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+                const statusCode = res.message.statusCode || 0;
+                const response = {
+                    statusCode,
+                    result: null,
+                    headers: {}
+                };
+                // not found leads to null obj returned
+                if (statusCode === HttpCodes.NotFound) {
+                    resolve(response);
+                }
+                // get the result from the body
+                function dateTimeDeserializer(key, value) {
+                    if (typeof value === 'string') {
+                        const a = new Date(value);
+                        if (!isNaN(a.valueOf())) {
+                            return a;
+                        }
+                    }
+                    return value;
+                }
+                let obj;
+                let contents;
+                try {
+                    contents = yield res.readBody();
+                    if (contents && contents.length > 0) {
+                        if (options && options.deserializeDates) {
+                            obj = JSON.parse(contents, dateTimeDeserializer);
+                        }
+                        else {
+                            obj = JSON.parse(contents);
+                        }
+                        response.result = obj;
+                    }
+                    response.headers = res.message.headers;
+                }
+                catch (err) {
+                    // Invalid resource (contents not json);  leaving result obj null
+                }
+                // note that 3xx redirects are handled by the http layer.
+                if (statusCode > 299) {
+                    let msg;
+                    // if exception/error in body, attempt to get better error
+                    if (obj && obj.message) {
+                        msg = obj.message;
+                    }
+                    else if (contents && contents.length > 0) {
+                        // it may be the case that the exception is in the body message as string
+                        msg = contents;
+                    }
+                    else {
+                        msg = `Failed request: (${statusCode})`;
+                    }
+                    const err = new HttpClientError(msg, statusCode);
+                    err.result = response.result;
+                    reject(err);
+                }
+                else {
+                    resolve(response);
+                }
+            }));
+        });
+    }
+}
+exports.HttpClient = HttpClient;
+const lowercaseKeys = (obj) => Object.keys(obj).reduce((c, k) => ((c[k.toLowerCase()] = obj[k]), c), {});
+//# sourceMappingURL=index.js.map
+
+/***/ }),
+
+/***/ 43695:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getProxyUrl = getProxyUrl;
+exports.checkBypass = checkBypass;
+function getProxyUrl(reqUrl) {
+    const usingSsl = reqUrl.protocol === 'https:';
+    if (checkBypass(reqUrl)) {
+        return undefined;
+    }
+    const proxyVar = (() => {
+        if (usingSsl) {
+            return process.env['https_proxy'] || process.env['HTTPS_PROXY'];
+        }
+        else {
+            return process.env['http_proxy'] || process.env['HTTP_PROXY'];
+        }
+    })();
+    if (proxyVar) {
+        try {
+            return new DecodedURL(proxyVar);
+        }
+        catch (_a) {
+            if (!proxyVar.startsWith('http://') && !proxyVar.startsWith('https://'))
+                return new DecodedURL(`http://${proxyVar}`);
+        }
+    }
+    else {
+        return undefined;
+    }
+}
+function checkBypass(reqUrl) {
+    if (!reqUrl.hostname) {
+        return false;
+    }
+    const reqHost = reqUrl.hostname;
+    if (isLoopbackAddress(reqHost)) {
+        return true;
+    }
+    const noProxy = process.env['no_proxy'] || process.env['NO_PROXY'] || '';
+    if (!noProxy) {
+        return false;
+    }
+    // Determine the request port
+    let reqPort;
+    if (reqUrl.port) {
+        reqPort = Number(reqUrl.port);
+    }
+    else if (reqUrl.protocol === 'http:') {
+        reqPort = 80;
+    }
+    else if (reqUrl.protocol === 'https:') {
+        reqPort = 443;
+    }
+    // Format the request hostname and hostname with port
+    const upperReqHosts = [reqUrl.hostname.toUpperCase()];
+    if (typeof reqPort === 'number') {
+        upperReqHosts.push(`${upperReqHosts[0]}:${reqPort}`);
+    }
+    // Compare request host against noproxy
+    for (const upperNoProxyItem of noProxy
+        .split(',')
+        .map(x => x.trim().toUpperCase())
+        .filter(x => x)) {
+        if (upperNoProxyItem === '*' ||
+            upperReqHosts.some(x => x === upperNoProxyItem ||
+                x.endsWith(`.${upperNoProxyItem}`) ||
+                (upperNoProxyItem.startsWith('.') &&
+                    x.endsWith(`${upperNoProxyItem}`)))) {
+            return true;
+        }
+    }
+    return false;
+}
+function isLoopbackAddress(host) {
+    const hostLower = host.toLowerCase();
+    return (hostLower === 'localhost' ||
+        hostLower.startsWith('127.') ||
+        hostLower.startsWith('[::1]') ||
+        hostLower.startsWith('[0:0:0:0:0:0:0:1]'));
+}
+class DecodedURL extends URL {
+    constructor(url, base) {
+        super(url, base);
+        this._decodedUsername = decodeURIComponent(super.username);
+        this._decodedPassword = decodeURIComponent(super.password);
+    }
+    get username() {
+        return this._decodedUsername;
+    }
+    get password() {
+        return this._decodedPassword;
+    }
+}
+//# sourceMappingURL=proxy.js.map
+
+/***/ }),
+
+/***/ 95236:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.exec = exec;
+exports.getExecOutput = getExecOutput;
+const string_decoder_1 = __nccwpck_require__(13193);
+const tr = __importStar(__nccwpck_require__(6665));
+/**
+ * Exec a command.
+ * Output will be streamed to the live console.
+ * Returns promise with return code
+ *
+ * @param     commandLine        command to execute (can include additional args). Must be correctly escaped.
+ * @param     args               optional arguments for tool. Escaping is handled by the lib.
+ * @param     options            optional exec options.  See ExecOptions
+ * @returns   Promise<number>    exit code
+ */
+function exec(commandLine, args, options) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const commandArgs = tr.argStringToArray(commandLine);
+        if (commandArgs.length === 0) {
+            throw new Error(`Parameter 'commandLine' cannot be null or empty.`);
+        }
+        // Path to tool to execute should be first arg
+        const toolPath = commandArgs[0];
+        args = commandArgs.slice(1).concat(args || []);
+        const runner = new tr.ToolRunner(toolPath, args, options);
+        return runner.exec();
+    });
+}
+/**
+ * Exec a command and get the output.
+ * Output will be streamed to the live console.
+ * Returns promise with the exit code and collected stdout and stderr
+ *
+ * @param     commandLine           command to execute (can include additional args). Must be correctly escaped.
+ * @param     args                  optional arguments for tool. Escaping is handled by the lib.
+ * @param     options               optional exec options.  See ExecOptions
+ * @returns   Promise<ExecOutput>   exit code, stdout, and stderr
+ */
+function getExecOutput(commandLine, args, options) {
+    return __awaiter(this, void 0, void 0, function* () {
+        var _a, _b;
+        let stdout = '';
+        let stderr = '';
+        //Using string decoder covers the case where a mult-byte character is split
+        const stdoutDecoder = new string_decoder_1.StringDecoder('utf8');
+        const stderrDecoder = new string_decoder_1.StringDecoder('utf8');
+        const originalStdoutListener = (_a = options === null || options === void 0 ? void 0 : options.listeners) === null || _a === void 0 ? void 0 : _a.stdout;
+        const originalStdErrListener = (_b = options === null || options === void 0 ? void 0 : options.listeners) === null || _b === void 0 ? void 0 : _b.stderr;
+        const stdErrListener = (data) => {
+            stderr += stderrDecoder.write(data);
+            if (originalStdErrListener) {
+                originalStdErrListener(data);
+            }
+        };
+        const stdOutListener = (data) => {
+            stdout += stdoutDecoder.write(data);
+            if (originalStdoutListener) {
+                originalStdoutListener(data);
+            }
+        };
+        const listeners = Object.assign(Object.assign({}, options === null || options === void 0 ? void 0 : options.listeners), { stdout: stdOutListener, stderr: stdErrListener });
+        const exitCode = yield exec(commandLine, args, Object.assign(Object.assign({}, options), { listeners }));
+        //flush any remaining characters
+        stdout += stdoutDecoder.end();
+        stderr += stderrDecoder.end();
+        return {
+            exitCode,
+            stdout,
+            stderr
+        };
+    });
+}
+//# sourceMappingURL=exec.js.map
+
+/***/ }),
+
+/***/ 6665:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ToolRunner = void 0;
+exports.argStringToArray = argStringToArray;
+const os = __importStar(__nccwpck_require__(70857));
+const events = __importStar(__nccwpck_require__(24434));
+const child = __importStar(__nccwpck_require__(35317));
+const path = __importStar(__nccwpck_require__(16928));
+const io = __importStar(__nccwpck_require__(94994));
+const ioUtil = __importStar(__nccwpck_require__(75207));
+const timers_1 = __nccwpck_require__(53557);
+/* eslint-disable @typescript-eslint/unbound-method */
+const IS_WINDOWS = process.platform === 'win32';
+/*
+ * Class for running command line tools. Handles quoting and arg parsing in a platform agnostic way.
+ */
+class ToolRunner extends events.EventEmitter {
+    constructor(toolPath, args, options) {
+        super();
+        if (!toolPath) {
+            throw new Error("Parameter 'toolPath' cannot be null or empty.");
+        }
+        this.toolPath = toolPath;
+        this.args = args || [];
+        this.options = options || {};
+    }
+    _debug(message) {
+        if (this.options.listeners && this.options.listeners.debug) {
+            this.options.listeners.debug(message);
+        }
+    }
+    _getCommandString(options, noPrefix) {
+        const toolPath = this._getSpawnFileName();
+        const args = this._getSpawnArgs(options);
+        let cmd = noPrefix ? '' : '[command]'; // omit prefix when piped to a second tool
+        if (IS_WINDOWS) {
+            // Windows + cmd file
+            if (this._isCmdFile()) {
+                cmd += toolPath;
+                for (const a of args) {
+                    cmd += ` ${a}`;
+                }
+            }
+            // Windows + verbatim
+            else if (options.windowsVerbatimArguments) {
+                cmd += `"${toolPath}"`;
+                for (const a of args) {
+                    cmd += ` ${a}`;
+                }
+            }
+            // Windows (regular)
+            else {
+                cmd += this._windowsQuoteCmdArg(toolPath);
+                for (const a of args) {
+                    cmd += ` ${this._windowsQuoteCmdArg(a)}`;
+                }
+            }
+        }
+        else {
+            // OSX/Linux - this can likely be improved with some form of quoting.
+            // creating processes on Unix is fundamentally different than Windows.
+            // on Unix, execvp() takes an arg array.
+            cmd += toolPath;
+            for (const a of args) {
+                cmd += ` ${a}`;
+            }
+        }
+        return cmd;
+    }
+    _processLineBuffer(data, strBuffer, onLine) {
+        try {
+            let s = strBuffer + data.toString();
+            let n = s.indexOf(os.EOL);
+            while (n > -1) {
+                const line = s.substring(0, n);
+                onLine(line);
+                // the rest of the string ...
+                s = s.substring(n + os.EOL.length);
+                n = s.indexOf(os.EOL);
+            }
+            return s;
+        }
+        catch (err) {
+            // streaming lines to console is best effort.  Don't fail a build.
+            this._debug(`error processing line. Failed with error ${err}`);
+            return '';
+        }
+    }
+    _getSpawnFileName() {
+        if (IS_WINDOWS) {
+            if (this._isCmdFile()) {
+                return process.env['COMSPEC'] || 'cmd.exe';
+            }
+        }
+        return this.toolPath;
+    }
+    _getSpawnArgs(options) {
+        if (IS_WINDOWS) {
+            if (this._isCmdFile()) {
+                let argline = `/D /S /C "${this._windowsQuoteCmdArg(this.toolPath)}`;
+                for (const a of this.args) {
+                    argline += ' ';
+                    argline += options.windowsVerbatimArguments
+                        ? a
+                        : this._windowsQuoteCmdArg(a);
+                }
+                argline += '"';
+                return [argline];
+            }
+        }
+        return this.args;
+    }
+    _endsWith(str, end) {
+        return str.endsWith(end);
+    }
+    _isCmdFile() {
+        const upperToolPath = this.toolPath.toUpperCase();
+        return (this._endsWith(upperToolPath, '.CMD') ||
+            this._endsWith(upperToolPath, '.BAT'));
+    }
+    _windowsQuoteCmdArg(arg) {
+        // for .exe, apply the normal quoting rules that libuv applies
+        if (!this._isCmdFile()) {
+            return this._uvQuoteCmdArg(arg);
+        }
+        // otherwise apply quoting rules specific to the cmd.exe command line parser.
+        // the libuv rules are generic and are not designed specifically for cmd.exe
+        // command line parser.
+        //
+        // for a detailed description of the cmd.exe command line parser, refer to
+        // http://stackoverflow.com/questions/4094699/how-does-the-windows-command-interpreter-cmd-exe-parse-scripts/7970912#7970912
+        // need quotes for empty arg
+        if (!arg) {
+            return '""';
+        }
+        // determine whether the arg needs to be quoted
+        const cmdSpecialChars = [
+            ' ',
+            '\t',
+            '&',
+            '(',
+            ')',
+            '[',
+            ']',
+            '{',
+            '}',
+            '^',
+            '=',
+            ';',
+            '!',
+            "'",
+            '+',
+            ',',
+            '`',
+            '~',
+            '|',
+            '<',
+            '>',
+            '"'
+        ];
+        let needsQuotes = false;
+        for (const char of arg) {
+            if (cmdSpecialChars.some(x => x === char)) {
+                needsQuotes = true;
+                break;
+            }
+        }
+        // short-circuit if quotes not needed
+        if (!needsQuotes) {
+            return arg;
+        }
+        // the following quoting rules are very similar to the rules that by libuv applies.
+        //
+        // 1) wrap the string in quotes
+        //
+        // 2) double-up quotes - i.e. " => ""
+        //
+        //    this is different from the libuv quoting rules. libuv replaces " with \", which unfortunately
+        //    doesn't work well with a cmd.exe command line.
+        //
+        //    note, replacing " with "" also works well if the arg is passed to a downstream .NET console app.
+        //    for example, the command line:
+        //          foo.exe "myarg:""my val"""
+        //    is parsed by a .NET console app into an arg array:
+        //          [ "myarg:\"my val\"" ]
+        //    which is the same end result when applying libuv quoting rules. although the actual
+        //    command line from libuv quoting rules would look like:
+        //          foo.exe "myarg:\"my val\""
+        //
+        // 3) double-up slashes that precede a quote,
+        //    e.g.  hello \world    => "hello \world"
+        //          hello\"world    => "hello\\""world"
+        //          hello\\"world   => "hello\\\\""world"
+        //          hello world\    => "hello world\\"
+        //
+        //    technically this is not required for a cmd.exe command line, or the batch argument parser.
+        //    the reasons for including this as a .cmd quoting rule are:
+        //
+        //    a) this is optimized for the scenario where the argument is passed from the .cmd file to an
+        //       external program. many programs (e.g. .NET console apps) rely on the slash-doubling rule.
+        //
+        //    b) it's what we've been doing previously (by deferring to node default behavior) and we
+        //       haven't heard any complaints about that aspect.
+        //
+        // note, a weakness of the quoting rules chosen here, is that % is not escaped. in fact, % cannot be
+        // escaped when used on the command line directly - even though within a .cmd file % can be escaped
+        // by using %%.
+        //
+        // the saving grace is, on the command line, %var% is left as-is if var is not defined. this contrasts
+        // the line parsing rules within a .cmd file, where if var is not defined it is replaced with nothing.
+        //
+        // one option that was explored was replacing % with ^% - i.e. %var% => ^%var^%. this hack would
+        // often work, since it is unlikely that var^ would exist, and the ^ character is removed when the
+        // variable is used. the problem, however, is that ^ is not removed when %* is used to pass the args
+        // to an external program.
+        //
+        // an unexplored potential solution for the % escaping problem, is to create a wrapper .cmd file.
+        // % can be escaped within a .cmd file.
+        let reverse = '"';
+        let quoteHit = true;
+        for (let i = arg.length; i > 0; i--) {
+            // walk the string in reverse
+            reverse += arg[i - 1];
+            if (quoteHit && arg[i - 1] === '\\') {
+                reverse += '\\'; // double the slash
+            }
+            else if (arg[i - 1] === '"') {
+                quoteHit = true;
+                reverse += '"'; // double the quote
+            }
+            else {
+                quoteHit = false;
+            }
+        }
+        reverse += '"';
+        return reverse.split('').reverse().join('');
+    }
+    _uvQuoteCmdArg(arg) {
+        // Tool runner wraps child_process.spawn() and needs to apply the same quoting as
+        // Node in certain cases where the undocumented spawn option windowsVerbatimArguments
+        // is used.
+        //
+        // Since this function is a port of quote_cmd_arg from Node 4.x (technically, lib UV,
+        // see https://github.com/nodejs/node/blob/v4.x/deps/uv/src/win/process.c for details),
+        // pasting copyright notice from Node within this function:
+        //
+        //      Copyright Joyent, Inc. and other Node contributors. All rights reserved.
+        //
+        //      Permission is hereby granted, free of charge, to any person obtaining a copy
+        //      of this software and associated documentation files (the "Software"), to
+        //      deal in the Software without restriction, including without limitation the
+        //      rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+        //      sell copies of the Software, and to permit persons to whom the Software is
+        //      furnished to do so, subject to the following conditions:
+        //
+        //      The above copyright notice and this permission notice shall be included in
+        //      all copies or substantial portions of the Software.
+        //
+        //      THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        //      IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        //      FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        //      AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        //      LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+        //      FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+        //      IN THE SOFTWARE.
+        if (!arg) {
+            // Need double quotation for empty argument
+            return '""';
+        }
+        if (!arg.includes(' ') && !arg.includes('\t') && !arg.includes('"')) {
+            // No quotation needed
+            return arg;
+        }
+        if (!arg.includes('"') && !arg.includes('\\')) {
+            // No embedded double quotes or backslashes, so I can just wrap
+            // quote marks around the whole thing.
+            return `"${arg}"`;
+        }
+        // Expected input/output:
+        //   input : hello"world
+        //   output: "hello\"world"
+        //   input : hello""world
+        //   output: "hello\"\"world"
+        //   input : hello\world
+        //   output: hello\world
+        //   input : hello\\world
+        //   output: hello\\world
+        //   input : hello\"world
+        //   output: "hello\\\"world"
+        //   input : hello\\"world
+        //   output: "hello\\\\\"world"
+        //   input : hello world\
+        //   output: "hello world\\" - note the comment in libuv actually reads "hello world\"
+        //                             but it appears the comment is wrong, it should be "hello world\\"
+        let reverse = '"';
+        let quoteHit = true;
+        for (let i = arg.length; i > 0; i--) {
+            // walk the string in reverse
+            reverse += arg[i - 1];
+            if (quoteHit && arg[i - 1] === '\\') {
+                reverse += '\\';
+            }
+            else if (arg[i - 1] === '"') {
+                quoteHit = true;
+                reverse += '\\';
+            }
+            else {
+                quoteHit = false;
+            }
+        }
+        reverse += '"';
+        return reverse.split('').reverse().join('');
+    }
+    _cloneExecOptions(options) {
+        options = options || {};
+        const result = {
+            cwd: options.cwd || process.cwd(),
+            env: options.env || process.env,
+            silent: options.silent || false,
+            windowsVerbatimArguments: options.windowsVerbatimArguments || false,
+            failOnStdErr: options.failOnStdErr || false,
+            ignoreReturnCode: options.ignoreReturnCode || false,
+            delay: options.delay || 10000
+        };
+        result.outStream = options.outStream || process.stdout;
+        result.errStream = options.errStream || process.stderr;
+        return result;
+    }
+    _getSpawnOptions(options, toolPath) {
+        options = options || {};
+        const result = {};
+        result.cwd = options.cwd;
+        result.env = options.env;
+        result['windowsVerbatimArguments'] =
+            options.windowsVerbatimArguments || this._isCmdFile();
+        if (options.windowsVerbatimArguments) {
+            result.argv0 = `"${toolPath}"`;
+        }
+        return result;
+    }
+    /**
+     * Exec a tool.
+     * Output will be streamed to the live console.
+     * Returns promise with return code
+     *
+     * @param     tool     path to tool to exec
+     * @param     options  optional exec options.  See ExecOptions
+     * @returns   number
+     */
+    exec() {
+        return __awaiter(this, void 0, void 0, function* () {
+            // root the tool path if it is unrooted and contains relative pathing
+            if (!ioUtil.isRooted(this.toolPath) &&
+                (this.toolPath.includes('/') ||
+                    (IS_WINDOWS && this.toolPath.includes('\\')))) {
+                // prefer options.cwd if it is specified, however options.cwd may also need to be rooted
+                this.toolPath = path.resolve(process.cwd(), this.options.cwd || process.cwd(), this.toolPath);
+            }
+            // if the tool is only a file name, then resolve it from the PATH
+            // otherwise verify it exists (add extension on Windows if necessary)
+            this.toolPath = yield io.which(this.toolPath, true);
+            return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+                this._debug(`exec tool: ${this.toolPath}`);
+                this._debug('arguments:');
+                for (const arg of this.args) {
+                    this._debug(`   ${arg}`);
+                }
+                const optionsNonNull = this._cloneExecOptions(this.options);
+                if (!optionsNonNull.silent && optionsNonNull.outStream) {
+                    optionsNonNull.outStream.write(this._getCommandString(optionsNonNull) + os.EOL);
+                }
+                const state = new ExecState(optionsNonNull, this.toolPath);
+                state.on('debug', (message) => {
+                    this._debug(message);
+                });
+                if (this.options.cwd && !(yield ioUtil.exists(this.options.cwd))) {
+                    return reject(new Error(`The cwd: ${this.options.cwd} does not exist!`));
+                }
+                const fileName = this._getSpawnFileName();
+                const cp = child.spawn(fileName, this._getSpawnArgs(optionsNonNull), this._getSpawnOptions(this.options, fileName));
+                let stdbuffer = '';
+                if (cp.stdout) {
+                    cp.stdout.on('data', (data) => {
+                        if (this.options.listeners && this.options.listeners.stdout) {
+                            this.options.listeners.stdout(data);
+                        }
+                        if (!optionsNonNull.silent && optionsNonNull.outStream) {
+                            optionsNonNull.outStream.write(data);
+                        }
+                        stdbuffer = this._processLineBuffer(data, stdbuffer, (line) => {
+                            if (this.options.listeners && this.options.listeners.stdline) {
+                                this.options.listeners.stdline(line);
+                            }
+                        });
+                    });
+                }
+                let errbuffer = '';
+                if (cp.stderr) {
+                    cp.stderr.on('data', (data) => {
+                        state.processStderr = true;
+                        if (this.options.listeners && this.options.listeners.stderr) {
+                            this.options.listeners.stderr(data);
+                        }
+                        if (!optionsNonNull.silent &&
+                            optionsNonNull.errStream &&
+                            optionsNonNull.outStream) {
+                            const s = optionsNonNull.failOnStdErr
+                                ? optionsNonNull.errStream
+                                : optionsNonNull.outStream;
+                            s.write(data);
+                        }
+                        errbuffer = this._processLineBuffer(data, errbuffer, (line) => {
+                            if (this.options.listeners && this.options.listeners.errline) {
+                                this.options.listeners.errline(line);
+                            }
+                        });
+                    });
+                }
+                cp.on('error', (err) => {
+                    state.processError = err.message;
+                    state.processExited = true;
+                    state.processClosed = true;
+                    state.CheckComplete();
+                });
+                cp.on('exit', (code) => {
+                    state.processExitCode = code;
+                    state.processExited = true;
+                    this._debug(`Exit code ${code} received from tool '${this.toolPath}'`);
+                    state.CheckComplete();
+                });
+                cp.on('close', (code) => {
+                    state.processExitCode = code;
+                    state.processExited = true;
+                    state.processClosed = true;
+                    this._debug(`STDIO streams have closed for tool '${this.toolPath}'`);
+                    state.CheckComplete();
+                });
+                state.on('done', (error, exitCode) => {
+                    if (stdbuffer.length > 0) {
+                        this.emit('stdline', stdbuffer);
+                    }
+                    if (errbuffer.length > 0) {
+                        this.emit('errline', errbuffer);
+                    }
+                    cp.removeAllListeners();
+                    if (error) {
+                        reject(error);
+                    }
+                    else {
+                        resolve(exitCode);
+                    }
+                });
+                if (this.options.input) {
+                    if (!cp.stdin) {
+                        throw new Error('child process missing stdin');
+                    }
+                    cp.stdin.end(this.options.input);
+                }
+            }));
+        });
+    }
+}
+exports.ToolRunner = ToolRunner;
+/**
+ * Convert an arg string to an array of args. Handles escaping
+ *
+ * @param    argString   string of arguments
+ * @returns  string[]    array of arguments
+ */
+function argStringToArray(argString) {
+    const args = [];
+    let inQuotes = false;
+    let escaped = false;
+    let arg = '';
+    function append(c) {
+        // we only escape double quotes.
+        if (escaped && c !== '"') {
+            arg += '\\';
+        }
+        arg += c;
+        escaped = false;
+    }
+    for (let i = 0; i < argString.length; i++) {
+        const c = argString.charAt(i);
+        if (c === '"') {
+            if (!escaped) {
+                inQuotes = !inQuotes;
+            }
+            else {
+                append(c);
+            }
+            continue;
+        }
+        if (c === '\\' && escaped) {
+            append(c);
+            continue;
+        }
+        if (c === '\\' && inQuotes) {
+            escaped = true;
+            continue;
+        }
+        if (c === ' ' && !inQuotes) {
+            if (arg.length > 0) {
+                args.push(arg);
+                arg = '';
+            }
+            continue;
+        }
+        append(c);
+    }
+    if (arg.length > 0) {
+        args.push(arg.trim());
+    }
+    return args;
+}
+class ExecState extends events.EventEmitter {
+    constructor(options, toolPath) {
+        super();
+        this.processClosed = false; // tracks whether the process has exited and stdio is closed
+        this.processError = '';
+        this.processExitCode = 0;
+        this.processExited = false; // tracks whether the process has exited
+        this.processStderr = false; // tracks whether stderr was written to
+        this.delay = 10000; // 10 seconds
+        this.done = false;
+        this.timeout = null;
+        if (!toolPath) {
+            throw new Error('toolPath must not be empty');
+        }
+        this.options = options;
+        this.toolPath = toolPath;
+        if (options.delay) {
+            this.delay = options.delay;
+        }
+    }
+    CheckComplete() {
+        if (this.done) {
+            return;
+        }
+        if (this.processClosed) {
+            this._setResult();
+        }
+        else if (this.processExited) {
+            this.timeout = (0, timers_1.setTimeout)(ExecState.HandleTimeout, this.delay, this);
+        }
+    }
+    _debug(message) {
+        this.emit('debug', message);
+    }
+    _setResult() {
+        // determine whether there is an error
+        let error;
+        if (this.processExited) {
+            if (this.processError) {
+                error = new Error(`There was an error when attempting to execute the process '${this.toolPath}'. This may indicate the process failed to start. Error: ${this.processError}`);
+            }
+            else if (this.processExitCode !== 0 && !this.options.ignoreReturnCode) {
+                error = new Error(`The process '${this.toolPath}' failed with exit code ${this.processExitCode}`);
+            }
+            else if (this.processStderr && this.options.failOnStdErr) {
+                error = new Error(`The process '${this.toolPath}' failed because one or more lines were written to the STDERR stream`);
+            }
+        }
+        // clear the timeout
+        if (this.timeout) {
+            clearTimeout(this.timeout);
+            this.timeout = null;
+        }
+        this.done = true;
+        this.emit('done', error, this.processExitCode);
+    }
+    static HandleTimeout(state) {
+        if (state.done) {
+            return;
+        }
+        if (!state.processClosed && state.processExited) {
+            const message = `The STDIO streams did not close within ${state.delay / 1000} seconds of the exit event from process '${state.toolPath}'. This may indicate a child process inherited the STDIO streams and has not yet exited.`;
             state._debug(message);
         }
         state._setResult();
@@ -3545,7 +7057,11 @@ class DecodedURL extends URL {
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -3555,13 +7071,23 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -3573,21 +7099,49 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getCmdPath = exports.tryGetExecutablePath = exports.isRooted = exports.isDirectory = exports.exists = exports.READONLY = exports.UV_FS_O_EXLOCK = exports.IS_WINDOWS = exports.unlink = exports.symlink = exports.stat = exports.rmdir = exports.rm = exports.rename = exports.readlink = exports.readdir = exports.open = exports.mkdir = exports.lstat = exports.copyFile = exports.chmod = void 0;
+exports.READONLY = exports.UV_FS_O_EXLOCK = exports.IS_WINDOWS = exports.unlink = exports.symlink = exports.stat = exports.rmdir = exports.rm = exports.rename = exports.readdir = exports.open = exports.mkdir = exports.lstat = exports.copyFile = exports.chmod = void 0;
+exports.readlink = readlink;
+exports.exists = exists;
+exports.isDirectory = isDirectory;
+exports.isRooted = isRooted;
+exports.tryGetExecutablePath = tryGetExecutablePath;
+exports.getCmdPath = getCmdPath;
 const fs = __importStar(__nccwpck_require__(79896));
 const path = __importStar(__nccwpck_require__(16928));
 _a = fs.promises
 // export const {open} = 'fs'
-, exports.chmod = _a.chmod, exports.copyFile = _a.copyFile, exports.lstat = _a.lstat, exports.mkdir = _a.mkdir, exports.open = _a.open, exports.readdir = _a.readdir, exports.readlink = _a.readlink, exports.rename = _a.rename, exports.rm = _a.rm, exports.rmdir = _a.rmdir, exports.stat = _a.stat, exports.symlink = _a.symlink, exports.unlink = _a.unlink;
+, exports.chmod = _a.chmod, exports.copyFile = _a.copyFile, exports.lstat = _a.lstat, exports.mkdir = _a.mkdir, exports.open = _a.open, exports.readdir = _a.readdir, exports.rename = _a.rename, exports.rm = _a.rm, exports.rmdir = _a.rmdir, exports.stat = _a.stat, exports.symlink = _a.symlink, exports.unlink = _a.unlink;
 // export const {open} = 'fs'
 exports.IS_WINDOWS = process.platform === 'win32';
+/**
+ * Custom implementation of readlink to ensure Windows junctions
+ * maintain trailing backslash for backward compatibility with Node.js < 24
+ *
+ * In Node.js 20, Windows junctions (directory symlinks) always returned paths
+ * with trailing backslashes. Node.js 24 removed this behavior, which breaks
+ * code that relied on this format for path operations.
+ *
+ * This implementation restores the Node 20 behavior by adding a trailing
+ * backslash to all junction results on Windows.
+ */
+function readlink(fsPath) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const result = yield fs.promises.readlink(fsPath);
+        // On Windows, restore Node 20 behavior: add trailing backslash to all results
+        // since junctions on Windows are always directory links
+        if (exports.IS_WINDOWS && !result.endsWith('\\')) {
+            return `${result}\\`;
+        }
+        return result;
+    });
+}
 // See https://github.com/nodejs/node/blob/d0153aee367422d0858105abec186da4dff0a0c5/deps/uv/include/uv/win.h#L691
 exports.UV_FS_O_EXLOCK = 0x10000000;
 exports.READONLY = fs.constants.O_RDONLY;
 function exists(fsPath) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            yield exports.stat(fsPath);
+            yield (0, exports.stat)(fsPath);
         }
         catch (err) {
             if (err.code === 'ENOENT') {
@@ -3598,14 +7152,12 @@ function exists(fsPath) {
         return true;
     });
 }
-exports.exists = exists;
-function isDirectory(fsPath, useStat = false) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const stats = useStat ? yield exports.stat(fsPath) : yield exports.lstat(fsPath);
+function isDirectory(fsPath_1) {
+    return __awaiter(this, arguments, void 0, function* (fsPath, useStat = false) {
+        const stats = useStat ? yield (0, exports.stat)(fsPath) : yield (0, exports.lstat)(fsPath);
         return stats.isDirectory();
     });
 }
-exports.isDirectory = isDirectory;
 /**
  * On OSX/Linux, true if path starts with '/'. On Windows, true for paths like:
  * \, \hello, \\hello\share, C:, and C:\hello (and corresponding alternate separator cases).
@@ -3621,7 +7173,6 @@ function isRooted(p) {
     }
     return p.startsWith('/');
 }
-exports.isRooted = isRooted;
 /**
  * Best effort attempt to determine whether a file exists and is executable.
  * @param filePath    file path to check
@@ -3633,7 +7184,7 @@ function tryGetExecutablePath(filePath, extensions) {
         let stats = undefined;
         try {
             // test file exists
-            stats = yield exports.stat(filePath);
+            stats = yield (0, exports.stat)(filePath);
         }
         catch (err) {
             if (err.code !== 'ENOENT') {
@@ -3661,7 +7212,7 @@ function tryGetExecutablePath(filePath, extensions) {
             filePath = originalFilePath + extension;
             stats = undefined;
             try {
-                stats = yield exports.stat(filePath);
+                stats = yield (0, exports.stat)(filePath);
             }
             catch (err) {
                 if (err.code !== 'ENOENT') {
@@ -3675,7 +7226,7 @@ function tryGetExecutablePath(filePath, extensions) {
                     try {
                         const directory = path.dirname(filePath);
                         const upperName = path.basename(filePath).toUpperCase();
-                        for (const actualName of yield exports.readdir(directory)) {
+                        for (const actualName of yield (0, exports.readdir)(directory)) {
                             if (upperName === actualName.toUpperCase()) {
                                 filePath = path.join(directory, actualName);
                                 break;
@@ -3698,7 +7249,6 @@ function tryGetExecutablePath(filePath, extensions) {
         return '';
     });
 }
-exports.tryGetExecutablePath = tryGetExecutablePath;
 function normalizeSeparators(p) {
     p = p || '';
     if (exports.IS_WINDOWS) {
@@ -3715,15 +7265,18 @@ function normalizeSeparators(p) {
 //   256 128 64 32 16 8 4 2 1
 function isUnixExecutable(stats) {
     return ((stats.mode & 1) > 0 ||
-        ((stats.mode & 8) > 0 && stats.gid === process.getgid()) ||
-        ((stats.mode & 64) > 0 && stats.uid === process.getuid()));
+        ((stats.mode & 8) > 0 &&
+            process.getgid !== undefined &&
+            stats.gid === process.getgid()) ||
+        ((stats.mode & 64) > 0 &&
+            process.getuid !== undefined &&
+            stats.uid === process.getuid()));
 }
 // Get the path of cmd.exe in windows
 function getCmdPath() {
     var _a;
     return (_a = process.env['COMSPEC']) !== null && _a !== void 0 ? _a : `cmd.exe`;
 }
-exports.getCmdPath = getCmdPath;
 //# sourceMappingURL=io-util.js.map
 
 /***/ }),
@@ -3735,7 +7288,11 @@ exports.getCmdPath = getCmdPath;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -3745,13 +7302,23 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -3762,7 +7329,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.findInPath = exports.which = exports.mkdirP = exports.rmRF = exports.mv = exports.cp = void 0;
+exports.cp = cp;
+exports.mv = mv;
+exports.rmRF = rmRF;
+exports.mkdirP = mkdirP;
+exports.which = which;
+exports.findInPath = findInPath;
 const assert_1 = __nccwpck_require__(42613);
 const path = __importStar(__nccwpck_require__(16928));
 const ioUtil = __importStar(__nccwpck_require__(75207));
@@ -3774,8 +7346,8 @@ const ioUtil = __importStar(__nccwpck_require__(75207));
  * @param     dest      destination path
  * @param     options   optional. See CopyOptions.
  */
-function cp(source, dest, options = {}) {
-    return __awaiter(this, void 0, void 0, function* () {
+function cp(source_1, dest_1) {
+    return __awaiter(this, arguments, void 0, function* (source, dest, options = {}) {
         const { force, recursive, copySourceDirectory } = readCopyOptions(options);
         const destStat = (yield ioUtil.exists(dest)) ? yield ioUtil.stat(dest) : null;
         // Dest is an existing file, but not forcing
@@ -3807,7 +7379,6 @@ function cp(source, dest, options = {}) {
         }
     });
 }
-exports.cp = cp;
 /**
  * Moves a path.
  *
@@ -3815,8 +7386,8 @@ exports.cp = cp;
  * @param     dest      destination path
  * @param     options   optional. See MoveOptions.
  */
-function mv(source, dest, options = {}) {
-    return __awaiter(this, void 0, void 0, function* () {
+function mv(source_1, dest_1) {
+    return __awaiter(this, arguments, void 0, function* (source, dest, options = {}) {
         if (yield ioUtil.exists(dest)) {
             let destExists = true;
             if (yield ioUtil.isDirectory(dest)) {
@@ -3837,7 +7408,6 @@ function mv(source, dest, options = {}) {
         yield ioUtil.rename(source, dest);
     });
 }
-exports.mv = mv;
 /**
  * Remove a path recursively with force
  *
@@ -3866,7 +7436,6 @@ function rmRF(inputPath) {
         }
     });
 }
-exports.rmRF = rmRF;
 /**
  * Make a directory.  Creates the full path with folders in between
  * Will throw if it fails
@@ -3876,11 +7445,10 @@ exports.rmRF = rmRF;
  */
 function mkdirP(fsPath) {
     return __awaiter(this, void 0, void 0, function* () {
-        assert_1.ok(fsPath, 'a path argument must be provided');
+        (0, assert_1.ok)(fsPath, 'a path argument must be provided');
         yield ioUtil.mkdir(fsPath, { recursive: true });
     });
 }
-exports.mkdirP = mkdirP;
 /**
  * Returns path of a tool had the tool actually been invoked.  Resolves via paths.
  * If you check and the tool does not exist, it will throw.
@@ -3914,7 +7482,6 @@ function which(tool, check) {
         return '';
     });
 }
-exports.which = which;
 /**
  * Returns a list of all occurrences of the given tool on the system path.
  *
@@ -3971,7 +7538,6 @@ function findInPath(tool) {
         return matches;
     });
 }
-exports.findInPath = findInPath;
 function readCopyOptions(options) {
     const force = options.force == null ? true : options.force;
     const recursive = Boolean(options.recursive);
@@ -6286,7 +9852,7 @@ __export(dist_src_exports, {
 module.exports = __toCommonJS(dist_src_exports);
 
 // pkg/dist-src/version.js
-var VERSION = "9.2.0";
+var VERSION = "9.2.2";
 
 // pkg/dist-src/normalize-paginated-list-response.js
 function normalizePaginatedListResponse(response) {
@@ -6334,7 +9900,7 @@ function iterator(octokit, route, parameters) {
           const response = await requestMethod({ method, url, headers });
           const normalizedResponse = normalizePaginatedListResponse(response);
           url = ((normalizedResponse.headers.link || "").match(
-            /<([^>]+)>;\s*rel="next"/
+            /<([^<>]+)>;\s*rel="next"/
           ) || [])[1];
           return { value: normalizedResponse };
         } catch (error) {
@@ -11657,90 +15223,60 @@ exports.SignedCertificateTimestamp = SignedCertificateTimestamp;
 
 "use strict";
 
-/* eslint-disable */
+// Code generated by protoc-gen-ts_proto. DO NOT EDIT.
+// versions:
+//   protoc-gen-ts_proto  v2.7.0
+//   protoc               v6.30.2
+// source: envelope.proto
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Signature = exports.Envelope = void 0;
-function createBaseEnvelope() {
-    return { payload: Buffer.alloc(0), payloadType: "", signatures: [] };
-}
 exports.Envelope = {
     fromJSON(object) {
         return {
             payload: isSet(object.payload) ? Buffer.from(bytesFromBase64(object.payload)) : Buffer.alloc(0),
-            payloadType: isSet(object.payloadType) ? String(object.payloadType) : "",
-            signatures: Array.isArray(object?.signatures) ? object.signatures.map((e) => exports.Signature.fromJSON(e)) : [],
+            payloadType: isSet(object.payloadType) ? globalThis.String(object.payloadType) : "",
+            signatures: globalThis.Array.isArray(object?.signatures)
+                ? object.signatures.map((e) => exports.Signature.fromJSON(e))
+                : [],
         };
     },
     toJSON(message) {
         const obj = {};
-        message.payload !== undefined &&
-            (obj.payload = base64FromBytes(message.payload !== undefined ? message.payload : Buffer.alloc(0)));
-        message.payloadType !== undefined && (obj.payloadType = message.payloadType);
-        if (message.signatures) {
-            obj.signatures = message.signatures.map((e) => e ? exports.Signature.toJSON(e) : undefined);
+        if (message.payload.length !== 0) {
+            obj.payload = base64FromBytes(message.payload);
         }
-        else {
-            obj.signatures = [];
+        if (message.payloadType !== "") {
+            obj.payloadType = message.payloadType;
+        }
+        if (message.signatures?.length) {
+            obj.signatures = message.signatures.map((e) => exports.Signature.toJSON(e));
         }
         return obj;
     },
 };
-function createBaseSignature() {
-    return { sig: Buffer.alloc(0), keyid: "" };
-}
 exports.Signature = {
     fromJSON(object) {
         return {
             sig: isSet(object.sig) ? Buffer.from(bytesFromBase64(object.sig)) : Buffer.alloc(0),
-            keyid: isSet(object.keyid) ? String(object.keyid) : "",
+            keyid: isSet(object.keyid) ? globalThis.String(object.keyid) : "",
         };
     },
     toJSON(message) {
         const obj = {};
-        message.sig !== undefined && (obj.sig = base64FromBytes(message.sig !== undefined ? message.sig : Buffer.alloc(0)));
-        message.keyid !== undefined && (obj.keyid = message.keyid);
+        if (message.sig.length !== 0) {
+            obj.sig = base64FromBytes(message.sig);
+        }
+        if (message.keyid !== "") {
+            obj.keyid = message.keyid;
+        }
         return obj;
     },
 };
-var tsProtoGlobalThis = (() => {
-    if (typeof globalThis !== "undefined") {
-        return globalThis;
-    }
-    if (typeof self !== "undefined") {
-        return self;
-    }
-    if (typeof window !== "undefined") {
-        return window;
-    }
-    if (typeof global !== "undefined") {
-        return global;
-    }
-    throw "Unable to locate global object";
-})();
 function bytesFromBase64(b64) {
-    if (tsProtoGlobalThis.Buffer) {
-        return Uint8Array.from(tsProtoGlobalThis.Buffer.from(b64, "base64"));
-    }
-    else {
-        const bin = tsProtoGlobalThis.atob(b64);
-        const arr = new Uint8Array(bin.length);
-        for (let i = 0; i < bin.length; ++i) {
-            arr[i] = bin.charCodeAt(i);
-        }
-        return arr;
-    }
+    return Uint8Array.from(globalThis.Buffer.from(b64, "base64"));
 }
 function base64FromBytes(arr) {
-    if (tsProtoGlobalThis.Buffer) {
-        return tsProtoGlobalThis.Buffer.from(arr).toString("base64");
-    }
-    else {
-        const bin = [];
-        arr.forEach((byte) => {
-            bin.push(String.fromCharCode(byte));
-        });
-        return tsProtoGlobalThis.btoa(bin.join(""));
-    }
+    return globalThis.Buffer.from(arr).toString("base64");
 }
 function isSet(value) {
     return value !== null && value !== undefined;
@@ -11754,23 +15290,28 @@ function isSet(value) {
 
 "use strict";
 
-/* eslint-disable */
+// Code generated by protoc-gen-ts_proto. DO NOT EDIT.
+// versions:
+//   protoc-gen-ts_proto  v2.7.0
+//   protoc               v6.30.2
+// source: google/protobuf/timestamp.proto
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Timestamp = void 0;
-function createBaseTimestamp() {
-    return { seconds: "0", nanos: 0 };
-}
 exports.Timestamp = {
     fromJSON(object) {
         return {
-            seconds: isSet(object.seconds) ? String(object.seconds) : "0",
-            nanos: isSet(object.nanos) ? Number(object.nanos) : 0,
+            seconds: isSet(object.seconds) ? globalThis.String(object.seconds) : "0",
+            nanos: isSet(object.nanos) ? globalThis.Number(object.nanos) : 0,
         };
     },
     toJSON(message) {
         const obj = {};
-        message.seconds !== undefined && (obj.seconds = message.seconds);
-        message.nanos !== undefined && (obj.nanos = Math.round(message.nanos));
+        if (message.seconds !== "0") {
+            obj.seconds = message.seconds;
+        }
+        if (message.nanos !== 0) {
+            obj.nanos = Math.round(message.nanos);
+        }
         return obj;
     },
 };
@@ -11786,37 +15327,33 @@ function isSet(value) {
 
 "use strict";
 
+// Code generated by protoc-gen-ts_proto. DO NOT EDIT.
+// versions:
+//   protoc-gen-ts_proto  v2.7.0
+//   protoc               v6.30.2
+// source: sigstore_bundle.proto
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Bundle = exports.VerificationMaterial = exports.TimestampVerificationData = void 0;
 /* eslint-disable */
 const envelope_1 = __nccwpck_require__(47030);
 const sigstore_common_1 = __nccwpck_require__(5334);
 const sigstore_rekor_1 = __nccwpck_require__(85204);
-function createBaseTimestampVerificationData() {
-    return { rfc3161Timestamps: [] };
-}
 exports.TimestampVerificationData = {
     fromJSON(object) {
         return {
-            rfc3161Timestamps: Array.isArray(object?.rfc3161Timestamps)
+            rfc3161Timestamps: globalThis.Array.isArray(object?.rfc3161Timestamps)
                 ? object.rfc3161Timestamps.map((e) => sigstore_common_1.RFC3161SignedTimestamp.fromJSON(e))
                 : [],
         };
     },
     toJSON(message) {
         const obj = {};
-        if (message.rfc3161Timestamps) {
-            obj.rfc3161Timestamps = message.rfc3161Timestamps.map((e) => e ? sigstore_common_1.RFC3161SignedTimestamp.toJSON(e) : undefined);
-        }
-        else {
-            obj.rfc3161Timestamps = [];
+        if (message.rfc3161Timestamps?.length) {
+            obj.rfc3161Timestamps = message.rfc3161Timestamps.map((e) => sigstore_common_1.RFC3161SignedTimestamp.toJSON(e));
         }
         return obj;
     },
 };
-function createBaseVerificationMaterial() {
-    return { content: undefined, tlogEntries: [], timestampVerificationData: undefined };
-}
 exports.VerificationMaterial = {
     fromJSON(object) {
         return {
@@ -11830,7 +15367,7 @@ exports.VerificationMaterial = {
                     : isSet(object.certificate)
                         ? { $case: "certificate", certificate: sigstore_common_1.X509Certificate.fromJSON(object.certificate) }
                         : undefined,
-            tlogEntries: Array.isArray(object?.tlogEntries)
+            tlogEntries: globalThis.Array.isArray(object?.tlogEntries)
                 ? object.tlogEntries.map((e) => sigstore_rekor_1.TransparencyLogEntry.fromJSON(e))
                 : [],
             timestampVerificationData: isSet(object.timestampVerificationData)
@@ -11840,36 +15377,28 @@ exports.VerificationMaterial = {
     },
     toJSON(message) {
         const obj = {};
-        message.content?.$case === "publicKey" &&
-            (obj.publicKey = message.content?.publicKey ? sigstore_common_1.PublicKeyIdentifier.toJSON(message.content?.publicKey) : undefined);
-        message.content?.$case === "x509CertificateChain" &&
-            (obj.x509CertificateChain = message.content?.x509CertificateChain
-                ? sigstore_common_1.X509CertificateChain.toJSON(message.content?.x509CertificateChain)
-                : undefined);
-        message.content?.$case === "certificate" &&
-            (obj.certificate = message.content?.certificate
-                ? sigstore_common_1.X509Certificate.toJSON(message.content?.certificate)
-                : undefined);
-        if (message.tlogEntries) {
-            obj.tlogEntries = message.tlogEntries.map((e) => e ? sigstore_rekor_1.TransparencyLogEntry.toJSON(e) : undefined);
+        if (message.content?.$case === "publicKey") {
+            obj.publicKey = sigstore_common_1.PublicKeyIdentifier.toJSON(message.content.publicKey);
         }
-        else {
-            obj.tlogEntries = [];
+        else if (message.content?.$case === "x509CertificateChain") {
+            obj.x509CertificateChain = sigstore_common_1.X509CertificateChain.toJSON(message.content.x509CertificateChain);
         }
-        message.timestampVerificationData !== undefined &&
-            (obj.timestampVerificationData = message.timestampVerificationData
-                ? exports.TimestampVerificationData.toJSON(message.timestampVerificationData)
-                : undefined);
+        else if (message.content?.$case === "certificate") {
+            obj.certificate = sigstore_common_1.X509Certificate.toJSON(message.content.certificate);
+        }
+        if (message.tlogEntries?.length) {
+            obj.tlogEntries = message.tlogEntries.map((e) => sigstore_rekor_1.TransparencyLogEntry.toJSON(e));
+        }
+        if (message.timestampVerificationData !== undefined) {
+            obj.timestampVerificationData = exports.TimestampVerificationData.toJSON(message.timestampVerificationData);
+        }
         return obj;
     },
 };
-function createBaseBundle() {
-    return { mediaType: "", verificationMaterial: undefined, content: undefined };
-}
 exports.Bundle = {
     fromJSON(object) {
         return {
-            mediaType: isSet(object.mediaType) ? String(object.mediaType) : "",
+            mediaType: isSet(object.mediaType) ? globalThis.String(object.mediaType) : "",
             verificationMaterial: isSet(object.verificationMaterial)
                 ? exports.VerificationMaterial.fromJSON(object.verificationMaterial)
                 : undefined,
@@ -11882,15 +15411,18 @@ exports.Bundle = {
     },
     toJSON(message) {
         const obj = {};
-        message.mediaType !== undefined && (obj.mediaType = message.mediaType);
-        message.verificationMaterial !== undefined && (obj.verificationMaterial = message.verificationMaterial
-            ? exports.VerificationMaterial.toJSON(message.verificationMaterial)
-            : undefined);
-        message.content?.$case === "messageSignature" && (obj.messageSignature = message.content?.messageSignature
-            ? sigstore_common_1.MessageSignature.toJSON(message.content?.messageSignature)
-            : undefined);
-        message.content?.$case === "dsseEnvelope" &&
-            (obj.dsseEnvelope = message.content?.dsseEnvelope ? envelope_1.Envelope.toJSON(message.content?.dsseEnvelope) : undefined);
+        if (message.mediaType !== "") {
+            obj.mediaType = message.mediaType;
+        }
+        if (message.verificationMaterial !== undefined) {
+            obj.verificationMaterial = exports.VerificationMaterial.toJSON(message.verificationMaterial);
+        }
+        if (message.content?.$case === "messageSignature") {
+            obj.messageSignature = sigstore_common_1.MessageSignature.toJSON(message.content.messageSignature);
+        }
+        else if (message.content?.$case === "dsseEnvelope") {
+            obj.dsseEnvelope = envelope_1.Envelope.toJSON(message.content.dsseEnvelope);
+        }
         return obj;
     },
 };
@@ -11906,8 +15438,19 @@ function isSet(value) {
 
 "use strict";
 
+// Code generated by protoc-gen-ts_proto. DO NOT EDIT.
+// versions:
+//   protoc-gen-ts_proto  v2.7.0
+//   protoc               v6.30.2
+// source: sigstore_common.proto
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TimeRange = exports.X509CertificateChain = exports.SubjectAlternativeName = exports.X509Certificate = exports.DistinguishedName = exports.ObjectIdentifierValuePair = exports.ObjectIdentifier = exports.PublicKeyIdentifier = exports.PublicKey = exports.RFC3161SignedTimestamp = exports.LogId = exports.MessageSignature = exports.HashOutput = exports.subjectAlternativeNameTypeToJSON = exports.subjectAlternativeNameTypeFromJSON = exports.SubjectAlternativeNameType = exports.publicKeyDetailsToJSON = exports.publicKeyDetailsFromJSON = exports.PublicKeyDetails = exports.hashAlgorithmToJSON = exports.hashAlgorithmFromJSON = exports.HashAlgorithm = void 0;
+exports.TimeRange = exports.X509CertificateChain = exports.SubjectAlternativeName = exports.X509Certificate = exports.DistinguishedName = exports.ObjectIdentifierValuePair = exports.ObjectIdentifier = exports.PublicKeyIdentifier = exports.PublicKey = exports.RFC3161SignedTimestamp = exports.LogId = exports.MessageSignature = exports.HashOutput = exports.SubjectAlternativeNameType = exports.PublicKeyDetails = exports.HashAlgorithm = void 0;
+exports.hashAlgorithmFromJSON = hashAlgorithmFromJSON;
+exports.hashAlgorithmToJSON = hashAlgorithmToJSON;
+exports.publicKeyDetailsFromJSON = publicKeyDetailsFromJSON;
+exports.publicKeyDetailsToJSON = publicKeyDetailsToJSON;
+exports.subjectAlternativeNameTypeFromJSON = subjectAlternativeNameTypeFromJSON;
+exports.subjectAlternativeNameTypeToJSON = subjectAlternativeNameTypeToJSON;
 /* eslint-disable */
 const timestamp_1 = __nccwpck_require__(45000);
 /**
@@ -11927,7 +15470,7 @@ var HashAlgorithm;
     HashAlgorithm[HashAlgorithm["SHA2_512"] = 3] = "SHA2_512";
     HashAlgorithm[HashAlgorithm["SHA3_256"] = 4] = "SHA3_256";
     HashAlgorithm[HashAlgorithm["SHA3_384"] = 5] = "SHA3_384";
-})(HashAlgorithm = exports.HashAlgorithm || (exports.HashAlgorithm = {}));
+})(HashAlgorithm || (exports.HashAlgorithm = HashAlgorithm = {}));
 function hashAlgorithmFromJSON(object) {
     switch (object) {
         case 0:
@@ -11949,10 +15492,9 @@ function hashAlgorithmFromJSON(object) {
         case "SHA3_384":
             return HashAlgorithm.SHA3_384;
         default:
-            throw new tsProtoGlobalThis.Error("Unrecognized enum value " + object + " for enum HashAlgorithm");
+            throw new globalThis.Error("Unrecognized enum value " + object + " for enum HashAlgorithm");
     }
 }
-exports.hashAlgorithmFromJSON = hashAlgorithmFromJSON;
 function hashAlgorithmToJSON(object) {
     switch (object) {
         case HashAlgorithm.HASH_ALGORITHM_UNSPECIFIED:
@@ -11968,10 +15510,9 @@ function hashAlgorithmToJSON(object) {
         case HashAlgorithm.SHA3_384:
             return "SHA3_384";
         default:
-            throw new tsProtoGlobalThis.Error("Unrecognized enum value " + object + " for enum HashAlgorithm");
+            throw new globalThis.Error("Unrecognized enum value " + object + " for enum HashAlgorithm");
     }
 }
-exports.hashAlgorithmToJSON = hashAlgorithmToJSON;
 /**
  * Details of a specific public key, capturing the the key encoding method,
  * and signature algorithm.
@@ -11983,7 +15524,8 @@ exports.hashAlgorithmToJSON = hashAlgorithmToJSON;
  * opinionated options instead of allowing every possible permutation.
  *
  * Any changes to this enum MUST be reflected in the algorithm registry.
- * See: docs/algorithm-registry.md
+ *
+ * See: <https://github.com/sigstore/architecture-docs/blob/main/algorithm-registry.md>
  *
  * To avoid the possibility of contradicting formats such as PKCS1 with
  * ED25519 the valid permutations are listed as a linear set instead of a
@@ -12031,10 +15573,20 @@ var PublicKeyDetails;
     PublicKeyDetails[PublicKeyDetails["PKIX_ED25519"] = 7] = "PKIX_ED25519";
     PublicKeyDetails[PublicKeyDetails["PKIX_ED25519_PH"] = 8] = "PKIX_ED25519_PH";
     /**
+     * PKIX_ECDSA_P384_SHA_256 - These algorithms are deprecated and should not be used, but they
+     * were/are being used by most Sigstore clients implementations.
+     *
+     * @deprecated
+     */
+    PublicKeyDetails[PublicKeyDetails["PKIX_ECDSA_P384_SHA_256"] = 19] = "PKIX_ECDSA_P384_SHA_256";
+    /** @deprecated */
+    PublicKeyDetails[PublicKeyDetails["PKIX_ECDSA_P521_SHA_256"] = 20] = "PKIX_ECDSA_P521_SHA_256";
+    /**
      * LMS_SHA256 - LMS and LM-OTS
      *
-     * These keys and signatures may be used by private Sigstore
-     * deployments, but are not currently supported by the public
+     * These algorithms are deprecated and should not be used.
+     * Keys and signatures MAY be used by private Sigstore
+     * deployments, but will not be supported by the public
      * good instance.
      *
      * USER WARNING: LMS and LM-OTS are both stateful signature schemes.
@@ -12044,10 +15596,30 @@ var PublicKeyDetails;
      * MUST NOT be used for more than one signature per LM-OTS key.
      * If you cannot maintain these invariants, you MUST NOT use these
      * schemes.
+     *
+     * @deprecated
      */
     PublicKeyDetails[PublicKeyDetails["LMS_SHA256"] = 14] = "LMS_SHA256";
+    /** @deprecated */
     PublicKeyDetails[PublicKeyDetails["LMOTS_SHA256"] = 15] = "LMOTS_SHA256";
-})(PublicKeyDetails = exports.PublicKeyDetails || (exports.PublicKeyDetails = {}));
+    /**
+     * ML_DSA_65 - ML-DSA
+     *
+     * These ML_DSA_65 and ML-DSA_87 algorithms are the pure variants that
+     * take data to sign rather than the prehash variants (HashML-DSA), which
+     * take digests.  While considered quantum-resistant, their usage
+     * involves tradeoffs in that signatures and keys are much larger, and
+     * this makes deployments more costly.
+     *
+     * USER WARNING: ML_DSA_65 and ML_DSA_87 are experimental algorithms.
+     * In the future they MAY be used by private Sigstore deployments, but
+     * they are not yet fully functional.  This warning will be removed when
+     * these algorithms are widely supported by Sigstore clients and servers,
+     * but care should still be taken for production environments.
+     */
+    PublicKeyDetails[PublicKeyDetails["ML_DSA_65"] = 21] = "ML_DSA_65";
+    PublicKeyDetails[PublicKeyDetails["ML_DSA_87"] = 22] = "ML_DSA_87";
+})(PublicKeyDetails || (exports.PublicKeyDetails = PublicKeyDetails = {}));
 function publicKeyDetailsFromJSON(object) {
     switch (object) {
         case 0:
@@ -12101,17 +15673,28 @@ function publicKeyDetailsFromJSON(object) {
         case 8:
         case "PKIX_ED25519_PH":
             return PublicKeyDetails.PKIX_ED25519_PH;
+        case 19:
+        case "PKIX_ECDSA_P384_SHA_256":
+            return PublicKeyDetails.PKIX_ECDSA_P384_SHA_256;
+        case 20:
+        case "PKIX_ECDSA_P521_SHA_256":
+            return PublicKeyDetails.PKIX_ECDSA_P521_SHA_256;
         case 14:
         case "LMS_SHA256":
             return PublicKeyDetails.LMS_SHA256;
         case 15:
         case "LMOTS_SHA256":
             return PublicKeyDetails.LMOTS_SHA256;
+        case 21:
+        case "ML_DSA_65":
+            return PublicKeyDetails.ML_DSA_65;
+        case 22:
+        case "ML_DSA_87":
+            return PublicKeyDetails.ML_DSA_87;
         default:
-            throw new tsProtoGlobalThis.Error("Unrecognized enum value " + object + " for enum PublicKeyDetails");
+            throw new globalThis.Error("Unrecognized enum value " + object + " for enum PublicKeyDetails");
     }
 }
-exports.publicKeyDetailsFromJSON = publicKeyDetailsFromJSON;
 function publicKeyDetailsToJSON(object) {
     switch (object) {
         case PublicKeyDetails.PUBLIC_KEY_DETAILS_UNSPECIFIED:
@@ -12148,15 +15731,22 @@ function publicKeyDetailsToJSON(object) {
             return "PKIX_ED25519";
         case PublicKeyDetails.PKIX_ED25519_PH:
             return "PKIX_ED25519_PH";
+        case PublicKeyDetails.PKIX_ECDSA_P384_SHA_256:
+            return "PKIX_ECDSA_P384_SHA_256";
+        case PublicKeyDetails.PKIX_ECDSA_P521_SHA_256:
+            return "PKIX_ECDSA_P521_SHA_256";
         case PublicKeyDetails.LMS_SHA256:
             return "LMS_SHA256";
         case PublicKeyDetails.LMOTS_SHA256:
             return "LMOTS_SHA256";
+        case PublicKeyDetails.ML_DSA_65:
+            return "ML_DSA_65";
+        case PublicKeyDetails.ML_DSA_87:
+            return "ML_DSA_87";
         default:
-            throw new tsProtoGlobalThis.Error("Unrecognized enum value " + object + " for enum PublicKeyDetails");
+            throw new globalThis.Error("Unrecognized enum value " + object + " for enum PublicKeyDetails");
     }
 }
-exports.publicKeyDetailsToJSON = publicKeyDetailsToJSON;
 var SubjectAlternativeNameType;
 (function (SubjectAlternativeNameType) {
     SubjectAlternativeNameType[SubjectAlternativeNameType["SUBJECT_ALTERNATIVE_NAME_TYPE_UNSPECIFIED"] = 0] = "SUBJECT_ALTERNATIVE_NAME_TYPE_UNSPECIFIED";
@@ -12168,7 +15758,7 @@ var SubjectAlternativeNameType;
      * for more details.
      */
     SubjectAlternativeNameType[SubjectAlternativeNameType["OTHER_NAME"] = 3] = "OTHER_NAME";
-})(SubjectAlternativeNameType = exports.SubjectAlternativeNameType || (exports.SubjectAlternativeNameType = {}));
+})(SubjectAlternativeNameType || (exports.SubjectAlternativeNameType = SubjectAlternativeNameType = {}));
 function subjectAlternativeNameTypeFromJSON(object) {
     switch (object) {
         case 0:
@@ -12184,10 +15774,9 @@ function subjectAlternativeNameTypeFromJSON(object) {
         case "OTHER_NAME":
             return SubjectAlternativeNameType.OTHER_NAME;
         default:
-            throw new tsProtoGlobalThis.Error("Unrecognized enum value " + object + " for enum SubjectAlternativeNameType");
+            throw new globalThis.Error("Unrecognized enum value " + object + " for enum SubjectAlternativeNameType");
     }
 }
-exports.subjectAlternativeNameTypeFromJSON = subjectAlternativeNameTypeFromJSON;
 function subjectAlternativeNameTypeToJSON(object) {
     switch (object) {
         case SubjectAlternativeNameType.SUBJECT_ALTERNATIVE_NAME_TYPE_UNSPECIFIED:
@@ -12199,12 +15788,8 @@ function subjectAlternativeNameTypeToJSON(object) {
         case SubjectAlternativeNameType.OTHER_NAME:
             return "OTHER_NAME";
         default:
-            throw new tsProtoGlobalThis.Error("Unrecognized enum value " + object + " for enum SubjectAlternativeNameType");
+            throw new globalThis.Error("Unrecognized enum value " + object + " for enum SubjectAlternativeNameType");
     }
-}
-exports.subjectAlternativeNameTypeToJSON = subjectAlternativeNameTypeToJSON;
-function createBaseHashOutput() {
-    return { algorithm: 0, digest: Buffer.alloc(0) };
 }
 exports.HashOutput = {
     fromJSON(object) {
@@ -12215,15 +15800,15 @@ exports.HashOutput = {
     },
     toJSON(message) {
         const obj = {};
-        message.algorithm !== undefined && (obj.algorithm = hashAlgorithmToJSON(message.algorithm));
-        message.digest !== undefined &&
-            (obj.digest = base64FromBytes(message.digest !== undefined ? message.digest : Buffer.alloc(0)));
+        if (message.algorithm !== 0) {
+            obj.algorithm = hashAlgorithmToJSON(message.algorithm);
+        }
+        if (message.digest.length !== 0) {
+            obj.digest = base64FromBytes(message.digest);
+        }
         return obj;
     },
 };
-function createBaseMessageSignature() {
-    return { messageDigest: undefined, signature: Buffer.alloc(0) };
-}
 exports.MessageSignature = {
     fromJSON(object) {
         return {
@@ -12233,30 +15818,27 @@ exports.MessageSignature = {
     },
     toJSON(message) {
         const obj = {};
-        message.messageDigest !== undefined &&
-            (obj.messageDigest = message.messageDigest ? exports.HashOutput.toJSON(message.messageDigest) : undefined);
-        message.signature !== undefined &&
-            (obj.signature = base64FromBytes(message.signature !== undefined ? message.signature : Buffer.alloc(0)));
+        if (message.messageDigest !== undefined) {
+            obj.messageDigest = exports.HashOutput.toJSON(message.messageDigest);
+        }
+        if (message.signature.length !== 0) {
+            obj.signature = base64FromBytes(message.signature);
+        }
         return obj;
     },
 };
-function createBaseLogId() {
-    return { keyId: Buffer.alloc(0) };
-}
 exports.LogId = {
     fromJSON(object) {
         return { keyId: isSet(object.keyId) ? Buffer.from(bytesFromBase64(object.keyId)) : Buffer.alloc(0) };
     },
     toJSON(message) {
         const obj = {};
-        message.keyId !== undefined &&
-            (obj.keyId = base64FromBytes(message.keyId !== undefined ? message.keyId : Buffer.alloc(0)));
+        if (message.keyId.length !== 0) {
+            obj.keyId = base64FromBytes(message.keyId);
+        }
         return obj;
     },
 };
-function createBaseRFC3161SignedTimestamp() {
-    return { signedTimestamp: Buffer.alloc(0) };
-}
 exports.RFC3161SignedTimestamp = {
     fromJSON(object) {
         return {
@@ -12267,14 +15849,12 @@ exports.RFC3161SignedTimestamp = {
     },
     toJSON(message) {
         const obj = {};
-        message.signedTimestamp !== undefined &&
-            (obj.signedTimestamp = base64FromBytes(message.signedTimestamp !== undefined ? message.signedTimestamp : Buffer.alloc(0)));
+        if (message.signedTimestamp.length !== 0) {
+            obj.signedTimestamp = base64FromBytes(message.signedTimestamp);
+        }
         return obj;
     },
 };
-function createBasePublicKey() {
-    return { rawBytes: undefined, keyDetails: 0, validFor: undefined };
-}
 exports.PublicKey = {
     fromJSON(object) {
         return {
@@ -12285,48 +15865,42 @@ exports.PublicKey = {
     },
     toJSON(message) {
         const obj = {};
-        message.rawBytes !== undefined &&
-            (obj.rawBytes = message.rawBytes !== undefined ? base64FromBytes(message.rawBytes) : undefined);
-        message.keyDetails !== undefined && (obj.keyDetails = publicKeyDetailsToJSON(message.keyDetails));
-        message.validFor !== undefined &&
-            (obj.validFor = message.validFor ? exports.TimeRange.toJSON(message.validFor) : undefined);
+        if (message.rawBytes !== undefined) {
+            obj.rawBytes = base64FromBytes(message.rawBytes);
+        }
+        if (message.keyDetails !== 0) {
+            obj.keyDetails = publicKeyDetailsToJSON(message.keyDetails);
+        }
+        if (message.validFor !== undefined) {
+            obj.validFor = exports.TimeRange.toJSON(message.validFor);
+        }
         return obj;
     },
 };
-function createBasePublicKeyIdentifier() {
-    return { hint: "" };
-}
 exports.PublicKeyIdentifier = {
     fromJSON(object) {
-        return { hint: isSet(object.hint) ? String(object.hint) : "" };
+        return { hint: isSet(object.hint) ? globalThis.String(object.hint) : "" };
     },
     toJSON(message) {
         const obj = {};
-        message.hint !== undefined && (obj.hint = message.hint);
+        if (message.hint !== "") {
+            obj.hint = message.hint;
+        }
         return obj;
     },
 };
-function createBaseObjectIdentifier() {
-    return { id: [] };
-}
 exports.ObjectIdentifier = {
     fromJSON(object) {
-        return { id: Array.isArray(object?.id) ? object.id.map((e) => Number(e)) : [] };
+        return { id: globalThis.Array.isArray(object?.id) ? object.id.map((e) => globalThis.Number(e)) : [] };
     },
     toJSON(message) {
         const obj = {};
-        if (message.id) {
+        if (message.id?.length) {
             obj.id = message.id.map((e) => Math.round(e));
-        }
-        else {
-            obj.id = [];
         }
         return obj;
     },
 };
-function createBaseObjectIdentifierValuePair() {
-    return { oid: undefined, value: Buffer.alloc(0) };
-}
 exports.ObjectIdentifierValuePair = {
     fromJSON(object) {
         return {
@@ -12336,90 +15910,86 @@ exports.ObjectIdentifierValuePair = {
     },
     toJSON(message) {
         const obj = {};
-        message.oid !== undefined && (obj.oid = message.oid ? exports.ObjectIdentifier.toJSON(message.oid) : undefined);
-        message.value !== undefined &&
-            (obj.value = base64FromBytes(message.value !== undefined ? message.value : Buffer.alloc(0)));
+        if (message.oid !== undefined) {
+            obj.oid = exports.ObjectIdentifier.toJSON(message.oid);
+        }
+        if (message.value.length !== 0) {
+            obj.value = base64FromBytes(message.value);
+        }
         return obj;
     },
 };
-function createBaseDistinguishedName() {
-    return { organization: "", commonName: "" };
-}
 exports.DistinguishedName = {
     fromJSON(object) {
         return {
-            organization: isSet(object.organization) ? String(object.organization) : "",
-            commonName: isSet(object.commonName) ? String(object.commonName) : "",
+            organization: isSet(object.organization) ? globalThis.String(object.organization) : "",
+            commonName: isSet(object.commonName) ? globalThis.String(object.commonName) : "",
         };
     },
     toJSON(message) {
         const obj = {};
-        message.organization !== undefined && (obj.organization = message.organization);
-        message.commonName !== undefined && (obj.commonName = message.commonName);
+        if (message.organization !== "") {
+            obj.organization = message.organization;
+        }
+        if (message.commonName !== "") {
+            obj.commonName = message.commonName;
+        }
         return obj;
     },
 };
-function createBaseX509Certificate() {
-    return { rawBytes: Buffer.alloc(0) };
-}
 exports.X509Certificate = {
     fromJSON(object) {
         return { rawBytes: isSet(object.rawBytes) ? Buffer.from(bytesFromBase64(object.rawBytes)) : Buffer.alloc(0) };
     },
     toJSON(message) {
         const obj = {};
-        message.rawBytes !== undefined &&
-            (obj.rawBytes = base64FromBytes(message.rawBytes !== undefined ? message.rawBytes : Buffer.alloc(0)));
+        if (message.rawBytes.length !== 0) {
+            obj.rawBytes = base64FromBytes(message.rawBytes);
+        }
         return obj;
     },
 };
-function createBaseSubjectAlternativeName() {
-    return { type: 0, identity: undefined };
-}
 exports.SubjectAlternativeName = {
     fromJSON(object) {
         return {
             type: isSet(object.type) ? subjectAlternativeNameTypeFromJSON(object.type) : 0,
             identity: isSet(object.regexp)
-                ? { $case: "regexp", regexp: String(object.regexp) }
+                ? { $case: "regexp", regexp: globalThis.String(object.regexp) }
                 : isSet(object.value)
-                    ? { $case: "value", value: String(object.value) }
+                    ? { $case: "value", value: globalThis.String(object.value) }
                     : undefined,
         };
     },
     toJSON(message) {
         const obj = {};
-        message.type !== undefined && (obj.type = subjectAlternativeNameTypeToJSON(message.type));
-        message.identity?.$case === "regexp" && (obj.regexp = message.identity?.regexp);
-        message.identity?.$case === "value" && (obj.value = message.identity?.value);
+        if (message.type !== 0) {
+            obj.type = subjectAlternativeNameTypeToJSON(message.type);
+        }
+        if (message.identity?.$case === "regexp") {
+            obj.regexp = message.identity.regexp;
+        }
+        else if (message.identity?.$case === "value") {
+            obj.value = message.identity.value;
+        }
         return obj;
     },
 };
-function createBaseX509CertificateChain() {
-    return { certificates: [] };
-}
 exports.X509CertificateChain = {
     fromJSON(object) {
         return {
-            certificates: Array.isArray(object?.certificates)
+            certificates: globalThis.Array.isArray(object?.certificates)
                 ? object.certificates.map((e) => exports.X509Certificate.fromJSON(e))
                 : [],
         };
     },
     toJSON(message) {
         const obj = {};
-        if (message.certificates) {
-            obj.certificates = message.certificates.map((e) => e ? exports.X509Certificate.toJSON(e) : undefined);
-        }
-        else {
-            obj.certificates = [];
+        if (message.certificates?.length) {
+            obj.certificates = message.certificates.map((e) => exports.X509Certificate.toJSON(e));
         }
         return obj;
     },
 };
-function createBaseTimeRange() {
-    return { start: undefined, end: undefined };
-}
 exports.TimeRange = {
     fromJSON(object) {
         return {
@@ -12429,62 +15999,32 @@ exports.TimeRange = {
     },
     toJSON(message) {
         const obj = {};
-        message.start !== undefined && (obj.start = message.start.toISOString());
-        message.end !== undefined && (obj.end = message.end.toISOString());
+        if (message.start !== undefined) {
+            obj.start = message.start.toISOString();
+        }
+        if (message.end !== undefined) {
+            obj.end = message.end.toISOString();
+        }
         return obj;
     },
 };
-var tsProtoGlobalThis = (() => {
-    if (typeof globalThis !== "undefined") {
-        return globalThis;
-    }
-    if (typeof self !== "undefined") {
-        return self;
-    }
-    if (typeof window !== "undefined") {
-        return window;
-    }
-    if (typeof global !== "undefined") {
-        return global;
-    }
-    throw "Unable to locate global object";
-})();
 function bytesFromBase64(b64) {
-    if (tsProtoGlobalThis.Buffer) {
-        return Uint8Array.from(tsProtoGlobalThis.Buffer.from(b64, "base64"));
-    }
-    else {
-        const bin = tsProtoGlobalThis.atob(b64);
-        const arr = new Uint8Array(bin.length);
-        for (let i = 0; i < bin.length; ++i) {
-            arr[i] = bin.charCodeAt(i);
-        }
-        return arr;
-    }
+    return Uint8Array.from(globalThis.Buffer.from(b64, "base64"));
 }
 function base64FromBytes(arr) {
-    if (tsProtoGlobalThis.Buffer) {
-        return tsProtoGlobalThis.Buffer.from(arr).toString("base64");
-    }
-    else {
-        const bin = [];
-        arr.forEach((byte) => {
-            bin.push(String.fromCharCode(byte));
-        });
-        return tsProtoGlobalThis.btoa(bin.join(""));
-    }
+    return globalThis.Buffer.from(arr).toString("base64");
 }
 function fromTimestamp(t) {
-    let millis = Number(t.seconds) * 1000;
-    millis += t.nanos / 1000000;
-    return new Date(millis);
+    let millis = (globalThis.Number(t.seconds) || 0) * 1_000;
+    millis += (t.nanos || 0) / 1_000_000;
+    return new globalThis.Date(millis);
 }
 function fromJsonTimestamp(o) {
-    if (o instanceof Date) {
+    if (o instanceof globalThis.Date) {
         return o;
     }
     else if (typeof o === "string") {
-        return new Date(o);
+        return new globalThis.Date(o);
     }
     else {
         return fromTimestamp(timestamp_1.Timestamp.fromJSON(o));
@@ -12502,73 +16042,77 @@ function isSet(value) {
 
 "use strict";
 
+// Code generated by protoc-gen-ts_proto. DO NOT EDIT.
+// versions:
+//   protoc-gen-ts_proto  v2.7.0
+//   protoc               v6.30.2
+// source: sigstore_rekor.proto
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TransparencyLogEntry = exports.InclusionPromise = exports.InclusionProof = exports.Checkpoint = exports.KindVersion = void 0;
 /* eslint-disable */
 const sigstore_common_1 = __nccwpck_require__(5334);
-function createBaseKindVersion() {
-    return { kind: "", version: "" };
-}
 exports.KindVersion = {
     fromJSON(object) {
         return {
-            kind: isSet(object.kind) ? String(object.kind) : "",
-            version: isSet(object.version) ? String(object.version) : "",
+            kind: isSet(object.kind) ? globalThis.String(object.kind) : "",
+            version: isSet(object.version) ? globalThis.String(object.version) : "",
         };
     },
     toJSON(message) {
         const obj = {};
-        message.kind !== undefined && (obj.kind = message.kind);
-        message.version !== undefined && (obj.version = message.version);
+        if (message.kind !== "") {
+            obj.kind = message.kind;
+        }
+        if (message.version !== "") {
+            obj.version = message.version;
+        }
         return obj;
     },
 };
-function createBaseCheckpoint() {
-    return { envelope: "" };
-}
 exports.Checkpoint = {
     fromJSON(object) {
-        return { envelope: isSet(object.envelope) ? String(object.envelope) : "" };
+        return { envelope: isSet(object.envelope) ? globalThis.String(object.envelope) : "" };
     },
     toJSON(message) {
         const obj = {};
-        message.envelope !== undefined && (obj.envelope = message.envelope);
+        if (message.envelope !== "") {
+            obj.envelope = message.envelope;
+        }
         return obj;
     },
 };
-function createBaseInclusionProof() {
-    return { logIndex: "0", rootHash: Buffer.alloc(0), treeSize: "0", hashes: [], checkpoint: undefined };
-}
 exports.InclusionProof = {
     fromJSON(object) {
         return {
-            logIndex: isSet(object.logIndex) ? String(object.logIndex) : "0",
+            logIndex: isSet(object.logIndex) ? globalThis.String(object.logIndex) : "0",
             rootHash: isSet(object.rootHash) ? Buffer.from(bytesFromBase64(object.rootHash)) : Buffer.alloc(0),
-            treeSize: isSet(object.treeSize) ? String(object.treeSize) : "0",
-            hashes: Array.isArray(object?.hashes) ? object.hashes.map((e) => Buffer.from(bytesFromBase64(e))) : [],
+            treeSize: isSet(object.treeSize) ? globalThis.String(object.treeSize) : "0",
+            hashes: globalThis.Array.isArray(object?.hashes)
+                ? object.hashes.map((e) => Buffer.from(bytesFromBase64(e)))
+                : [],
             checkpoint: isSet(object.checkpoint) ? exports.Checkpoint.fromJSON(object.checkpoint) : undefined,
         };
     },
     toJSON(message) {
         const obj = {};
-        message.logIndex !== undefined && (obj.logIndex = message.logIndex);
-        message.rootHash !== undefined &&
-            (obj.rootHash = base64FromBytes(message.rootHash !== undefined ? message.rootHash : Buffer.alloc(0)));
-        message.treeSize !== undefined && (obj.treeSize = message.treeSize);
-        if (message.hashes) {
-            obj.hashes = message.hashes.map((e) => base64FromBytes(e !== undefined ? e : Buffer.alloc(0)));
+        if (message.logIndex !== "0") {
+            obj.logIndex = message.logIndex;
         }
-        else {
-            obj.hashes = [];
+        if (message.rootHash.length !== 0) {
+            obj.rootHash = base64FromBytes(message.rootHash);
         }
-        message.checkpoint !== undefined &&
-            (obj.checkpoint = message.checkpoint ? exports.Checkpoint.toJSON(message.checkpoint) : undefined);
+        if (message.treeSize !== "0") {
+            obj.treeSize = message.treeSize;
+        }
+        if (message.hashes?.length) {
+            obj.hashes = message.hashes.map((e) => base64FromBytes(e));
+        }
+        if (message.checkpoint !== undefined) {
+            obj.checkpoint = exports.Checkpoint.toJSON(message.checkpoint);
+        }
         return obj;
     },
 };
-function createBaseInclusionPromise() {
-    return { signedEntryTimestamp: Buffer.alloc(0) };
-}
 exports.InclusionPromise = {
     fromJSON(object) {
         return {
@@ -12579,29 +16123,19 @@ exports.InclusionPromise = {
     },
     toJSON(message) {
         const obj = {};
-        message.signedEntryTimestamp !== undefined &&
-            (obj.signedEntryTimestamp = base64FromBytes(message.signedEntryTimestamp !== undefined ? message.signedEntryTimestamp : Buffer.alloc(0)));
+        if (message.signedEntryTimestamp.length !== 0) {
+            obj.signedEntryTimestamp = base64FromBytes(message.signedEntryTimestamp);
+        }
         return obj;
     },
 };
-function createBaseTransparencyLogEntry() {
-    return {
-        logIndex: "0",
-        logId: undefined,
-        kindVersion: undefined,
-        integratedTime: "0",
-        inclusionPromise: undefined,
-        inclusionProof: undefined,
-        canonicalizedBody: Buffer.alloc(0),
-    };
-}
 exports.TransparencyLogEntry = {
     fromJSON(object) {
         return {
-            logIndex: isSet(object.logIndex) ? String(object.logIndex) : "0",
+            logIndex: isSet(object.logIndex) ? globalThis.String(object.logIndex) : "0",
             logId: isSet(object.logId) ? sigstore_common_1.LogId.fromJSON(object.logId) : undefined,
             kindVersion: isSet(object.kindVersion) ? exports.KindVersion.fromJSON(object.kindVersion) : undefined,
-            integratedTime: isSet(object.integratedTime) ? String(object.integratedTime) : "0",
+            integratedTime: isSet(object.integratedTime) ? globalThis.String(object.integratedTime) : "0",
             inclusionPromise: isSet(object.inclusionPromise) ? exports.InclusionPromise.fromJSON(object.inclusionPromise) : undefined,
             inclusionProof: isSet(object.inclusionProof) ? exports.InclusionProof.fromJSON(object.inclusionProof) : undefined,
             canonicalizedBody: isSet(object.canonicalizedBody)
@@ -12611,59 +16145,35 @@ exports.TransparencyLogEntry = {
     },
     toJSON(message) {
         const obj = {};
-        message.logIndex !== undefined && (obj.logIndex = message.logIndex);
-        message.logId !== undefined && (obj.logId = message.logId ? sigstore_common_1.LogId.toJSON(message.logId) : undefined);
-        message.kindVersion !== undefined &&
-            (obj.kindVersion = message.kindVersion ? exports.KindVersion.toJSON(message.kindVersion) : undefined);
-        message.integratedTime !== undefined && (obj.integratedTime = message.integratedTime);
-        message.inclusionPromise !== undefined &&
-            (obj.inclusionPromise = message.inclusionPromise ? exports.InclusionPromise.toJSON(message.inclusionPromise) : undefined);
-        message.inclusionProof !== undefined &&
-            (obj.inclusionProof = message.inclusionProof ? exports.InclusionProof.toJSON(message.inclusionProof) : undefined);
-        message.canonicalizedBody !== undefined &&
-            (obj.canonicalizedBody = base64FromBytes(message.canonicalizedBody !== undefined ? message.canonicalizedBody : Buffer.alloc(0)));
+        if (message.logIndex !== "0") {
+            obj.logIndex = message.logIndex;
+        }
+        if (message.logId !== undefined) {
+            obj.logId = sigstore_common_1.LogId.toJSON(message.logId);
+        }
+        if (message.kindVersion !== undefined) {
+            obj.kindVersion = exports.KindVersion.toJSON(message.kindVersion);
+        }
+        if (message.integratedTime !== "0") {
+            obj.integratedTime = message.integratedTime;
+        }
+        if (message.inclusionPromise !== undefined) {
+            obj.inclusionPromise = exports.InclusionPromise.toJSON(message.inclusionPromise);
+        }
+        if (message.inclusionProof !== undefined) {
+            obj.inclusionProof = exports.InclusionProof.toJSON(message.inclusionProof);
+        }
+        if (message.canonicalizedBody.length !== 0) {
+            obj.canonicalizedBody = base64FromBytes(message.canonicalizedBody);
+        }
         return obj;
     },
 };
-var tsProtoGlobalThis = (() => {
-    if (typeof globalThis !== "undefined") {
-        return globalThis;
-    }
-    if (typeof self !== "undefined") {
-        return self;
-    }
-    if (typeof window !== "undefined") {
-        return window;
-    }
-    if (typeof global !== "undefined") {
-        return global;
-    }
-    throw "Unable to locate global object";
-})();
 function bytesFromBase64(b64) {
-    if (tsProtoGlobalThis.Buffer) {
-        return Uint8Array.from(tsProtoGlobalThis.Buffer.from(b64, "base64"));
-    }
-    else {
-        const bin = tsProtoGlobalThis.atob(b64);
-        const arr = new Uint8Array(bin.length);
-        for (let i = 0; i < bin.length; ++i) {
-            arr[i] = bin.charCodeAt(i);
-        }
-        return arr;
-    }
+    return Uint8Array.from(globalThis.Buffer.from(b64, "base64"));
 }
 function base64FromBytes(arr) {
-    if (tsProtoGlobalThis.Buffer) {
-        return tsProtoGlobalThis.Buffer.from(arr).toString("base64");
-    }
-    else {
-        const bin = [];
-        arr.forEach((byte) => {
-            bin.push(String.fromCharCode(byte));
-        });
-        return tsProtoGlobalThis.btoa(bin.join(""));
-    }
+    return globalThis.Buffer.from(arr).toString("base64");
 }
 function isSet(value) {
     return value !== null && value !== undefined;
@@ -12677,157 +16187,283 @@ function isSet(value) {
 
 "use strict";
 
+// Code generated by protoc-gen-ts_proto. DO NOT EDIT.
+// versions:
+//   protoc-gen-ts_proto  v2.7.0
+//   protoc               v6.30.2
+// source: sigstore_trustroot.proto
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ClientTrustConfig = exports.SigningConfig = exports.TrustedRoot = exports.CertificateAuthority = exports.TransparencyLogInstance = void 0;
+exports.ClientTrustConfig = exports.ServiceConfiguration = exports.Service = exports.SigningConfig = exports.TrustedRoot = exports.CertificateAuthority = exports.TransparencyLogInstance = exports.ServiceSelector = void 0;
+exports.serviceSelectorFromJSON = serviceSelectorFromJSON;
+exports.serviceSelectorToJSON = serviceSelectorToJSON;
 /* eslint-disable */
 const sigstore_common_1 = __nccwpck_require__(5334);
-function createBaseTransparencyLogInstance() {
-    return { baseUrl: "", hashAlgorithm: 0, publicKey: undefined, logId: undefined, checkpointKeyId: undefined };
+/**
+ * ServiceSelector specifies how a client SHOULD select a set of
+ * Services to connect to. A client SHOULD throw an error if
+ * the value is SERVICE_SELECTOR_UNDEFINED.
+ */
+var ServiceSelector;
+(function (ServiceSelector) {
+    ServiceSelector[ServiceSelector["SERVICE_SELECTOR_UNDEFINED"] = 0] = "SERVICE_SELECTOR_UNDEFINED";
+    /**
+     * ALL - Clients SHOULD select all Services based on supported API version
+     * and validity window.
+     */
+    ServiceSelector[ServiceSelector["ALL"] = 1] = "ALL";
+    /**
+     * ANY - Clients SHOULD select one Service based on supported API version
+     * and validity window. It is up to the client implementation to
+     * decide how to select the Service, e.g. random or round-robin.
+     */
+    ServiceSelector[ServiceSelector["ANY"] = 2] = "ANY";
+    /**
+     * EXACT - Clients SHOULD select a specific number of Services based on
+     * supported API version and validity window, using the provided
+     * `count`. It is up to the client implementation to decide how to
+     * select the Service, e.g. random or round-robin.
+     */
+    ServiceSelector[ServiceSelector["EXACT"] = 3] = "EXACT";
+})(ServiceSelector || (exports.ServiceSelector = ServiceSelector = {}));
+function serviceSelectorFromJSON(object) {
+    switch (object) {
+        case 0:
+        case "SERVICE_SELECTOR_UNDEFINED":
+            return ServiceSelector.SERVICE_SELECTOR_UNDEFINED;
+        case 1:
+        case "ALL":
+            return ServiceSelector.ALL;
+        case 2:
+        case "ANY":
+            return ServiceSelector.ANY;
+        case 3:
+        case "EXACT":
+            return ServiceSelector.EXACT;
+        default:
+            throw new globalThis.Error("Unrecognized enum value " + object + " for enum ServiceSelector");
+    }
+}
+function serviceSelectorToJSON(object) {
+    switch (object) {
+        case ServiceSelector.SERVICE_SELECTOR_UNDEFINED:
+            return "SERVICE_SELECTOR_UNDEFINED";
+        case ServiceSelector.ALL:
+            return "ALL";
+        case ServiceSelector.ANY:
+            return "ANY";
+        case ServiceSelector.EXACT:
+            return "EXACT";
+        default:
+            throw new globalThis.Error("Unrecognized enum value " + object + " for enum ServiceSelector");
+    }
 }
 exports.TransparencyLogInstance = {
     fromJSON(object) {
         return {
-            baseUrl: isSet(object.baseUrl) ? String(object.baseUrl) : "",
+            baseUrl: isSet(object.baseUrl) ? globalThis.String(object.baseUrl) : "",
             hashAlgorithm: isSet(object.hashAlgorithm) ? (0, sigstore_common_1.hashAlgorithmFromJSON)(object.hashAlgorithm) : 0,
             publicKey: isSet(object.publicKey) ? sigstore_common_1.PublicKey.fromJSON(object.publicKey) : undefined,
             logId: isSet(object.logId) ? sigstore_common_1.LogId.fromJSON(object.logId) : undefined,
             checkpointKeyId: isSet(object.checkpointKeyId) ? sigstore_common_1.LogId.fromJSON(object.checkpointKeyId) : undefined,
+            operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
         };
     },
     toJSON(message) {
         const obj = {};
-        message.baseUrl !== undefined && (obj.baseUrl = message.baseUrl);
-        message.hashAlgorithm !== undefined && (obj.hashAlgorithm = (0, sigstore_common_1.hashAlgorithmToJSON)(message.hashAlgorithm));
-        message.publicKey !== undefined &&
-            (obj.publicKey = message.publicKey ? sigstore_common_1.PublicKey.toJSON(message.publicKey) : undefined);
-        message.logId !== undefined && (obj.logId = message.logId ? sigstore_common_1.LogId.toJSON(message.logId) : undefined);
-        message.checkpointKeyId !== undefined &&
-            (obj.checkpointKeyId = message.checkpointKeyId ? sigstore_common_1.LogId.toJSON(message.checkpointKeyId) : undefined);
+        if (message.baseUrl !== "") {
+            obj.baseUrl = message.baseUrl;
+        }
+        if (message.hashAlgorithm !== 0) {
+            obj.hashAlgorithm = (0, sigstore_common_1.hashAlgorithmToJSON)(message.hashAlgorithm);
+        }
+        if (message.publicKey !== undefined) {
+            obj.publicKey = sigstore_common_1.PublicKey.toJSON(message.publicKey);
+        }
+        if (message.logId !== undefined) {
+            obj.logId = sigstore_common_1.LogId.toJSON(message.logId);
+        }
+        if (message.checkpointKeyId !== undefined) {
+            obj.checkpointKeyId = sigstore_common_1.LogId.toJSON(message.checkpointKeyId);
+        }
+        if (message.operator !== "") {
+            obj.operator = message.operator;
+        }
         return obj;
     },
 };
-function createBaseCertificateAuthority() {
-    return { subject: undefined, uri: "", certChain: undefined, validFor: undefined };
-}
 exports.CertificateAuthority = {
     fromJSON(object) {
         return {
             subject: isSet(object.subject) ? sigstore_common_1.DistinguishedName.fromJSON(object.subject) : undefined,
-            uri: isSet(object.uri) ? String(object.uri) : "",
+            uri: isSet(object.uri) ? globalThis.String(object.uri) : "",
             certChain: isSet(object.certChain) ? sigstore_common_1.X509CertificateChain.fromJSON(object.certChain) : undefined,
             validFor: isSet(object.validFor) ? sigstore_common_1.TimeRange.fromJSON(object.validFor) : undefined,
+            operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
         };
     },
     toJSON(message) {
         const obj = {};
-        message.subject !== undefined &&
-            (obj.subject = message.subject ? sigstore_common_1.DistinguishedName.toJSON(message.subject) : undefined);
-        message.uri !== undefined && (obj.uri = message.uri);
-        message.certChain !== undefined &&
-            (obj.certChain = message.certChain ? sigstore_common_1.X509CertificateChain.toJSON(message.certChain) : undefined);
-        message.validFor !== undefined &&
-            (obj.validFor = message.validFor ? sigstore_common_1.TimeRange.toJSON(message.validFor) : undefined);
+        if (message.subject !== undefined) {
+            obj.subject = sigstore_common_1.DistinguishedName.toJSON(message.subject);
+        }
+        if (message.uri !== "") {
+            obj.uri = message.uri;
+        }
+        if (message.certChain !== undefined) {
+            obj.certChain = sigstore_common_1.X509CertificateChain.toJSON(message.certChain);
+        }
+        if (message.validFor !== undefined) {
+            obj.validFor = sigstore_common_1.TimeRange.toJSON(message.validFor);
+        }
+        if (message.operator !== "") {
+            obj.operator = message.operator;
+        }
         return obj;
     },
 };
-function createBaseTrustedRoot() {
-    return { mediaType: "", tlogs: [], certificateAuthorities: [], ctlogs: [], timestampAuthorities: [] };
-}
 exports.TrustedRoot = {
     fromJSON(object) {
         return {
-            mediaType: isSet(object.mediaType) ? String(object.mediaType) : "",
-            tlogs: Array.isArray(object?.tlogs) ? object.tlogs.map((e) => exports.TransparencyLogInstance.fromJSON(e)) : [],
-            certificateAuthorities: Array.isArray(object?.certificateAuthorities)
+            mediaType: isSet(object.mediaType) ? globalThis.String(object.mediaType) : "",
+            tlogs: globalThis.Array.isArray(object?.tlogs)
+                ? object.tlogs.map((e) => exports.TransparencyLogInstance.fromJSON(e))
+                : [],
+            certificateAuthorities: globalThis.Array.isArray(object?.certificateAuthorities)
                 ? object.certificateAuthorities.map((e) => exports.CertificateAuthority.fromJSON(e))
                 : [],
-            ctlogs: Array.isArray(object?.ctlogs)
+            ctlogs: globalThis.Array.isArray(object?.ctlogs)
                 ? object.ctlogs.map((e) => exports.TransparencyLogInstance.fromJSON(e))
                 : [],
-            timestampAuthorities: Array.isArray(object?.timestampAuthorities)
+            timestampAuthorities: globalThis.Array.isArray(object?.timestampAuthorities)
                 ? object.timestampAuthorities.map((e) => exports.CertificateAuthority.fromJSON(e))
                 : [],
         };
     },
     toJSON(message) {
         const obj = {};
-        message.mediaType !== undefined && (obj.mediaType = message.mediaType);
-        if (message.tlogs) {
-            obj.tlogs = message.tlogs.map((e) => e ? exports.TransparencyLogInstance.toJSON(e) : undefined);
+        if (message.mediaType !== "") {
+            obj.mediaType = message.mediaType;
         }
-        else {
-            obj.tlogs = [];
+        if (message.tlogs?.length) {
+            obj.tlogs = message.tlogs.map((e) => exports.TransparencyLogInstance.toJSON(e));
         }
-        if (message.certificateAuthorities) {
-            obj.certificateAuthorities = message.certificateAuthorities.map((e) => e ? exports.CertificateAuthority.toJSON(e) : undefined);
+        if (message.certificateAuthorities?.length) {
+            obj.certificateAuthorities = message.certificateAuthorities.map((e) => exports.CertificateAuthority.toJSON(e));
         }
-        else {
-            obj.certificateAuthorities = [];
+        if (message.ctlogs?.length) {
+            obj.ctlogs = message.ctlogs.map((e) => exports.TransparencyLogInstance.toJSON(e));
         }
-        if (message.ctlogs) {
-            obj.ctlogs = message.ctlogs.map((e) => e ? exports.TransparencyLogInstance.toJSON(e) : undefined);
-        }
-        else {
-            obj.ctlogs = [];
-        }
-        if (message.timestampAuthorities) {
-            obj.timestampAuthorities = message.timestampAuthorities.map((e) => e ? exports.CertificateAuthority.toJSON(e) : undefined);
-        }
-        else {
-            obj.timestampAuthorities = [];
+        if (message.timestampAuthorities?.length) {
+            obj.timestampAuthorities = message.timestampAuthorities.map((e) => exports.CertificateAuthority.toJSON(e));
         }
         return obj;
     },
 };
-function createBaseSigningConfig() {
-    return { caUrl: "", oidcUrl: "", tlogUrls: [], tsaUrls: [] };
-}
 exports.SigningConfig = {
     fromJSON(object) {
         return {
-            caUrl: isSet(object.caUrl) ? String(object.caUrl) : "",
-            oidcUrl: isSet(object.oidcUrl) ? String(object.oidcUrl) : "",
-            tlogUrls: Array.isArray(object?.tlogUrls) ? object.tlogUrls.map((e) => String(e)) : [],
-            tsaUrls: Array.isArray(object?.tsaUrls) ? object.tsaUrls.map((e) => String(e)) : [],
+            mediaType: isSet(object.mediaType) ? globalThis.String(object.mediaType) : "",
+            caUrls: globalThis.Array.isArray(object?.caUrls) ? object.caUrls.map((e) => exports.Service.fromJSON(e)) : [],
+            oidcUrls: globalThis.Array.isArray(object?.oidcUrls) ? object.oidcUrls.map((e) => exports.Service.fromJSON(e)) : [],
+            rekorTlogUrls: globalThis.Array.isArray(object?.rekorTlogUrls)
+                ? object.rekorTlogUrls.map((e) => exports.Service.fromJSON(e))
+                : [],
+            rekorTlogConfig: isSet(object.rekorTlogConfig)
+                ? exports.ServiceConfiguration.fromJSON(object.rekorTlogConfig)
+                : undefined,
+            tsaUrls: globalThis.Array.isArray(object?.tsaUrls) ? object.tsaUrls.map((e) => exports.Service.fromJSON(e)) : [],
+            tsaConfig: isSet(object.tsaConfig) ? exports.ServiceConfiguration.fromJSON(object.tsaConfig) : undefined,
         };
     },
     toJSON(message) {
         const obj = {};
-        message.caUrl !== undefined && (obj.caUrl = message.caUrl);
-        message.oidcUrl !== undefined && (obj.oidcUrl = message.oidcUrl);
-        if (message.tlogUrls) {
-            obj.tlogUrls = message.tlogUrls.map((e) => e);
+        if (message.mediaType !== "") {
+            obj.mediaType = message.mediaType;
         }
-        else {
-            obj.tlogUrls = [];
+        if (message.caUrls?.length) {
+            obj.caUrls = message.caUrls.map((e) => exports.Service.toJSON(e));
         }
-        if (message.tsaUrls) {
-            obj.tsaUrls = message.tsaUrls.map((e) => e);
+        if (message.oidcUrls?.length) {
+            obj.oidcUrls = message.oidcUrls.map((e) => exports.Service.toJSON(e));
         }
-        else {
-            obj.tsaUrls = [];
+        if (message.rekorTlogUrls?.length) {
+            obj.rekorTlogUrls = message.rekorTlogUrls.map((e) => exports.Service.toJSON(e));
+        }
+        if (message.rekorTlogConfig !== undefined) {
+            obj.rekorTlogConfig = exports.ServiceConfiguration.toJSON(message.rekorTlogConfig);
+        }
+        if (message.tsaUrls?.length) {
+            obj.tsaUrls = message.tsaUrls.map((e) => exports.Service.toJSON(e));
+        }
+        if (message.tsaConfig !== undefined) {
+            obj.tsaConfig = exports.ServiceConfiguration.toJSON(message.tsaConfig);
         }
         return obj;
     },
 };
-function createBaseClientTrustConfig() {
-    return { mediaType: "", trustedRoot: undefined, signingConfig: undefined };
-}
+exports.Service = {
+    fromJSON(object) {
+        return {
+            url: isSet(object.url) ? globalThis.String(object.url) : "",
+            majorApiVersion: isSet(object.majorApiVersion) ? globalThis.Number(object.majorApiVersion) : 0,
+            validFor: isSet(object.validFor) ? sigstore_common_1.TimeRange.fromJSON(object.validFor) : undefined,
+            operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
+        };
+    },
+    toJSON(message) {
+        const obj = {};
+        if (message.url !== "") {
+            obj.url = message.url;
+        }
+        if (message.majorApiVersion !== 0) {
+            obj.majorApiVersion = Math.round(message.majorApiVersion);
+        }
+        if (message.validFor !== undefined) {
+            obj.validFor = sigstore_common_1.TimeRange.toJSON(message.validFor);
+        }
+        if (message.operator !== "") {
+            obj.operator = message.operator;
+        }
+        return obj;
+    },
+};
+exports.ServiceConfiguration = {
+    fromJSON(object) {
+        return {
+            selector: isSet(object.selector) ? serviceSelectorFromJSON(object.selector) : 0,
+            count: isSet(object.count) ? globalThis.Number(object.count) : 0,
+        };
+    },
+    toJSON(message) {
+        const obj = {};
+        if (message.selector !== 0) {
+            obj.selector = serviceSelectorToJSON(message.selector);
+        }
+        if (message.count !== 0) {
+            obj.count = Math.round(message.count);
+        }
+        return obj;
+    },
+};
 exports.ClientTrustConfig = {
     fromJSON(object) {
         return {
-            mediaType: isSet(object.mediaType) ? String(object.mediaType) : "",
+            mediaType: isSet(object.mediaType) ? globalThis.String(object.mediaType) : "",
             trustedRoot: isSet(object.trustedRoot) ? exports.TrustedRoot.fromJSON(object.trustedRoot) : undefined,
             signingConfig: isSet(object.signingConfig) ? exports.SigningConfig.fromJSON(object.signingConfig) : undefined,
         };
     },
     toJSON(message) {
         const obj = {};
-        message.mediaType !== undefined && (obj.mediaType = message.mediaType);
-        message.trustedRoot !== undefined &&
-            (obj.trustedRoot = message.trustedRoot ? exports.TrustedRoot.toJSON(message.trustedRoot) : undefined);
-        message.signingConfig !== undefined &&
-            (obj.signingConfig = message.signingConfig ? exports.SigningConfig.toJSON(message.signingConfig) : undefined);
+        if (message.mediaType !== "") {
+            obj.mediaType = message.mediaType;
+        }
+        if (message.trustedRoot !== undefined) {
+            obj.trustedRoot = exports.TrustedRoot.toJSON(message.trustedRoot);
+        }
+        if (message.signingConfig !== undefined) {
+            obj.signingConfig = exports.SigningConfig.toJSON(message.signingConfig);
+        }
         return obj;
     },
 };
@@ -12843,88 +16479,73 @@ function isSet(value) {
 
 "use strict";
 
+// Code generated by protoc-gen-ts_proto. DO NOT EDIT.
+// versions:
+//   protoc-gen-ts_proto  v2.7.0
+//   protoc               v6.30.2
+// source: sigstore_verification.proto
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Input = exports.Artifact = exports.ArtifactVerificationOptions_ObserverTimestampOptions = exports.ArtifactVerificationOptions_TlogIntegratedTimestampOptions = exports.ArtifactVerificationOptions_TimestampAuthorityOptions = exports.ArtifactVerificationOptions_CtlogOptions = exports.ArtifactVerificationOptions_TlogOptions = exports.ArtifactVerificationOptions = exports.PublicKeyIdentities = exports.CertificateIdentities = exports.CertificateIdentity = void 0;
 /* eslint-disable */
 const sigstore_bundle_1 = __nccwpck_require__(70715);
 const sigstore_common_1 = __nccwpck_require__(5334);
 const sigstore_trustroot_1 = __nccwpck_require__(61997);
-function createBaseCertificateIdentity() {
-    return { issuer: "", san: undefined, oids: [] };
-}
 exports.CertificateIdentity = {
     fromJSON(object) {
         return {
-            issuer: isSet(object.issuer) ? String(object.issuer) : "",
+            issuer: isSet(object.issuer) ? globalThis.String(object.issuer) : "",
             san: isSet(object.san) ? sigstore_common_1.SubjectAlternativeName.fromJSON(object.san) : undefined,
-            oids: Array.isArray(object?.oids) ? object.oids.map((e) => sigstore_common_1.ObjectIdentifierValuePair.fromJSON(e)) : [],
+            oids: globalThis.Array.isArray(object?.oids)
+                ? object.oids.map((e) => sigstore_common_1.ObjectIdentifierValuePair.fromJSON(e))
+                : [],
         };
     },
     toJSON(message) {
         const obj = {};
-        message.issuer !== undefined && (obj.issuer = message.issuer);
-        message.san !== undefined && (obj.san = message.san ? sigstore_common_1.SubjectAlternativeName.toJSON(message.san) : undefined);
-        if (message.oids) {
-            obj.oids = message.oids.map((e) => e ? sigstore_common_1.ObjectIdentifierValuePair.toJSON(e) : undefined);
+        if (message.issuer !== "") {
+            obj.issuer = message.issuer;
         }
-        else {
-            obj.oids = [];
+        if (message.san !== undefined) {
+            obj.san = sigstore_common_1.SubjectAlternativeName.toJSON(message.san);
+        }
+        if (message.oids?.length) {
+            obj.oids = message.oids.map((e) => sigstore_common_1.ObjectIdentifierValuePair.toJSON(e));
         }
         return obj;
     },
 };
-function createBaseCertificateIdentities() {
-    return { identities: [] };
-}
 exports.CertificateIdentities = {
     fromJSON(object) {
         return {
-            identities: Array.isArray(object?.identities)
+            identities: globalThis.Array.isArray(object?.identities)
                 ? object.identities.map((e) => exports.CertificateIdentity.fromJSON(e))
                 : [],
         };
     },
     toJSON(message) {
         const obj = {};
-        if (message.identities) {
-            obj.identities = message.identities.map((e) => e ? exports.CertificateIdentity.toJSON(e) : undefined);
-        }
-        else {
-            obj.identities = [];
+        if (message.identities?.length) {
+            obj.identities = message.identities.map((e) => exports.CertificateIdentity.toJSON(e));
         }
         return obj;
     },
 };
-function createBasePublicKeyIdentities() {
-    return { publicKeys: [] };
-}
 exports.PublicKeyIdentities = {
     fromJSON(object) {
         return {
-            publicKeys: Array.isArray(object?.publicKeys) ? object.publicKeys.map((e) => sigstore_common_1.PublicKey.fromJSON(e)) : [],
+            publicKeys: globalThis.Array.isArray(object?.publicKeys)
+                ? object.publicKeys.map((e) => sigstore_common_1.PublicKey.fromJSON(e))
+                : [],
         };
     },
     toJSON(message) {
         const obj = {};
-        if (message.publicKeys) {
-            obj.publicKeys = message.publicKeys.map((e) => e ? sigstore_common_1.PublicKey.toJSON(e) : undefined);
-        }
-        else {
-            obj.publicKeys = [];
+        if (message.publicKeys?.length) {
+            obj.publicKeys = message.publicKeys.map((e) => sigstore_common_1.PublicKey.toJSON(e));
         }
         return obj;
     },
 };
-function createBaseArtifactVerificationOptions() {
-    return {
-        signers: undefined,
-        tlogOptions: undefined,
-        ctlogOptions: undefined,
-        tsaOptions: undefined,
-        integratedTsOptions: undefined,
-        observerOptions: undefined,
-    };
-}
 exports.ArtifactVerificationOptions = {
     fromJSON(object) {
         return {
@@ -12955,150 +16576,152 @@ exports.ArtifactVerificationOptions = {
     },
     toJSON(message) {
         const obj = {};
-        message.signers?.$case === "certificateIdentities" &&
-            (obj.certificateIdentities = message.signers?.certificateIdentities
-                ? exports.CertificateIdentities.toJSON(message.signers?.certificateIdentities)
-                : undefined);
-        message.signers?.$case === "publicKeys" && (obj.publicKeys = message.signers?.publicKeys
-            ? exports.PublicKeyIdentities.toJSON(message.signers?.publicKeys)
-            : undefined);
-        message.tlogOptions !== undefined && (obj.tlogOptions = message.tlogOptions
-            ? exports.ArtifactVerificationOptions_TlogOptions.toJSON(message.tlogOptions)
-            : undefined);
-        message.ctlogOptions !== undefined && (obj.ctlogOptions = message.ctlogOptions
-            ? exports.ArtifactVerificationOptions_CtlogOptions.toJSON(message.ctlogOptions)
-            : undefined);
-        message.tsaOptions !== undefined && (obj.tsaOptions = message.tsaOptions
-            ? exports.ArtifactVerificationOptions_TimestampAuthorityOptions.toJSON(message.tsaOptions)
-            : undefined);
-        message.integratedTsOptions !== undefined && (obj.integratedTsOptions = message.integratedTsOptions
-            ? exports.ArtifactVerificationOptions_TlogIntegratedTimestampOptions.toJSON(message.integratedTsOptions)
-            : undefined);
-        message.observerOptions !== undefined && (obj.observerOptions = message.observerOptions
-            ? exports.ArtifactVerificationOptions_ObserverTimestampOptions.toJSON(message.observerOptions)
-            : undefined);
+        if (message.signers?.$case === "certificateIdentities") {
+            obj.certificateIdentities = exports.CertificateIdentities.toJSON(message.signers.certificateIdentities);
+        }
+        else if (message.signers?.$case === "publicKeys") {
+            obj.publicKeys = exports.PublicKeyIdentities.toJSON(message.signers.publicKeys);
+        }
+        if (message.tlogOptions !== undefined) {
+            obj.tlogOptions = exports.ArtifactVerificationOptions_TlogOptions.toJSON(message.tlogOptions);
+        }
+        if (message.ctlogOptions !== undefined) {
+            obj.ctlogOptions = exports.ArtifactVerificationOptions_CtlogOptions.toJSON(message.ctlogOptions);
+        }
+        if (message.tsaOptions !== undefined) {
+            obj.tsaOptions = exports.ArtifactVerificationOptions_TimestampAuthorityOptions.toJSON(message.tsaOptions);
+        }
+        if (message.integratedTsOptions !== undefined) {
+            obj.integratedTsOptions = exports.ArtifactVerificationOptions_TlogIntegratedTimestampOptions.toJSON(message.integratedTsOptions);
+        }
+        if (message.observerOptions !== undefined) {
+            obj.observerOptions = exports.ArtifactVerificationOptions_ObserverTimestampOptions.toJSON(message.observerOptions);
+        }
         return obj;
     },
 };
-function createBaseArtifactVerificationOptions_TlogOptions() {
-    return { threshold: 0, performOnlineVerification: false, disable: false };
-}
 exports.ArtifactVerificationOptions_TlogOptions = {
     fromJSON(object) {
         return {
-            threshold: isSet(object.threshold) ? Number(object.threshold) : 0,
+            threshold: isSet(object.threshold) ? globalThis.Number(object.threshold) : 0,
             performOnlineVerification: isSet(object.performOnlineVerification)
-                ? Boolean(object.performOnlineVerification)
+                ? globalThis.Boolean(object.performOnlineVerification)
                 : false,
-            disable: isSet(object.disable) ? Boolean(object.disable) : false,
+            disable: isSet(object.disable) ? globalThis.Boolean(object.disable) : false,
         };
     },
     toJSON(message) {
         const obj = {};
-        message.threshold !== undefined && (obj.threshold = Math.round(message.threshold));
-        message.performOnlineVerification !== undefined &&
-            (obj.performOnlineVerification = message.performOnlineVerification);
-        message.disable !== undefined && (obj.disable = message.disable);
+        if (message.threshold !== 0) {
+            obj.threshold = Math.round(message.threshold);
+        }
+        if (message.performOnlineVerification !== false) {
+            obj.performOnlineVerification = message.performOnlineVerification;
+        }
+        if (message.disable !== false) {
+            obj.disable = message.disable;
+        }
         return obj;
     },
 };
-function createBaseArtifactVerificationOptions_CtlogOptions() {
-    return { threshold: 0, disable: false };
-}
 exports.ArtifactVerificationOptions_CtlogOptions = {
     fromJSON(object) {
         return {
-            threshold: isSet(object.threshold) ? Number(object.threshold) : 0,
-            disable: isSet(object.disable) ? Boolean(object.disable) : false,
+            threshold: isSet(object.threshold) ? globalThis.Number(object.threshold) : 0,
+            disable: isSet(object.disable) ? globalThis.Boolean(object.disable) : false,
         };
     },
     toJSON(message) {
         const obj = {};
-        message.threshold !== undefined && (obj.threshold = Math.round(message.threshold));
-        message.disable !== undefined && (obj.disable = message.disable);
+        if (message.threshold !== 0) {
+            obj.threshold = Math.round(message.threshold);
+        }
+        if (message.disable !== false) {
+            obj.disable = message.disable;
+        }
         return obj;
     },
 };
-function createBaseArtifactVerificationOptions_TimestampAuthorityOptions() {
-    return { threshold: 0, disable: false };
-}
 exports.ArtifactVerificationOptions_TimestampAuthorityOptions = {
     fromJSON(object) {
         return {
-            threshold: isSet(object.threshold) ? Number(object.threshold) : 0,
-            disable: isSet(object.disable) ? Boolean(object.disable) : false,
+            threshold: isSet(object.threshold) ? globalThis.Number(object.threshold) : 0,
+            disable: isSet(object.disable) ? globalThis.Boolean(object.disable) : false,
         };
     },
     toJSON(message) {
         const obj = {};
-        message.threshold !== undefined && (obj.threshold = Math.round(message.threshold));
-        message.disable !== undefined && (obj.disable = message.disable);
+        if (message.threshold !== 0) {
+            obj.threshold = Math.round(message.threshold);
+        }
+        if (message.disable !== false) {
+            obj.disable = message.disable;
+        }
         return obj;
     },
 };
-function createBaseArtifactVerificationOptions_TlogIntegratedTimestampOptions() {
-    return { threshold: 0, disable: false };
-}
 exports.ArtifactVerificationOptions_TlogIntegratedTimestampOptions = {
     fromJSON(object) {
         return {
-            threshold: isSet(object.threshold) ? Number(object.threshold) : 0,
-            disable: isSet(object.disable) ? Boolean(object.disable) : false,
+            threshold: isSet(object.threshold) ? globalThis.Number(object.threshold) : 0,
+            disable: isSet(object.disable) ? globalThis.Boolean(object.disable) : false,
         };
     },
     toJSON(message) {
         const obj = {};
-        message.threshold !== undefined && (obj.threshold = Math.round(message.threshold));
-        message.disable !== undefined && (obj.disable = message.disable);
+        if (message.threshold !== 0) {
+            obj.threshold = Math.round(message.threshold);
+        }
+        if (message.disable !== false) {
+            obj.disable = message.disable;
+        }
         return obj;
     },
 };
-function createBaseArtifactVerificationOptions_ObserverTimestampOptions() {
-    return { threshold: 0, disable: false };
-}
 exports.ArtifactVerificationOptions_ObserverTimestampOptions = {
     fromJSON(object) {
         return {
-            threshold: isSet(object.threshold) ? Number(object.threshold) : 0,
-            disable: isSet(object.disable) ? Boolean(object.disable) : false,
+            threshold: isSet(object.threshold) ? globalThis.Number(object.threshold) : 0,
+            disable: isSet(object.disable) ? globalThis.Boolean(object.disable) : false,
         };
     },
     toJSON(message) {
         const obj = {};
-        message.threshold !== undefined && (obj.threshold = Math.round(message.threshold));
-        message.disable !== undefined && (obj.disable = message.disable);
+        if (message.threshold !== 0) {
+            obj.threshold = Math.round(message.threshold);
+        }
+        if (message.disable !== false) {
+            obj.disable = message.disable;
+        }
         return obj;
     },
 };
-function createBaseArtifact() {
-    return { data: undefined };
-}
 exports.Artifact = {
     fromJSON(object) {
         return {
             data: isSet(object.artifactUri)
-                ? { $case: "artifactUri", artifactUri: String(object.artifactUri) }
+                ? { $case: "artifactUri", artifactUri: globalThis.String(object.artifactUri) }
                 : isSet(object.artifact)
                     ? { $case: "artifact", artifact: Buffer.from(bytesFromBase64(object.artifact)) }
-                    : undefined,
+                    : isSet(object.artifactDigest)
+                        ? { $case: "artifactDigest", artifactDigest: sigstore_common_1.HashOutput.fromJSON(object.artifactDigest) }
+                        : undefined,
         };
     },
     toJSON(message) {
         const obj = {};
-        message.data?.$case === "artifactUri" && (obj.artifactUri = message.data?.artifactUri);
-        message.data?.$case === "artifact" &&
-            (obj.artifact = message.data?.artifact !== undefined ? base64FromBytes(message.data?.artifact) : undefined);
+        if (message.data?.$case === "artifactUri") {
+            obj.artifactUri = message.data.artifactUri;
+        }
+        else if (message.data?.$case === "artifact") {
+            obj.artifact = base64FromBytes(message.data.artifact);
+        }
+        else if (message.data?.$case === "artifactDigest") {
+            obj.artifactDigest = sigstore_common_1.HashOutput.toJSON(message.data.artifactDigest);
+        }
         return obj;
     },
 };
-function createBaseInput() {
-    return {
-        artifactTrustRoot: undefined,
-        artifactVerificationOptions: undefined,
-        bundle: undefined,
-        artifact: undefined,
-    };
-}
 exports.Input = {
     fromJSON(object) {
         return {
@@ -13112,56 +16735,26 @@ exports.Input = {
     },
     toJSON(message) {
         const obj = {};
-        message.artifactTrustRoot !== undefined &&
-            (obj.artifactTrustRoot = message.artifactTrustRoot ? sigstore_trustroot_1.TrustedRoot.toJSON(message.artifactTrustRoot) : undefined);
-        message.artifactVerificationOptions !== undefined &&
-            (obj.artifactVerificationOptions = message.artifactVerificationOptions
-                ? exports.ArtifactVerificationOptions.toJSON(message.artifactVerificationOptions)
-                : undefined);
-        message.bundle !== undefined && (obj.bundle = message.bundle ? sigstore_bundle_1.Bundle.toJSON(message.bundle) : undefined);
-        message.artifact !== undefined && (obj.artifact = message.artifact ? exports.Artifact.toJSON(message.artifact) : undefined);
+        if (message.artifactTrustRoot !== undefined) {
+            obj.artifactTrustRoot = sigstore_trustroot_1.TrustedRoot.toJSON(message.artifactTrustRoot);
+        }
+        if (message.artifactVerificationOptions !== undefined) {
+            obj.artifactVerificationOptions = exports.ArtifactVerificationOptions.toJSON(message.artifactVerificationOptions);
+        }
+        if (message.bundle !== undefined) {
+            obj.bundle = sigstore_bundle_1.Bundle.toJSON(message.bundle);
+        }
+        if (message.artifact !== undefined) {
+            obj.artifact = exports.Artifact.toJSON(message.artifact);
+        }
         return obj;
     },
 };
-var tsProtoGlobalThis = (() => {
-    if (typeof globalThis !== "undefined") {
-        return globalThis;
-    }
-    if (typeof self !== "undefined") {
-        return self;
-    }
-    if (typeof window !== "undefined") {
-        return window;
-    }
-    if (typeof global !== "undefined") {
-        return global;
-    }
-    throw "Unable to locate global object";
-})();
 function bytesFromBase64(b64) {
-    if (tsProtoGlobalThis.Buffer) {
-        return Uint8Array.from(tsProtoGlobalThis.Buffer.from(b64, "base64"));
-    }
-    else {
-        const bin = tsProtoGlobalThis.atob(b64);
-        const arr = new Uint8Array(bin.length);
-        for (let i = 0; i < bin.length; ++i) {
-            arr[i] = bin.charCodeAt(i);
-        }
-        return arr;
-    }
+    return Uint8Array.from(globalThis.Buffer.from(b64, "base64"));
 }
 function base64FromBytes(arr) {
-    if (tsProtoGlobalThis.Buffer) {
-        return tsProtoGlobalThis.Buffer.from(arr).toString("base64");
-    }
-    else {
-        const bin = [];
-        arr.forEach((byte) => {
-            bin.push(String.fromCharCode(byte));
-        });
-        return tsProtoGlobalThis.btoa(bin.join(""));
-    }
+    return globalThis.Buffer.from(arr).toString("base64");
 }
 function isSet(value) {
     return value !== null && value !== undefined;
@@ -13294,13 +16887,23 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.toMessageSignatureBundle = toMessageSignatureBundle;
 exports.toDSSEBundle = toDSSEBundle;
@@ -14229,13 +17832,23 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ua = exports.oidc = exports.pem = exports.json = exports.encoding = exports.dsse = exports.crypto = void 0;
 /*
@@ -14978,9 +18591,7 @@ class Agent extends http.Agent {
     // In order to properly update the socket pool, we need to call `getName()` on
     // the core `https.Agent` if it is a secureEndpoint.
     getName(options) {
-        const secureEndpoint = typeof options.secureEndpoint === 'boolean'
-            ? options.secureEndpoint
-            : this.isSecureEndpoint(options);
+        const secureEndpoint = this.isSecureEndpoint(options);
         if (secureEndpoint) {
             // @ts-expect-error `getName()` isn't defined in `@types/node`
             return https_1.Agent.prototype.getName.call(this, options);
@@ -15000,8 +18611,13 @@ class Agent extends http.Agent {
             .then((socket) => {
             this.decrementSockets(name, fakeSocket);
             if (socket instanceof http.Agent) {
-                // @ts-expect-error `addRequest()` isn't defined in `@types/node`
-                return socket.addRequest(req, connectOpts);
+                try {
+                    // @ts-expect-error `addRequest()` isn't defined in `@types/node`
+                    return socket.addRequest(req, connectOpts);
+                }
+                catch (err) {
+                    return cb(err);
+                }
             }
             this[INTERNAL].currentSocket = socket;
             // @ts-expect-error `createSocket()` isn't defined in `@types/node`
@@ -18059,7 +21675,7 @@ async function all (cache) {
 "use strict";
 
 
-const { glob } = __nccwpck_require__(67471)
+const { glob } = __nccwpck_require__(21363)
 const path = __nccwpck_require__(16928)
 
 const globify = (pattern) => pattern.split(path.win32.sep).join(path.posix.sep)
@@ -18379,216 +21995,6 @@ async function lastRun (cache) {
   const data = await readFile(path.join(cache, '_lastverified'), { encoding: 'utf8' })
   return new Date(+data)
 }
-
-
-/***/ }),
-
-/***/ 45177:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-var balanced = __nccwpck_require__(59380);
-
-module.exports = expandTop;
-
-var escSlash = '\0SLASH'+Math.random()+'\0';
-var escOpen = '\0OPEN'+Math.random()+'\0';
-var escClose = '\0CLOSE'+Math.random()+'\0';
-var escComma = '\0COMMA'+Math.random()+'\0';
-var escPeriod = '\0PERIOD'+Math.random()+'\0';
-
-function numeric(str) {
-  return parseInt(str, 10) == str
-    ? parseInt(str, 10)
-    : str.charCodeAt(0);
-}
-
-function escapeBraces(str) {
-  return str.split('\\\\').join(escSlash)
-            .split('\\{').join(escOpen)
-            .split('\\}').join(escClose)
-            .split('\\,').join(escComma)
-            .split('\\.').join(escPeriod);
-}
-
-function unescapeBraces(str) {
-  return str.split(escSlash).join('\\')
-            .split(escOpen).join('{')
-            .split(escClose).join('}')
-            .split(escComma).join(',')
-            .split(escPeriod).join('.');
-}
-
-
-// Basically just str.split(","), but handling cases
-// where we have nested braced sections, which should be
-// treated as individual members, like {a,{b,c},d}
-function parseCommaParts(str) {
-  if (!str)
-    return [''];
-
-  var parts = [];
-  var m = balanced('{', '}', str);
-
-  if (!m)
-    return str.split(',');
-
-  var pre = m.pre;
-  var body = m.body;
-  var post = m.post;
-  var p = pre.split(',');
-
-  p[p.length-1] += '{' + body + '}';
-  var postParts = parseCommaParts(post);
-  if (post.length) {
-    p[p.length-1] += postParts.shift();
-    p.push.apply(p, postParts);
-  }
-
-  parts.push.apply(parts, p);
-
-  return parts;
-}
-
-function expandTop(str) {
-  if (!str)
-    return [];
-
-  // I don't know why Bash 4.3 does this, but it does.
-  // Anything starting with {} will have the first two bytes preserved
-  // but *only* at the top level, so {},a}b will not expand to anything,
-  // but a{},b}c will be expanded to [a}c,abc].
-  // One could argue that this is a bug in Bash, but since the goal of
-  // this module is to match Bash's rules, we escape a leading {}
-  if (str.substr(0, 2) === '{}') {
-    str = '\\{\\}' + str.substr(2);
-  }
-
-  return expand(escapeBraces(str), true).map(unescapeBraces);
-}
-
-function embrace(str) {
-  return '{' + str + '}';
-}
-function isPadded(el) {
-  return /^-?0\d/.test(el);
-}
-
-function lte(i, y) {
-  return i <= y;
-}
-function gte(i, y) {
-  return i >= y;
-}
-
-function expand(str, isTop) {
-  var expansions = [];
-
-  var m = balanced('{', '}', str);
-  if (!m) return [str];
-
-  // no need to expand pre, since it is guaranteed to be free of brace-sets
-  var pre = m.pre;
-  var post = m.post.length
-    ? expand(m.post, false)
-    : [''];
-
-  if (/\$$/.test(m.pre)) {    
-    for (var k = 0; k < post.length; k++) {
-      var expansion = pre+ '{' + m.body + '}' + post[k];
-      expansions.push(expansion);
-    }
-  } else {
-    var isNumericSequence = /^-?\d+\.\.-?\d+(?:\.\.-?\d+)?$/.test(m.body);
-    var isAlphaSequence = /^[a-zA-Z]\.\.[a-zA-Z](?:\.\.-?\d+)?$/.test(m.body);
-    var isSequence = isNumericSequence || isAlphaSequence;
-    var isOptions = m.body.indexOf(',') >= 0;
-    if (!isSequence && !isOptions) {
-      // {a},b}
-      if (m.post.match(/,.*\}/)) {
-        str = m.pre + '{' + m.body + escClose + m.post;
-        return expand(str);
-      }
-      return [str];
-    }
-
-    var n;
-    if (isSequence) {
-      n = m.body.split(/\.\./);
-    } else {
-      n = parseCommaParts(m.body);
-      if (n.length === 1) {
-        // x{{a,b}}y ==> x{a}y x{b}y
-        n = expand(n[0], false).map(embrace);
-        if (n.length === 1) {
-          return post.map(function(p) {
-            return m.pre + n[0] + p;
-          });
-        }
-      }
-    }
-
-    // at this point, n is the parts, and we know it's not a comma set
-    // with a single entry.
-    var N;
-
-    if (isSequence) {
-      var x = numeric(n[0]);
-      var y = numeric(n[1]);
-      var width = Math.max(n[0].length, n[1].length)
-      var incr = n.length == 3
-        ? Math.abs(numeric(n[2]))
-        : 1;
-      var test = lte;
-      var reverse = y < x;
-      if (reverse) {
-        incr *= -1;
-        test = gte;
-      }
-      var pad = n.some(isPadded);
-
-      N = [];
-
-      for (var i = x; test(i, y); i += incr) {
-        var c;
-        if (isAlphaSequence) {
-          c = String.fromCharCode(i);
-          if (c === '\\')
-            c = '';
-        } else {
-          c = String(i);
-          if (pad) {
-            var need = width - c.length;
-            if (need > 0) {
-              var z = new Array(need + 1).join('0');
-              if (i < 0)
-                c = '-' + z + c.slice(1);
-              else
-                c = z + c;
-            }
-          }
-        }
-        N.push(c);
-      }
-    } else {
-      N = [];
-
-      for (var j = 0; j < n.length; j++) {
-        N.push.apply(N, expand(n[j], false));
-      }
-    }
-
-    for (var j = 0; j < N.length; j++) {
-      for (var k = 0; k < post.length; k++) {
-        var expansion = pre + N[j] + post[k];
-        if (!isTop || isSequence || expansion)
-          expansions.push(expansion);
-      }
-    }
-  }
-
-  return expansions;
-}
-
 
 
 /***/ }),
@@ -20062,6 +23468,216 @@ exports.WriteStreamSync = WriteStreamSync
 
 /***/ }),
 
+/***/ 68497:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+var balanced = __nccwpck_require__(59380);
+
+module.exports = expandTop;
+
+var escSlash = '\0SLASH'+Math.random()+'\0';
+var escOpen = '\0OPEN'+Math.random()+'\0';
+var escClose = '\0CLOSE'+Math.random()+'\0';
+var escComma = '\0COMMA'+Math.random()+'\0';
+var escPeriod = '\0PERIOD'+Math.random()+'\0';
+
+function numeric(str) {
+  return parseInt(str, 10) == str
+    ? parseInt(str, 10)
+    : str.charCodeAt(0);
+}
+
+function escapeBraces(str) {
+  return str.split('\\\\').join(escSlash)
+            .split('\\{').join(escOpen)
+            .split('\\}').join(escClose)
+            .split('\\,').join(escComma)
+            .split('\\.').join(escPeriod);
+}
+
+function unescapeBraces(str) {
+  return str.split(escSlash).join('\\')
+            .split(escOpen).join('{')
+            .split(escClose).join('}')
+            .split(escComma).join(',')
+            .split(escPeriod).join('.');
+}
+
+
+// Basically just str.split(","), but handling cases
+// where we have nested braced sections, which should be
+// treated as individual members, like {a,{b,c},d}
+function parseCommaParts(str) {
+  if (!str)
+    return [''];
+
+  var parts = [];
+  var m = balanced('{', '}', str);
+
+  if (!m)
+    return str.split(',');
+
+  var pre = m.pre;
+  var body = m.body;
+  var post = m.post;
+  var p = pre.split(',');
+
+  p[p.length-1] += '{' + body + '}';
+  var postParts = parseCommaParts(post);
+  if (post.length) {
+    p[p.length-1] += postParts.shift();
+    p.push.apply(p, postParts);
+  }
+
+  parts.push.apply(parts, p);
+
+  return parts;
+}
+
+function expandTop(str) {
+  if (!str)
+    return [];
+
+  // I don't know why Bash 4.3 does this, but it does.
+  // Anything starting with {} will have the first two bytes preserved
+  // but *only* at the top level, so {},a}b will not expand to anything,
+  // but a{},b}c will be expanded to [a}c,abc].
+  // One could argue that this is a bug in Bash, but since the goal of
+  // this module is to match Bash's rules, we escape a leading {}
+  if (str.substr(0, 2) === '{}') {
+    str = '\\{\\}' + str.substr(2);
+  }
+
+  return expand(escapeBraces(str), true).map(unescapeBraces);
+}
+
+function embrace(str) {
+  return '{' + str + '}';
+}
+function isPadded(el) {
+  return /^-?0\d/.test(el);
+}
+
+function lte(i, y) {
+  return i <= y;
+}
+function gte(i, y) {
+  return i >= y;
+}
+
+function expand(str, isTop) {
+  var expansions = [];
+
+  var m = balanced('{', '}', str);
+  if (!m) return [str];
+
+  // no need to expand pre, since it is guaranteed to be free of brace-sets
+  var pre = m.pre;
+  var post = m.post.length
+    ? expand(m.post, false)
+    : [''];
+
+  if (/\$$/.test(m.pre)) {    
+    for (var k = 0; k < post.length; k++) {
+      var expansion = pre+ '{' + m.body + '}' + post[k];
+      expansions.push(expansion);
+    }
+  } else {
+    var isNumericSequence = /^-?\d+\.\.-?\d+(?:\.\.-?\d+)?$/.test(m.body);
+    var isAlphaSequence = /^[a-zA-Z]\.\.[a-zA-Z](?:\.\.-?\d+)?$/.test(m.body);
+    var isSequence = isNumericSequence || isAlphaSequence;
+    var isOptions = m.body.indexOf(',') >= 0;
+    if (!isSequence && !isOptions) {
+      // {a},b}
+      if (m.post.match(/,(?!,).*\}/)) {
+        str = m.pre + '{' + m.body + escClose + m.post;
+        return expand(str);
+      }
+      return [str];
+    }
+
+    var n;
+    if (isSequence) {
+      n = m.body.split(/\.\./);
+    } else {
+      n = parseCommaParts(m.body);
+      if (n.length === 1) {
+        // x{{a,b}}y ==> x{a}y x{b}y
+        n = expand(n[0], false).map(embrace);
+        if (n.length === 1) {
+          return post.map(function(p) {
+            return m.pre + n[0] + p;
+          });
+        }
+      }
+    }
+
+    // at this point, n is the parts, and we know it's not a comma set
+    // with a single entry.
+    var N;
+
+    if (isSequence) {
+      var x = numeric(n[0]);
+      var y = numeric(n[1]);
+      var width = Math.max(n[0].length, n[1].length)
+      var incr = n.length == 3
+        ? Math.abs(numeric(n[2]))
+        : 1;
+      var test = lte;
+      var reverse = y < x;
+      if (reverse) {
+        incr *= -1;
+        test = gte;
+      }
+      var pad = n.some(isPadded);
+
+      N = [];
+
+      for (var i = x; test(i, y); i += incr) {
+        var c;
+        if (isAlphaSequence) {
+          c = String.fromCharCode(i);
+          if (c === '\\')
+            c = '';
+        } else {
+          c = String(i);
+          if (pad) {
+            var need = width - c.length;
+            if (need > 0) {
+              var z = new Array(need + 1).join('0');
+              if (i < 0)
+                c = '-' + z + c.slice(1);
+              else
+                c = z + c;
+            }
+          }
+        }
+        N.push(c);
+      }
+    } else {
+      N = [];
+
+      for (var j = 0; j < n.length; j++) {
+        N.push.apply(N, expand(n[j], false));
+      }
+    }
+
+    for (var j = 0; j < N.length; j++) {
+      for (var k = 0; k < post.length; k++) {
+        var expansion = pre + N[j] + post[k];
+        if (!isTop || isSequence || expansion)
+          expansions.push(expansion);
+      }
+    }
+  }
+
+  return expansions;
+}
+
+
+
+/***/ }),
+
 /***/ 83813:
 /***/ ((module) => {
 
@@ -20083,7 +23699,24 @@ module.exports = (flag, argv = process.argv) => {
 
 "use strict";
 
-// rfc7231 6.1
+
+/**
+ * @typedef {Object} HttpRequest
+ * @property {Record<string, string>} headers - Request headers
+ * @property {string} [method] - HTTP method
+ * @property {string} [url] - Request URL
+ */
+
+/**
+ * @typedef {Object} HttpResponse
+ * @property {Record<string, string>} headers - Response headers
+ * @property {number} [status] - HTTP status code
+ */
+
+/**
+ * Set of default cacheable status codes per RFC 7231 section 6.1.
+ * @type {Set<number>}
+ */
 const statusCodeCacheableByDefault = new Set([
     200,
     203,
@@ -20099,7 +23732,11 @@ const statusCodeCacheableByDefault = new Set([
     501,
 ]);
 
-// This implementation does not understand partial responses (206)
+/**
+ * Set of HTTP status codes that the cache implementation understands.
+ * Note: This implementation does not understand partial responses (206).
+ * @type {Set<number>}
+ */
 const understoodStatuses = new Set([
     200,
     203,
@@ -20117,13 +23754,21 @@ const understoodStatuses = new Set([
     501,
 ]);
 
+/**
+ * Set of HTTP error status codes.
+ * @type {Set<number>}
+ */
 const errorStatusCodes = new Set([
     500,
     502,
-    503, 
+    503,
     504,
 ]);
 
+/**
+ * Object representing hop-by-hop headers that should be removed.
+ * @type {Record<string, boolean>}
+ */
 const hopByHopHeaders = {
     date: true, // included, because we add Age update Date
     connection: true,
@@ -20136,6 +23781,10 @@ const hopByHopHeaders = {
     upgrade: true,
 };
 
+/**
+ * Headers that are excluded from revalidation update.
+ * @type {Record<string, boolean>}
+ */
 const excludedFromRevalidationUpdate = {
     // Since the old body is reused, it doesn't make sense to change properties of the body
     'content-length': true,
@@ -20144,21 +23793,37 @@ const excludedFromRevalidationUpdate = {
     'content-range': true,
 };
 
+/**
+ * Converts a string to a number or returns zero if the conversion fails.
+ * @param {string} s - The string to convert.
+ * @returns {number} The parsed number or 0.
+ */
 function toNumberOrZero(s) {
     const n = parseInt(s, 10);
     return isFinite(n) ? n : 0;
 }
 
-// RFC 5861
+/**
+ * Determines if the given response is an error response.
+ * Implements RFC 5861 behavior.
+ * @param {HttpResponse|undefined} response - The HTTP response object.
+ * @returns {boolean} true if the response is an error or undefined, false otherwise.
+ */
 function isErrorResponse(response) {
     // consider undefined response as faulty
-    if(!response) {
-        return true
+    if (!response) {
+        return true;
     }
     return errorStatusCodes.has(response.status);
 }
 
+/**
+ * Parses a Cache-Control header string into an object.
+ * @param {string} [header] - The Cache-Control header value.
+ * @returns {Record<string, string|boolean>} An object representing Cache-Control directives.
+ */
 function parseCacheControl(header) {
+    /** @type {Record<string, string|boolean>} */
     const cc = {};
     if (!header) return cc;
 
@@ -20173,6 +23838,11 @@ function parseCacheControl(header) {
     return cc;
 }
 
+/**
+ * Formats a Cache-Control directives object into a header string.
+ * @param {Record<string, string|boolean>} cc - The Cache-Control directives.
+ * @returns {string|undefined} A formatted Cache-Control header string or undefined if empty.
+ */
 function formatCacheControl(cc) {
     let parts = [];
     for (const k in cc) {
@@ -20186,6 +23856,17 @@ function formatCacheControl(cc) {
 }
 
 module.exports = class CachePolicy {
+    /**
+     * Creates a new CachePolicy instance.
+     * @param {HttpRequest} req - Incoming client request.
+     * @param {HttpResponse} res - Received server response.
+     * @param {Object} [options={}] - Configuration options.
+     * @param {boolean} [options.shared=true] - Is the cache shared (a public proxy)? `false` for personal browser caches.
+     * @param {number} [options.cacheHeuristic=0.1] - Fallback heuristic (age fraction) for cache duration.
+     * @param {number} [options.immutableMinTimeToLive=86400000] - Minimum TTL for immutable responses in milliseconds.
+     * @param {boolean} [options.ignoreCargoCult=false] - Detect nonsense cache headers, and override them.
+     * @param {any} [options._fromObject] - Internal parameter for deserialization. Do not use.
+     */
     constructor(
         req,
         res,
@@ -20207,29 +23888,44 @@ module.exports = class CachePolicy {
         }
         this._assertRequestHasHeaders(req);
 
+        /** @type {number} Timestamp when the response was received */
         this._responseTime = this.now();
+        /** @type {boolean} Indicates if the cache is shared */
         this._isShared = shared !== false;
+        /** @type {boolean} Indicates if legacy cargo cult directives should be ignored */
+        this._ignoreCargoCult = !!ignoreCargoCult;
+        /** @type {number} Heuristic cache fraction */
         this._cacheHeuristic =
             undefined !== cacheHeuristic ? cacheHeuristic : 0.1; // 10% matches IE
+        /** @type {number} Minimum TTL for immutable responses in ms */
         this._immutableMinTtl =
             undefined !== immutableMinTimeToLive
                 ? immutableMinTimeToLive
                 : 24 * 3600 * 1000;
 
+        /** @type {number} HTTP status code */
         this._status = 'status' in res ? res.status : 200;
+        /** @type {Record<string, string>} Response headers */
         this._resHeaders = res.headers;
+        /** @type {Record<string, string|boolean>} Parsed Cache-Control directives from response */
         this._rescc = parseCacheControl(res.headers['cache-control']);
+        /** @type {string} HTTP method (e.g., GET, POST) */
         this._method = 'method' in req ? req.method : 'GET';
+        /** @type {string} Request URL */
         this._url = req.url;
+        /** @type {string} Host header from the request */
         this._host = req.headers.host;
+        /** @type {boolean} Whether the request does not include an Authorization header */
         this._noAuthorization = !req.headers.authorization;
+        /** @type {Record<string, string>|null} Request headers used for Vary matching */
         this._reqHeaders = res.headers.vary ? req.headers : null; // Don't keep all request headers if they won't be used
+        /** @type {Record<string, string|boolean>} Parsed Cache-Control directives from request */
         this._reqcc = parseCacheControl(req.headers['cache-control']);
 
         // Assume that if someone uses legacy, non-standard uncecessary options they don't understand caching,
         // so there's no point stricly adhering to the blindly copy&pasted directives.
         if (
-            ignoreCargoCult &&
+            this._ignoreCargoCult &&
             'pre-check' in this._rescc &&
             'post-check' in this._rescc
         ) {
@@ -20255,10 +23951,18 @@ module.exports = class CachePolicy {
         }
     }
 
+    /**
+     * You can monkey-patch it for testing.
+     * @returns {number} Current time in milliseconds.
+     */
     now() {
         return Date.now();
     }
 
+    /**
+     * Determines if the response is storable in a cache.
+     * @returns {boolean} `false` if can never be cached.
+     */
     storable() {
         // The "no-store" request directive indicates that a cache MUST NOT store any part of either this request or any response to it.
         return !!(
@@ -20292,62 +23996,160 @@ module.exports = class CachePolicy {
         );
     }
 
+    /**
+     * @returns {boolean} true if expiration is explicitly defined.
+     */
     _hasExplicitExpiration() {
         // 4.2.1 Calculating Freshness Lifetime
-        return (
+        return !!(
             (this._isShared && this._rescc['s-maxage']) ||
             this._rescc['max-age'] ||
             this._resHeaders.expires
         );
     }
 
+    /**
+     * @param {HttpRequest} req - a request
+     * @throws {Error} if the headers are missing.
+     */
     _assertRequestHasHeaders(req) {
         if (!req || !req.headers) {
             throw Error('Request headers missing');
         }
     }
 
+    /**
+     * Checks if the request matches the cache and can be satisfied from the cache immediately,
+     * without having to make a request to the server.
+     *
+     * This doesn't support `stale-while-revalidate`. See `evaluateRequest()` for a more complete solution.
+     *
+     * @param {HttpRequest} req - The new incoming HTTP request.
+     * @returns {boolean} `true`` if the cached response used to construct this cache policy satisfies the request without revalidation.
+     */
     satisfiesWithoutRevalidation(req) {
+        const result = this.evaluateRequest(req);
+        return !result.revalidation;
+    }
+
+    /**
+     * @param {{headers: Record<string, string>, synchronous: boolean}|undefined} revalidation - Revalidation information, if any.
+     * @returns {{response: {headers: Record<string, string>}, revalidation: {headers: Record<string, string>, synchronous: boolean}|undefined}} An object with a cached response headers and revalidation info.
+     */
+    _evaluateRequestHitResult(revalidation) {
+        return {
+            response: {
+                headers: this.responseHeaders(),
+            },
+            revalidation,
+        };
+    }
+
+    /**
+     * @param {HttpRequest} request - new incoming
+     * @param {boolean} synchronous - whether revalidation must be synchronous (not s-w-r).
+     * @returns {{headers: Record<string, string>, synchronous: boolean}} An object with revalidation headers and a synchronous flag.
+     */
+    _evaluateRequestRevalidation(request, synchronous) {
+        return {
+            synchronous,
+            headers: this.revalidationHeaders(request),
+        };
+    }
+
+    /**
+     * @param {HttpRequest} request - new incoming
+     * @returns {{response: undefined, revalidation: {headers: Record<string, string>, synchronous: boolean}}} An object indicating no cached response and revalidation details.
+     */
+    _evaluateRequestMissResult(request) {
+        return {
+            response: undefined,
+            revalidation: this._evaluateRequestRevalidation(request, true),
+        };
+    }
+
+    /**
+     * Checks if the given request matches this cache entry, and how the cache can be used to satisfy it. Returns an object with:
+     *
+     * ```
+     * {
+     *     // If defined, you must send a request to the server.
+     *     revalidation: {
+     *         headers: {}, // HTTP headers to use when sending the revalidation response
+     *         // If true, you MUST wait for a response from the server before using the cache
+     *         // If false, this is stale-while-revalidate. The cache is stale, but you can use it while you update it asynchronously.
+     *         synchronous: bool,
+     *     },
+     *     // If defined, you can use this cached response.
+     *     response: {
+     *         headers: {}, // Updated cached HTTP headers you must use when responding to the client
+     *     },
+     * }
+     * ```
+     * @param {HttpRequest} req - new incoming HTTP request
+     * @returns {{response: {headers: Record<string, string>}|undefined, revalidation: {headers: Record<string, string>, synchronous: boolean}|undefined}} An object containing keys:
+     *   - revalidation: { headers: Record<string, string>, synchronous: boolean } Set if you should send this to the origin server
+     *   - response: { headers: Record<string, string> } Set if you can respond to the client with these cached headers
+     */
+    evaluateRequest(req) {
         this._assertRequestHasHeaders(req);
+
+        // In all circumstances, a cache MUST NOT ignore the must-revalidate directive
+        if (this._rescc['must-revalidate']) {
+            return this._evaluateRequestMissResult(req);
+        }
+
+        if (!this._requestMatches(req, false)) {
+            return this._evaluateRequestMissResult(req);
+        }
 
         // When presented with a request, a cache MUST NOT reuse a stored response, unless:
         // the presented request does not contain the no-cache pragma (Section 5.4), nor the no-cache cache directive,
         // unless the stored response is successfully validated (Section 4.3), and
         const requestCC = parseCacheControl(req.headers['cache-control']);
+
         if (requestCC['no-cache'] || /no-cache/.test(req.headers.pragma)) {
-            return false;
+            return this._evaluateRequestMissResult(req);
         }
 
-        if (requestCC['max-age'] && this.age() > requestCC['max-age']) {
-            return false;
+        if (requestCC['max-age'] && this.age() > toNumberOrZero(requestCC['max-age'])) {
+            return this._evaluateRequestMissResult(req);
         }
 
-        if (
-            requestCC['min-fresh'] &&
-            this.timeToLive() < 1000 * requestCC['min-fresh']
-        ) {
-            return false;
+        if (requestCC['min-fresh'] && this.maxAge() - this.age() < toNumberOrZero(requestCC['min-fresh'])) {
+            return this._evaluateRequestMissResult(req);
         }
 
         // the stored response is either:
         // fresh, or allowed to be served stale
         if (this.stale()) {
-            const allowsStale =
-                requestCC['max-stale'] &&
-                !this._rescc['must-revalidate'] &&
-                (true === requestCC['max-stale'] ||
-                    requestCC['max-stale'] > this.age() - this.maxAge());
-            if (!allowsStale) {
-                return false;
+            // If a value is present, then the client is willing to accept a response that has
+            // exceeded its freshness lifetime by no more than the specified number of seconds
+            const allowsStaleWithoutRevalidation = 'max-stale' in requestCC &&
+                (true === requestCC['max-stale'] || requestCC['max-stale'] > this.age() - this.maxAge());
+
+            if (allowsStaleWithoutRevalidation) {
+                return this._evaluateRequestHitResult(undefined);
             }
+
+            if (this.useStaleWhileRevalidate()) {
+                return this._evaluateRequestHitResult(this._evaluateRequestRevalidation(req, false));
+            }
+
+            return this._evaluateRequestMissResult(req);
         }
 
-        return this._requestMatches(req, false);
+        return this._evaluateRequestHitResult(undefined);
     }
 
+    /**
+     * @param {HttpRequest} req - check if this is for the same cache entry
+     * @param {boolean} allowHeadMethod - allow a HEAD method to match.
+     * @returns {boolean} `true` if the request matches.
+     */
     _requestMatches(req, allowHeadMethod) {
         // The presented effective request URI and that of the stored response match, and
-        return (
+        return !!(
             (!this._url || this._url === req.url) &&
             this._host === req.headers.host &&
             // the request method associated with the stored response allows it to be used for the presented request, and
@@ -20359,15 +24161,24 @@ module.exports = class CachePolicy {
         );
     }
 
+    /**
+     * Determines whether storing authenticated responses is allowed.
+     * @returns {boolean} `true` if allowed.
+     */
     _allowsStoringAuthenticated() {
-        //  following Cache-Control response directives (Section 5.2.2) have such an effect: must-revalidate, public, and s-maxage.
-        return (
+        // following Cache-Control response directives (Section 5.2.2) have such an effect: must-revalidate, public, and s-maxage.
+        return !!(
             this._rescc['must-revalidate'] ||
             this._rescc.public ||
             this._rescc['s-maxage']
         );
     }
 
+    /**
+     * Checks whether the Vary header in the response matches the new request.
+     * @param {HttpRequest} req - incoming HTTP request
+     * @returns {boolean} `true` if the vary headers match.
+     */
     _varyMatches(req) {
         if (!this._resHeaders.vary) {
             return true;
@@ -20388,7 +24199,13 @@ module.exports = class CachePolicy {
         return true;
     }
 
+    /**
+     * Creates a copy of the given headers without any hop-by-hop headers.
+     * @param {Record<string, string>} inHeaders - old headers from the cached response
+     * @returns {Record<string, string>} A new headers object without hop-by-hop headers.
+     */
     _copyWithoutHopByHopHeaders(inHeaders) {
+        /** @type {Record<string, string>} */
         const headers = {};
         for (const name in inHeaders) {
             if (hopByHopHeaders[name]) continue;
@@ -20414,6 +24231,11 @@ module.exports = class CachePolicy {
         return headers;
     }
 
+    /**
+     * Returns the response headers adjusted for serving the cached response.
+     * Removes hop-by-hop headers and updates the Age and Date headers.
+     * @returns {Record<string, string>} The adjusted response headers.
+     */
     responseHeaders() {
         const headers = this._copyWithoutHopByHopHeaders(this._resHeaders);
         const age = this.age();
@@ -20435,8 +24257,8 @@ module.exports = class CachePolicy {
     }
 
     /**
-     * Value of the Date response header or current time if Date was invalid
-     * @return timestamp
+     * Returns the Date header value from the response or the current time if invalid.
+     * @returns {number} Timestamp (in milliseconds) representing the Date header or response time.
      */
     date() {
         const serverDate = Date.parse(this._resHeaders.date);
@@ -20449,8 +24271,7 @@ module.exports = class CachePolicy {
     /**
      * Value of the Age header, in seconds, updated for the current time.
      * May be fractional.
-     *
-     * @return Number
+     * @returns {number} The age in seconds.
      */
     age() {
         let age = this._ageValue();
@@ -20459,16 +24280,21 @@ module.exports = class CachePolicy {
         return age + residentTime;
     }
 
+    /**
+     * @returns {number} The Age header value as a number.
+     */
     _ageValue() {
         return toNumberOrZero(this._resHeaders.age);
     }
 
     /**
-     * Value of applicable max-age (or heuristic equivalent) in seconds. This counts since response's `Date`.
+     * Possibly outdated value of applicable max-age (or heuristic equivalent) in seconds.
+     * This counts since response's `Date`.
      *
      * For an up-to-date value, see `timeToLive()`.
      *
-     * @return Number
+     * Returns the maximum age (freshness lifetime) of the response in seconds.
+     * @returns {number} The max-age value in seconds.
      */
     maxAge() {
         if (!this.storable() || this._rescc['no-cache']) {
@@ -20530,29 +24356,57 @@ module.exports = class CachePolicy {
         return defaultMinTtl;
     }
 
+    /**
+     * Remaining time this cache entry may be useful for, in *milliseconds*.
+     * You can use this as an expiration time for your cache storage.
+     *
+     * Prefer this method over `maxAge()`, because it includes other factors like `age` and `stale-while-revalidate`.
+     * @returns {number} Time-to-live in milliseconds.
+     */
     timeToLive() {
         const age = this.maxAge() - this.age();
         const staleIfErrorAge = age + toNumberOrZero(this._rescc['stale-if-error']);
         const staleWhileRevalidateAge = age + toNumberOrZero(this._rescc['stale-while-revalidate']);
-        return Math.max(0, age, staleIfErrorAge, staleWhileRevalidateAge) * 1000;
+        return Math.round(Math.max(0, age, staleIfErrorAge, staleWhileRevalidateAge) * 1000);
     }
 
+    /**
+     * If true, this cache entry is past its expiration date.
+     * Note that stale cache may be useful sometimes, see `evaluateRequest()`.
+     * @returns {boolean} `false` doesn't mean it's fresh nor usable
+     */
     stale() {
         return this.maxAge() <= this.age();
     }
 
+    /**
+     * @returns {boolean} `true` if `stale-if-error` condition allows use of a stale response.
+     */
     _useStaleIfError() {
         return this.maxAge() + toNumberOrZero(this._rescc['stale-if-error']) > this.age();
     }
 
+    /** See `evaluateRequest()` for a more complete solution
+     * @returns {boolean} `true` if `stale-while-revalidate` is currently allowed.
+     */
     useStaleWhileRevalidate() {
-        return this.maxAge() + toNumberOrZero(this._rescc['stale-while-revalidate']) > this.age();
+        const swr = toNumberOrZero(this._rescc['stale-while-revalidate']);
+        return swr > 0 && this.maxAge() + swr > this.age();
     }
 
+    /**
+     * Creates a `CachePolicy` instance from a serialized object.
+     * @param {Object} obj - The serialized object.
+     * @returns {CachePolicy} A new CachePolicy instance.
+     */
     static fromObject(obj) {
         return new this(undefined, undefined, { _fromObject: obj });
     }
 
+    /**
+     * @param {any} obj - The serialized object.
+     * @throws {Error} If already initialized or if the object is invalid.
+     */
     _fromObject(obj) {
         if (this._responseTime) throw Error('Reinitialized');
         if (!obj || obj.v !== 1) throw Error('Invalid serialization');
@@ -20562,6 +24416,7 @@ module.exports = class CachePolicy {
         this._cacheHeuristic = obj.ch;
         this._immutableMinTtl =
             obj.imm !== undefined ? obj.imm : 24 * 3600 * 1000;
+        this._ignoreCargoCult = !!obj.icc;
         this._status = obj.st;
         this._resHeaders = obj.resh;
         this._rescc = obj.rescc;
@@ -20573,6 +24428,10 @@ module.exports = class CachePolicy {
         this._reqcc = obj.reqcc;
     }
 
+    /**
+     * Serializes the `CachePolicy` instance into a JSON-serializable object.
+     * @returns {Object} The serialized object.
+     */
     toObject() {
         return {
             v: 1,
@@ -20580,6 +24439,7 @@ module.exports = class CachePolicy {
             sh: this._isShared,
             ch: this._cacheHeuristic,
             imm: this._immutableMinTtl,
+            icc: this._ignoreCargoCult,
             st: this._status,
             resh: this._resHeaders,
             rescc: this._rescc,
@@ -20598,6 +24458,8 @@ module.exports = class CachePolicy {
      *
      * Hop by hop headers are always stripped.
      * Revalidation headers may be added or removed, depending on request.
+     * @param {HttpRequest} incomingReq - The incoming HTTP request.
+     * @returns {Record<string, string>} The headers for the revalidation request.
      */
     revalidationHeaders(incomingReq) {
         this._assertRequestHasHeaders(incomingReq);
@@ -20662,17 +24524,22 @@ module.exports = class CachePolicy {
      * Returns {policy, modified} where modified is a boolean indicating
      * whether the response body has been modified, and old cached body can't be used.
      *
-     * @return {Object} {policy: CachePolicy, modified: Boolean}
+     * @param {HttpRequest} request - The latest HTTP request asking for the cached entry.
+     * @param {HttpResponse} response - The latest revalidation HTTP response from the origin server.
+     * @returns {{policy: CachePolicy, modified: boolean, matches: boolean}} The updated policy and modification status.
+     * @throws {Error} If the response headers are missing.
      */
     revalidatedPolicy(request, response) {
         this._assertRequestHasHeaders(request);
-        if(this._useStaleIfError() && isErrorResponse(response)) {  // I consider the revalidation request unsuccessful
+
+        if (this._useStaleIfError() && isErrorResponse(response)) {
           return {
-            modified: false,
-            matches: false,
-            policy: this,
+              policy: this,
+              modified: false,
+              matches: true,
           };
         }
+
         if (!response || !response.headers) {
             throw Error('Response headers missing');
         }
@@ -20719,9 +24586,16 @@ module.exports = class CachePolicy {
             }
         }
 
+        const optionsCopy = {
+            shared: this._isShared,
+            cacheHeuristic: this._cacheHeuristic,
+            immutableMinTimeToLive: this._immutableMinTtl,
+            ignoreCargoCult: this._ignoreCargoCult,
+        };
+
         if (!matches) {
             return {
-                policy: new this.constructor(request, response),
+                policy: new this.constructor(request, response, optionsCopy),
                 // Client receiving 304 without body, even if it's invalid/mismatched has no option
                 // but to reuse a cached body. We don't have a good way to tell clients to do
                 // error recovery in such case.
@@ -20746,11 +24620,7 @@ module.exports = class CachePolicy {
             headers,
         });
         return {
-            policy: new this.constructor(request, newResponse, {
-                shared: this._isShared,
-                cacheHeuristic: this._cacheHeuristic,
-                immutableMinTimeToLive: this._immutableMinTtl,
-            }),
+            policy: new this.constructor(request, newResponse, optionsCopy),
             modified: false,
             matches: true,
         };
@@ -20956,6 +24826,17 @@ const agent_base_1 = __nccwpck_require__(98894);
 const url_1 = __nccwpck_require__(87016);
 const parse_proxy_response_1 = __nccwpck_require__(37943);
 const debug = (0, debug_1.default)('https-proxy-agent');
+const setServernameFromNonIpHost = (options) => {
+    if (options.servername === undefined &&
+        options.host &&
+        !net.isIP(options.host)) {
+        return {
+            ...options,
+            servername: options.host,
+        };
+    }
+    return options;
+};
 /**
  * The `HttpsProxyAgent` implements an HTTP Agent subclass that connects to
  * the specified "HTTP(s) proxy server" in order to proxy HTTPS requests.
@@ -21003,11 +24884,7 @@ class HttpsProxyAgent extends agent_base_1.Agent {
         let socket;
         if (proxy.protocol === 'https:') {
             debug('Creating `tls.Socket`: %o', this.connectOpts);
-            const servername = this.connectOpts.servername || this.connectOpts.host;
-            socket = tls.connect({
-                ...this.connectOpts,
-                servername,
-            });
+            socket = tls.connect(setServernameFromNonIpHost(this.connectOpts));
         }
         else {
             debug('Creating `net.Socket`: %o', this.connectOpts);
@@ -21043,11 +24920,9 @@ class HttpsProxyAgent extends agent_base_1.Agent {
                 // The proxy is connecting to a TLS server, so upgrade
                 // this socket connection to a TLS connection.
                 debug('Upgrading socket connection to TLS');
-                const servername = opts.servername || opts.host;
                 return tls.connect({
-                    ...omit(opts, 'host', 'path', 'port'),
+                    ...omit(setServernameFromNonIpHost(opts), 'host', 'path', 'port'),
                     socket,
-                    servername,
                 });
             }
             return socket;
@@ -24315,9 +28190,7 @@ class AddressError extends Error {
     constructor(message, parseMessage) {
         super(message);
         this.name = 'AddressError';
-        if (parseMessage !== null) {
-            this.parseMessage = parseMessage;
-        }
+        this.parseMessage = parseMessage;
     }
 }
 exports.AddressError = AddressError;
@@ -24331,7 +28204,11 @@ exports.AddressError = AddressError;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.isCorrect = exports.isInSubnet = void 0;
+exports.isInSubnet = isInSubnet;
+exports.isCorrect = isCorrect;
+exports.numberToPaddedHex = numberToPaddedHex;
+exports.stringToPaddedHex = stringToPaddedHex;
+exports.testBit = testBit;
 function isInSubnet(address) {
     if (this.subnetMask < address.subnetMask) {
         return false;
@@ -24341,7 +28218,6 @@ function isInSubnet(address) {
     }
     return false;
 }
-exports.isInSubnet = isInSubnet;
 function isCorrect(defaultBits) {
     return function () {
         if (this.addressMinusSuffix !== this.correctForm()) {
@@ -24353,7 +28229,24 @@ function isCorrect(defaultBits) {
         return this.parsedSubnet === String(this.subnetMask);
     };
 }
-exports.isCorrect = isCorrect;
+function numberToPaddedHex(number) {
+    return number.toString(16).padStart(2, '0');
+}
+function stringToPaddedHex(numberString) {
+    return numberToPaddedHex(parseInt(numberString, 10));
+}
+/**
+ * @param binaryValue Binary representation of a value (e.g. `10`)
+ * @param position Byte position, where 0 is the least significant bit
+ */
+function testBit(binaryValue, position) {
+    const { length } = binaryValue;
+    if (position > length) {
+        return false;
+    }
+    const positionInString = length - position;
+    return binaryValue.substring(positionInString, positionInString + 1) === '1';
+}
 //# sourceMappingURL=common.js.map
 
 /***/ }),
@@ -24388,11 +28281,11 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.v6 = exports.AddressError = exports.Address6 = exports.Address4 = void 0;
-const ipv4_1 = __nccwpck_require__(17946);
+var ipv4_1 = __nccwpck_require__(17946);
 Object.defineProperty(exports, "Address4", ({ enumerable: true, get: function () { return ipv4_1.Address4; } }));
-const ipv6_1 = __nccwpck_require__(38096);
+var ipv6_1 = __nccwpck_require__(38096);
 Object.defineProperty(exports, "Address6", ({ enumerable: true, get: function () { return ipv6_1.Address6; } }));
-const address_error_1 = __nccwpck_require__(68850);
+var address_error_1 = __nccwpck_require__(68850);
 Object.defineProperty(exports, "AddressError", ({ enumerable: true, get: function () { return address_error_1.AddressError; } }));
 const helpers = __importStar(__nccwpck_require__(20339));
 exports.v6 = { helpers };
@@ -24434,8 +28327,6 @@ exports.Address4 = void 0;
 const common = __importStar(__nccwpck_require__(45864));
 const constants = __importStar(__nccwpck_require__(66437));
 const address_error_1 = __nccwpck_require__(68850);
-const jsbn_1 = __nccwpck_require__(95947);
-const sprintf_js_1 = __nccwpck_require__(72701);
 /**
  * Represents an IPv4 address
  * @class Address4
@@ -24556,7 +28447,7 @@ class Address4 {
      * @returns {String}
      */
     toHex() {
-        return this.parsedAddress.map((part) => (0, sprintf_js_1.sprintf)('%02x', parseInt(part, 10))).join(':');
+        return this.parsedAddress.map((part) => common.stringToPaddedHex(part)).join(':');
     }
     /**
      * Converts an IPv4 address object to an array of bytes
@@ -24577,28 +28468,27 @@ class Address4 {
         const output = [];
         let i;
         for (i = 0; i < constants.GROUPS; i += 2) {
-            const hex = (0, sprintf_js_1.sprintf)('%02x%02x', parseInt(this.parsedAddress[i], 10), parseInt(this.parsedAddress[i + 1], 10));
-            output.push((0, sprintf_js_1.sprintf)('%x', parseInt(hex, 16)));
+            output.push(`${common.stringToPaddedHex(this.parsedAddress[i])}${common.stringToPaddedHex(this.parsedAddress[i + 1])}`);
         }
         return output.join(':');
     }
     /**
-     * Returns the address as a BigInteger
+     * Returns the address as a `bigint`
      * @memberof Address4
      * @instance
-     * @returns {BigInteger}
+     * @returns {bigint}
      */
-    bigInteger() {
-        return new jsbn_1.BigInteger(this.parsedAddress.map((n) => (0, sprintf_js_1.sprintf)('%02x', parseInt(n, 10))).join(''), 16);
+    bigInt() {
+        return BigInt(`0x${this.parsedAddress.map((n) => common.stringToPaddedHex(n)).join('')}`);
     }
     /**
      * Helper function getting start address.
      * @memberof Address4
      * @instance
-     * @returns {BigInteger}
+     * @returns {bigint}
      */
     _startAddress() {
-        return new jsbn_1.BigInteger(this.mask() + '0'.repeat(constants.BITS - this.subnetMask), 2);
+        return BigInt(`0b${this.mask() + '0'.repeat(constants.BITS - this.subnetMask)}`);
     }
     /**
      * The first address in the range given by this address' subnet.
@@ -24608,7 +28498,7 @@ class Address4 {
      * @returns {Address4}
      */
     startAddress() {
-        return Address4.fromBigInteger(this._startAddress());
+        return Address4.fromBigInt(this._startAddress());
     }
     /**
      * The first host address in the range given by this address's subnet ie
@@ -24618,17 +28508,17 @@ class Address4 {
      * @returns {Address4}
      */
     startAddressExclusive() {
-        const adjust = new jsbn_1.BigInteger('1');
-        return Address4.fromBigInteger(this._startAddress().add(adjust));
+        const adjust = BigInt('1');
+        return Address4.fromBigInt(this._startAddress() + adjust);
     }
     /**
      * Helper function getting end address.
      * @memberof Address4
      * @instance
-     * @returns {BigInteger}
+     * @returns {bigint}
      */
     _endAddress() {
-        return new jsbn_1.BigInteger(this.mask() + '1'.repeat(constants.BITS - this.subnetMask), 2);
+        return BigInt(`0b${this.mask() + '1'.repeat(constants.BITS - this.subnetMask)}`);
     }
     /**
      * The last address in the range given by this address' subnet
@@ -24638,7 +28528,7 @@ class Address4 {
      * @returns {Address4}
      */
     endAddress() {
-        return Address4.fromBigInteger(this._endAddress());
+        return Address4.fromBigInt(this._endAddress());
     }
     /**
      * The last host address in the range given by this address's subnet ie
@@ -24648,18 +28538,18 @@ class Address4 {
      * @returns {Address4}
      */
     endAddressExclusive() {
-        const adjust = new jsbn_1.BigInteger('1');
-        return Address4.fromBigInteger(this._endAddress().subtract(adjust));
+        const adjust = BigInt('1');
+        return Address4.fromBigInt(this._endAddress() - adjust);
     }
     /**
-     * Converts a BigInteger to a v4 address object
+     * Converts a BigInt to a v4 address object
      * @memberof Address4
      * @static
-     * @param {BigInteger} bigInteger - a BigInteger to convert
+     * @param {bigint} bigInt - a BigInt to convert
      * @returns {Address4}
      */
-    static fromBigInteger(bigInteger) {
-        return Address4.fromInteger(parseInt(bigInteger.toString(), 10));
+    static fromBigInt(bigInt) {
+        return Address4.fromHex(bigInt.toString(16));
     }
     /**
      * Returns the first n bits of the address, defaulting to the
@@ -24699,7 +28589,7 @@ class Address4 {
         if (options.omitSuffix) {
             return reversed;
         }
-        return (0, sprintf_js_1.sprintf)('%s.in-addr.arpa.', reversed);
+        return `${reversed}.in-addr.arpa.`;
     }
     /**
      * Returns true if the given address is a multicast address
@@ -24717,7 +28607,7 @@ class Address4 {
      * @returns {string}
      */
     binaryZeroPad() {
-        return this.bigInteger().toString(2).padStart(constants.BITS, '0');
+        return this.bigInt().toString(2).padStart(constants.BITS, '0');
     }
     /**
      * Groups an IPv4 address for inclusion at the end of an IPv6 address
@@ -24725,7 +28615,11 @@ class Address4 {
      */
     groupForV6() {
         const segments = this.parsedAddress;
-        return this.address.replace(constants.RE_ADDRESS, (0, sprintf_js_1.sprintf)('<span class="hover-group group-v4 group-6">%s</span>.<span class="hover-group group-v4 group-7">%s</span>', segments.slice(0, 2).join('.'), segments.slice(2, 4).join('.')));
+        return this.address.replace(constants.RE_ADDRESS, `<span class="hover-group group-v4 group-6">${segments
+            .slice(0, 2)
+            .join('.')}</span>.<span class="hover-group group-v4 group-7">${segments
+            .slice(2, 4)
+            .join('.')}</span>`);
     }
 }
 exports.Address4 = Address4;
@@ -24772,8 +28666,7 @@ const helpers = __importStar(__nccwpck_require__(20339));
 const ipv4_1 = __nccwpck_require__(17946);
 const regular_expressions_1 = __nccwpck_require__(72016);
 const address_error_1 = __nccwpck_require__(68850);
-const jsbn_1 = __nccwpck_require__(95947);
-const sprintf_js_1 = __nccwpck_require__(72701);
+const common_1 = __nccwpck_require__(45864);
 function assert(condition) {
     if (!condition) {
         throw new Error('Assertion failed.');
@@ -24809,7 +28702,7 @@ function compact(address, slice) {
     return s1.concat(['compact']).concat(s2);
 }
 function paddedHex(octet) {
-    return (0, sprintf_js_1.sprintf)('%04x', parseInt(octet, 16));
+    return parseInt(octet, 16).toString(16).padStart(4, '0');
 }
 function unsignByte(b) {
     // eslint-disable-next-line no-bitwise
@@ -24887,18 +28780,18 @@ class Address6 {
         }
     }
     /**
-     * Convert a BigInteger to a v6 address object
+     * Convert a BigInt to a v6 address object
      * @memberof Address6
      * @static
-     * @param {BigInteger} bigInteger - a BigInteger to convert
+     * @param {bigint} bigInt - a BigInt to convert
      * @returns {Address6}
      * @example
-     * var bigInteger = new BigInteger('1000000000000');
-     * var address = Address6.fromBigInteger(bigInteger);
+     * var bigInt = BigInt('1000000000000');
+     * var address = Address6.fromBigInt(bigInt);
      * address.correctForm(); // '::e8:d4a5:1000'
      */
-    static fromBigInteger(bigInteger) {
-        const hex = bigInteger.toString(16).padStart(32, '0');
+    static fromBigInt(bigInt) {
+        const hex = bigInt.toString(16).padStart(32, '0');
         const groups = [];
         let i;
         for (i = 0; i < constants6.GROUPS; i++) {
@@ -25018,7 +28911,7 @@ class Address6 {
      * @returns {String} the Microsoft UNC transcription of the address
      */
     microsoftTranscription() {
-        return (0, sprintf_js_1.sprintf)('%s.ipv6-literal.net', this.correctForm().replace(/:/g, '-'));
+        return `${this.correctForm().replace(/:/g, '-')}.ipv6-literal.net`;
     }
     /**
      * Return the first n bits of the address, defaulting to the subnet mask
@@ -25034,7 +28927,7 @@ class Address6 {
      * Return the number of possible subnets of a given size in the address
      * @memberof Address6
      * @instance
-     * @param {number} [size=128] - the subnet size
+     * @param {number} [subnetSize=128] - the subnet size
      * @returns {String}
      */
     // TODO: probably useful to have a numeric version of this too
@@ -25045,16 +28938,16 @@ class Address6 {
         if (subnetPowers < 0) {
             return '0';
         }
-        return addCommas(new jsbn_1.BigInteger('2', 10).pow(subnetPowers).toString(10));
+        return addCommas((BigInt('2') ** BigInt(subnetPowers)).toString(10));
     }
     /**
      * Helper function getting start address.
      * @memberof Address6
      * @instance
-     * @returns {BigInteger}
+     * @returns {bigint}
      */
     _startAddress() {
-        return new jsbn_1.BigInteger(this.mask() + '0'.repeat(constants6.BITS - this.subnetMask), 2);
+        return BigInt(`0b${this.mask() + '0'.repeat(constants6.BITS - this.subnetMask)}`);
     }
     /**
      * The first address in the range given by this address' subnet
@@ -25064,7 +28957,7 @@ class Address6 {
      * @returns {Address6}
      */
     startAddress() {
-        return Address6.fromBigInteger(this._startAddress());
+        return Address6.fromBigInt(this._startAddress());
     }
     /**
      * The first host address in the range given by this address's subnet ie
@@ -25074,17 +28967,17 @@ class Address6 {
      * @returns {Address6}
      */
     startAddressExclusive() {
-        const adjust = new jsbn_1.BigInteger('1');
-        return Address6.fromBigInteger(this._startAddress().add(adjust));
+        const adjust = BigInt('1');
+        return Address6.fromBigInt(this._startAddress() + adjust);
     }
     /**
      * Helper function getting end address.
      * @memberof Address6
      * @instance
-     * @returns {BigInteger}
+     * @returns {bigint}
      */
     _endAddress() {
-        return new jsbn_1.BigInteger(this.mask() + '1'.repeat(constants6.BITS - this.subnetMask), 2);
+        return BigInt(`0b${this.mask() + '1'.repeat(constants6.BITS - this.subnetMask)}`);
     }
     /**
      * The last address in the range given by this address' subnet
@@ -25094,7 +28987,7 @@ class Address6 {
      * @returns {Address6}
      */
     endAddress() {
-        return Address6.fromBigInteger(this._endAddress());
+        return Address6.fromBigInt(this._endAddress());
     }
     /**
      * The last host address in the range given by this address's subnet ie
@@ -25104,8 +28997,8 @@ class Address6 {
      * @returns {Address6}
      */
     endAddressExclusive() {
-        const adjust = new jsbn_1.BigInteger('1');
-        return Address6.fromBigInteger(this._endAddress().subtract(adjust));
+        const adjust = BigInt('1');
+        return Address6.fromBigInt(this._endAddress() - adjust);
     }
     /**
      * Return the scope of the address
@@ -25114,7 +29007,7 @@ class Address6 {
      * @returns {String}
      */
     getScope() {
-        let scope = constants6.SCOPES[this.getBits(12, 16).intValue()];
+        let scope = constants6.SCOPES[parseInt(this.getBits(12, 16).toString(10), 10)];
         if (this.getType() === 'Global unicast' && scope !== 'Link local') {
             scope = 'Global';
         }
@@ -25135,13 +29028,13 @@ class Address6 {
         return 'Global unicast';
     }
     /**
-     * Return the bits in the given range as a BigInteger
+     * Return the bits in the given range as a BigInt
      * @memberof Address6
      * @instance
-     * @returns {BigInteger}
+     * @returns {bigint}
      */
     getBits(start, end) {
-        return new jsbn_1.BigInteger(this.getBitsBase2(start, end), 2);
+        return BigInt(`0b${this.getBitsBase2(start, end)}`);
     }
     /**
      * Return the bits in the given range as a base-2 string
@@ -25199,7 +29092,7 @@ class Address6 {
             if (options.omitSuffix) {
                 return reversed;
             }
-            return (0, sprintf_js_1.sprintf)('%s.ip6.arpa.', reversed);
+            return `${reversed}.ip6.arpa.`;
         }
         if (options.omitSuffix) {
             return '';
@@ -25248,7 +29141,7 @@ class Address6 {
         }
         let correct = groups.join(':');
         correct = correct.replace(/^compact$/, '::');
-        correct = correct.replace(/^compact|compact$/, ':');
+        correct = correct.replace(/(^compact)|(compact$)/, ':');
         correct = correct.replace(/compact/, '');
         return correct;
     }
@@ -25264,7 +29157,7 @@ class Address6 {
      * //  0000000000000000000000000000000000000000000000000001000000010001'
      */
     binaryZeroPad() {
-        return this.bigInteger().toString(2).padStart(constants6.BITS, '0');
+        return this.bigInt().toString(2).padStart(constants6.BITS, '0');
     }
     // TODO: Improve the semantics of this helper function
     parse4in6(address) {
@@ -25290,11 +29183,11 @@ class Address6 {
         address = this.parse4in6(address);
         const badCharacters = address.match(constants6.RE_BAD_CHARACTERS);
         if (badCharacters) {
-            throw new address_error_1.AddressError((0, sprintf_js_1.sprintf)('Bad character%s detected in address: %s', badCharacters.length > 1 ? 's' : '', badCharacters.join('')), address.replace(constants6.RE_BAD_CHARACTERS, '<span class="parse-error">$1</span>'));
+            throw new address_error_1.AddressError(`Bad character${badCharacters.length > 1 ? 's' : ''} detected in address: ${badCharacters.join('')}`, address.replace(constants6.RE_BAD_CHARACTERS, '<span class="parse-error">$1</span>'));
         }
         const badAddress = address.match(constants6.RE_BAD_ADDRESS);
         if (badAddress) {
-            throw new address_error_1.AddressError((0, sprintf_js_1.sprintf)('Address failed regex: %s', badAddress.join('')), address.replace(constants6.RE_BAD_ADDRESS, '<span class="parse-error">$1</span>'));
+            throw new address_error_1.AddressError(`Address failed regex: ${badAddress.join('')}`, address.replace(constants6.RE_BAD_ADDRESS, '<span class="parse-error">$1</span>'));
         }
         let groups = [];
         const halves = address.split('::');
@@ -25327,7 +29220,7 @@ class Address6 {
         else {
             throw new address_error_1.AddressError('Too many :: groups found');
         }
-        groups = groups.map((group) => (0, sprintf_js_1.sprintf)('%x', parseInt(group, 16)));
+        groups = groups.map((group) => parseInt(group, 16).toString(16));
         if (groups.length !== this.groups) {
             throw new address_error_1.AddressError('Incorrect number of groups found');
         }
@@ -25349,16 +29242,16 @@ class Address6 {
      * @returns {String}
      */
     decimal() {
-        return this.parsedAddress.map((n) => (0, sprintf_js_1.sprintf)('%05d', parseInt(n, 16))).join(':');
+        return this.parsedAddress.map((n) => parseInt(n, 16).toString(10).padStart(5, '0')).join(':');
     }
     /**
-     * Return the address as a BigInteger
+     * Return the address as a BigInt
      * @memberof Address6
      * @instance
-     * @returns {BigInteger}
+     * @returns {bigint}
      */
-    bigInteger() {
-        return new jsbn_1.BigInteger(this.parsedAddress.map(paddedHex).join(''), 16);
+    bigInt() {
+        return BigInt(`0x${this.parsedAddress.map(paddedHex).join('')}`);
     }
     /**
      * Return the last two groups of this address as an IPv4 address string
@@ -25371,7 +29264,7 @@ class Address6 {
      */
     to4() {
         const binary = this.binaryZeroPad().split('');
-        return ipv4_1.Address4.fromHex(new jsbn_1.BigInteger(binary.slice(96, 128).join(''), 2).toString(16));
+        return ipv4_1.Address4.fromHex(BigInt(`0b${binary.slice(96, 128).join('')}`).toString(16));
     }
     /**
      * Return the v4-in-v6 form of the address
@@ -25418,18 +29311,21 @@ class Address6 {
           public IPv4 address of the NAT with all bits inverted.
         */
         const prefix = this.getBitsBase16(0, 32);
-        const udpPort = this.getBits(80, 96).xor(new jsbn_1.BigInteger('ffff', 16)).toString();
+        const bitsForUdpPort = this.getBits(80, 96);
+        // eslint-disable-next-line no-bitwise
+        const udpPort = (bitsForUdpPort ^ BigInt('0xffff')).toString();
         const server4 = ipv4_1.Address4.fromHex(this.getBitsBase16(32, 64));
-        const client4 = ipv4_1.Address4.fromHex(this.getBits(96, 128).xor(new jsbn_1.BigInteger('ffffffff', 16)).toString(16));
-        const flags = this.getBits(64, 80);
+        const bitsForClient4 = this.getBits(96, 128);
+        // eslint-disable-next-line no-bitwise
+        const client4 = ipv4_1.Address4.fromHex((bitsForClient4 ^ BigInt('0xffffffff')).toString(16));
         const flagsBase2 = this.getBitsBase2(64, 80);
-        const coneNat = flags.testBit(15);
-        const reserved = flags.testBit(14);
-        const groupIndividual = flags.testBit(8);
-        const universalLocal = flags.testBit(9);
-        const nonce = new jsbn_1.BigInteger(flagsBase2.slice(2, 6) + flagsBase2.slice(8, 16), 2).toString(10);
+        const coneNat = (0, common_1.testBit)(flagsBase2, 15);
+        const reserved = (0, common_1.testBit)(flagsBase2, 14);
+        const groupIndividual = (0, common_1.testBit)(flagsBase2, 8);
+        const universalLocal = (0, common_1.testBit)(flagsBase2, 9);
+        const nonce = BigInt(`0b${flagsBase2.slice(2, 6) + flagsBase2.slice(8, 16)}`).toString(10);
         return {
-            prefix: (0, sprintf_js_1.sprintf)('%s:%s', prefix.slice(0, 4), prefix.slice(4, 8)),
+            prefix: `${prefix.slice(0, 4)}:${prefix.slice(4, 8)}`,
             server4: server4.address,
             client4: client4.address,
             flags: flagsBase2,
@@ -25457,7 +29353,7 @@ class Address6 {
         const prefix = this.getBitsBase16(0, 16);
         const gateway = ipv4_1.Address4.fromHex(this.getBitsBase16(16, 48));
         return {
-            prefix: (0, sprintf_js_1.sprintf)('%s', prefix.slice(0, 4)),
+            prefix: prefix.slice(0, 4),
             gateway: gateway.address,
         };
     }
@@ -25487,12 +29383,14 @@ class Address6 {
      * @returns {Array}
      */
     toByteArray() {
-        const byteArray = this.bigInteger().toByteArray();
-        // work around issue where `toByteArray` returns a leading 0 element
-        if (byteArray.length === 17 && byteArray[0] === 0) {
-            return byteArray.slice(1);
+        const valueWithoutPadding = this.bigInt().toString(16);
+        const leadingPad = '0'.repeat(valueWithoutPadding.length % 2);
+        const value = `${leadingPad}${valueWithoutPadding}`;
+        const bytes = [];
+        for (let i = 0, length = value.length; i < length; i += 2) {
+            bytes.push(parseInt(value.substring(i, i + 2), 16));
         }
-        return byteArray;
+        return bytes;
     }
     /**
      * Return an unsigned byte array
@@ -25519,14 +29417,14 @@ class Address6 {
      * @returns {Address6}
      */
     static fromUnsignedByteArray(bytes) {
-        const BYTE_MAX = new jsbn_1.BigInteger('256', 10);
-        let result = new jsbn_1.BigInteger('0', 10);
-        let multiplier = new jsbn_1.BigInteger('1', 10);
+        const BYTE_MAX = BigInt('256');
+        let result = BigInt('0');
+        let multiplier = BigInt('1');
         for (let i = bytes.length - 1; i >= 0; i--) {
-            result = result.add(multiplier.multiply(new jsbn_1.BigInteger(bytes[i].toString(10), 10)));
-            multiplier = multiplier.multiply(BYTE_MAX);
+            result += multiplier * BigInt(bytes[i].toString(10));
+            multiplier *= BYTE_MAX;
         }
-        return Address6.fromBigInteger(result);
+        return Address6.fromBigInt(result);
     }
     /**
      * Returns true if the address is in the canonical form, false otherwise
@@ -25606,9 +29504,9 @@ class Address6 {
             optionalPort = '';
         }
         else {
-            optionalPort = (0, sprintf_js_1.sprintf)(':%s', optionalPort);
+            optionalPort = `:${optionalPort}`;
         }
-        return (0, sprintf_js_1.sprintf)('http://[%s]%s/', this.correctForm(), optionalPort);
+        return `http://[${this.correctForm()}]${optionalPort}/`;
     }
     /**
      * @returns {String} a link suitable for conveying the address via a URL hash
@@ -25630,10 +29528,11 @@ class Address6 {
         if (options.v4) {
             formFunction = this.to4in6;
         }
+        const form = formFunction.call(this);
         if (options.className) {
-            return (0, sprintf_js_1.sprintf)('<a href="%1$s%2$s" class="%3$s">%2$s</a>', options.prefix, formFunction.call(this), options.className);
+            return `<a href="${options.prefix}${form}" class="${options.className}">${form}</a>`;
         }
-        return (0, sprintf_js_1.sprintf)('<a href="%1$s%2$s">%2$s</a>', options.prefix, formFunction.call(this));
+        return `<a href="${options.prefix}${form}">${form}</a>`;
     }
     /**
      * Groups an address
@@ -25657,9 +29556,9 @@ class Address6 {
         }
         const classes = ['hover-group'];
         for (let i = this.elisionBegin; i < this.elisionBegin + this.elidedGroups; i++) {
-            classes.push((0, sprintf_js_1.sprintf)('group-%d', i));
+            classes.push(`group-${i}`);
         }
-        output.push((0, sprintf_js_1.sprintf)('<span class="%s"></span>', classes.join(' ')));
+        output.push(`<span class="${classes.join(' ')}"></span>`);
         if (right.length) {
             output.push(...helpers.simpleGroup(right, this.elisionEnd));
         }
@@ -25830,38 +29729,37 @@ exports.RE_SUBNET_STRING = /\/\d{1,3}(?=%|$)/;
  * @static
  */
 exports.RE_ZONE_STRING = /%.*$/;
-exports.RE_URL = new RegExp(/^\[{0,1}([0-9a-f:]+)\]{0,1}/);
-exports.RE_URL_WITH_PORT = new RegExp(/\[([0-9a-f:]+)\]:([0-9]{1,5})/);
+exports.RE_URL = /^\[{0,1}([0-9a-f:]+)\]{0,1}/;
+exports.RE_URL_WITH_PORT = /\[([0-9a-f:]+)\]:([0-9]{1,5})/;
 //# sourceMappingURL=constants.js.map
 
 /***/ }),
 
 /***/ 20339:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+/***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.simpleGroup = exports.spanLeadingZeroes = exports.spanAll = exports.spanAllZeroes = void 0;
-const sprintf_js_1 = __nccwpck_require__(72701);
+exports.spanAllZeroes = spanAllZeroes;
+exports.spanAll = spanAll;
+exports.spanLeadingZeroes = spanLeadingZeroes;
+exports.simpleGroup = simpleGroup;
 /**
  * @returns {String} the string with all zeroes contained in a <span>
  */
 function spanAllZeroes(s) {
     return s.replace(/(0+)/g, '<span class="zero">$1</span>');
 }
-exports.spanAllZeroes = spanAllZeroes;
 /**
  * @returns {String} the string with each character contained in a <span>
  */
 function spanAll(s, offset = 0) {
     const letters = s.split('');
     return letters
-        .map((n, i) => (0, sprintf_js_1.sprintf)('<span class="digit value-%s position-%d">%s</span>', n, i + offset, spanAllZeroes(n)) // XXX Use #base-2 .value-0 instead?
-    )
+        .map((n, i) => `<span class="digit value-${n} position-${i + offset}">${spanAllZeroes(n)}</span>`)
         .join('');
 }
-exports.spanAll = spanAll;
 function spanLeadingZeroesSimple(group) {
     return group.replace(/^(0+)/, '<span class="zero">$1</span>');
 }
@@ -25872,7 +29770,6 @@ function spanLeadingZeroes(address) {
     const groups = address.split(':');
     return groups.map((g) => spanLeadingZeroesSimple(g)).join(':');
 }
-exports.spanLeadingZeroes = spanLeadingZeroes;
 /**
  * Groups an address
  * @returns {String} a grouped address
@@ -25883,10 +29780,9 @@ function simpleGroup(addressString, offset = 0) {
         if (/group-v4/.test(g)) {
             return g;
         }
-        return (0, sprintf_js_1.sprintf)('<span class="hover-group group-%d">%s</span>', i + offset, spanLeadingZeroesSimple(g));
+        return `<span class="hover-group group-${i + offset}">${spanLeadingZeroesSimple(g)}</span>`;
     });
 }
-exports.simpleGroup = simpleGroup;
 //# sourceMappingURL=helpers.js.map
 
 /***/ }),
@@ -25920,20 +29816,21 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.possibleElisions = exports.simpleRegularExpression = exports.ADDRESS_BOUNDARY = exports.padGroup = exports.groupPossibilities = void 0;
-const v6 = __importStar(__nccwpck_require__(75280));
-const sprintf_js_1 = __nccwpck_require__(72701);
-function groupPossibilities(possibilities) {
-    return (0, sprintf_js_1.sprintf)('(%s)', possibilities.join('|'));
-}
+exports.ADDRESS_BOUNDARY = void 0;
 exports.groupPossibilities = groupPossibilities;
+exports.padGroup = padGroup;
+exports.simpleRegularExpression = simpleRegularExpression;
+exports.possibleElisions = possibleElisions;
+const v6 = __importStar(__nccwpck_require__(75280));
+function groupPossibilities(possibilities) {
+    return `(${possibilities.join('|')})`;
+}
 function padGroup(group) {
     if (group.length < 4) {
-        return (0, sprintf_js_1.sprintf)('0{0,%d}%s', 4 - group.length, group);
+        return `0{0,${4 - group.length}}${group}`;
     }
     return group;
 }
-exports.padGroup = padGroup;
 exports.ADDRESS_BOUNDARY = '[^A-Fa-f0-9:]';
 function simpleRegularExpression(groups) {
     const zeroIndexes = [];
@@ -25958,7 +29855,6 @@ function simpleRegularExpression(groups) {
     possibilities.push(groups.map(padGroup).join(':'));
     return groupPossibilities(possibilities);
 }
-exports.simpleRegularExpression = simpleRegularExpression;
 function possibleElisions(elidedGroups, moreLeft, moreRight) {
     const left = moreLeft ? '' : ':';
     const right = moreRight ? '' : ':';
@@ -25976,259 +29872,20 @@ function possibleElisions(elidedGroups, moreLeft, moreRight) {
         possibilities.push(':');
     }
     // 4. elision from the left side
-    possibilities.push((0, sprintf_js_1.sprintf)('%s(:0{1,4}){1,%d}', left, elidedGroups - 1));
+    possibilities.push(`${left}(:0{1,4}){1,${elidedGroups - 1}}`);
     // 5. elision from the right side
-    possibilities.push((0, sprintf_js_1.sprintf)('(0{1,4}:){1,%d}%s', elidedGroups - 1, right));
+    possibilities.push(`(0{1,4}:){1,${elidedGroups - 1}}${right}`);
     // 6. no elision
-    possibilities.push((0, sprintf_js_1.sprintf)('(0{1,4}:){%d}0{1,4}', elidedGroups - 1));
+    possibilities.push(`(0{1,4}:){${elidedGroups - 1}}0{1,4}`);
     // 7. elision (including sloppy elision) from the middle
     for (let groups = 1; groups < elidedGroups - 1; groups++) {
         for (let position = 1; position < elidedGroups - groups; position++) {
-            possibilities.push((0, sprintf_js_1.sprintf)('(0{1,4}:){%d}:(0{1,4}:){%d}0{1,4}', position, elidedGroups - position - groups - 1));
+            possibilities.push(`(0{1,4}:){${position}}:(0{1,4}:){${elidedGroups - position - groups - 1}}0{1,4}`);
         }
     }
     return groupPossibilities(possibilities);
 }
-exports.possibleElisions = possibleElisions;
 //# sourceMappingURL=regular-expressions.js.map
-
-/***/ }),
-
-/***/ 72701:
-/***/ ((__unused_webpack_module, exports) => {
-
-/* global window, exports, define */
-
-!function() {
-    'use strict'
-
-    var re = {
-        not_string: /[^s]/,
-        not_bool: /[^t]/,
-        not_type: /[^T]/,
-        not_primitive: /[^v]/,
-        number: /[diefg]/,
-        numeric_arg: /[bcdiefguxX]/,
-        json: /[j]/,
-        not_json: /[^j]/,
-        text: /^[^\x25]+/,
-        modulo: /^\x25{2}/,
-        placeholder: /^\x25(?:([1-9]\d*)\$|\(([^)]+)\))?(\+)?(0|'[^$])?(-)?(\d+)?(?:\.(\d+))?([b-gijostTuvxX])/,
-        key: /^([a-z_][a-z_\d]*)/i,
-        key_access: /^\.([a-z_][a-z_\d]*)/i,
-        index_access: /^\[(\d+)\]/,
-        sign: /^[+-]/
-    }
-
-    function sprintf(key) {
-        // `arguments` is not an array, but should be fine for this call
-        return sprintf_format(sprintf_parse(key), arguments)
-    }
-
-    function vsprintf(fmt, argv) {
-        return sprintf.apply(null, [fmt].concat(argv || []))
-    }
-
-    function sprintf_format(parse_tree, argv) {
-        var cursor = 1, tree_length = parse_tree.length, arg, output = '', i, k, ph, pad, pad_character, pad_length, is_positive, sign
-        for (i = 0; i < tree_length; i++) {
-            if (typeof parse_tree[i] === 'string') {
-                output += parse_tree[i]
-            }
-            else if (typeof parse_tree[i] === 'object') {
-                ph = parse_tree[i] // convenience purposes only
-                if (ph.keys) { // keyword argument
-                    arg = argv[cursor]
-                    for (k = 0; k < ph.keys.length; k++) {
-                        if (arg == undefined) {
-                            throw new Error(sprintf('[sprintf] Cannot access property "%s" of undefined value "%s"', ph.keys[k], ph.keys[k-1]))
-                        }
-                        arg = arg[ph.keys[k]]
-                    }
-                }
-                else if (ph.param_no) { // positional argument (explicit)
-                    arg = argv[ph.param_no]
-                }
-                else { // positional argument (implicit)
-                    arg = argv[cursor++]
-                }
-
-                if (re.not_type.test(ph.type) && re.not_primitive.test(ph.type) && arg instanceof Function) {
-                    arg = arg()
-                }
-
-                if (re.numeric_arg.test(ph.type) && (typeof arg !== 'number' && isNaN(arg))) {
-                    throw new TypeError(sprintf('[sprintf] expecting number but found %T', arg))
-                }
-
-                if (re.number.test(ph.type)) {
-                    is_positive = arg >= 0
-                }
-
-                switch (ph.type) {
-                    case 'b':
-                        arg = parseInt(arg, 10).toString(2)
-                        break
-                    case 'c':
-                        arg = String.fromCharCode(parseInt(arg, 10))
-                        break
-                    case 'd':
-                    case 'i':
-                        arg = parseInt(arg, 10)
-                        break
-                    case 'j':
-                        arg = JSON.stringify(arg, null, ph.width ? parseInt(ph.width) : 0)
-                        break
-                    case 'e':
-                        arg = ph.precision ? parseFloat(arg).toExponential(ph.precision) : parseFloat(arg).toExponential()
-                        break
-                    case 'f':
-                        arg = ph.precision ? parseFloat(arg).toFixed(ph.precision) : parseFloat(arg)
-                        break
-                    case 'g':
-                        arg = ph.precision ? String(Number(arg.toPrecision(ph.precision))) : parseFloat(arg)
-                        break
-                    case 'o':
-                        arg = (parseInt(arg, 10) >>> 0).toString(8)
-                        break
-                    case 's':
-                        arg = String(arg)
-                        arg = (ph.precision ? arg.substring(0, ph.precision) : arg)
-                        break
-                    case 't':
-                        arg = String(!!arg)
-                        arg = (ph.precision ? arg.substring(0, ph.precision) : arg)
-                        break
-                    case 'T':
-                        arg = Object.prototype.toString.call(arg).slice(8, -1).toLowerCase()
-                        arg = (ph.precision ? arg.substring(0, ph.precision) : arg)
-                        break
-                    case 'u':
-                        arg = parseInt(arg, 10) >>> 0
-                        break
-                    case 'v':
-                        arg = arg.valueOf()
-                        arg = (ph.precision ? arg.substring(0, ph.precision) : arg)
-                        break
-                    case 'x':
-                        arg = (parseInt(arg, 10) >>> 0).toString(16)
-                        break
-                    case 'X':
-                        arg = (parseInt(arg, 10) >>> 0).toString(16).toUpperCase()
-                        break
-                }
-                if (re.json.test(ph.type)) {
-                    output += arg
-                }
-                else {
-                    if (re.number.test(ph.type) && (!is_positive || ph.sign)) {
-                        sign = is_positive ? '+' : '-'
-                        arg = arg.toString().replace(re.sign, '')
-                    }
-                    else {
-                        sign = ''
-                    }
-                    pad_character = ph.pad_char ? ph.pad_char === '0' ? '0' : ph.pad_char.charAt(1) : ' '
-                    pad_length = ph.width - (sign + arg).length
-                    pad = ph.width ? (pad_length > 0 ? pad_character.repeat(pad_length) : '') : ''
-                    output += ph.align ? sign + arg + pad : (pad_character === '0' ? sign + pad + arg : pad + sign + arg)
-                }
-            }
-        }
-        return output
-    }
-
-    var sprintf_cache = Object.create(null)
-
-    function sprintf_parse(fmt) {
-        if (sprintf_cache[fmt]) {
-            return sprintf_cache[fmt]
-        }
-
-        var _fmt = fmt, match, parse_tree = [], arg_names = 0
-        while (_fmt) {
-            if ((match = re.text.exec(_fmt)) !== null) {
-                parse_tree.push(match[0])
-            }
-            else if ((match = re.modulo.exec(_fmt)) !== null) {
-                parse_tree.push('%')
-            }
-            else if ((match = re.placeholder.exec(_fmt)) !== null) {
-                if (match[2]) {
-                    arg_names |= 1
-                    var field_list = [], replacement_field = match[2], field_match = []
-                    if ((field_match = re.key.exec(replacement_field)) !== null) {
-                        field_list.push(field_match[1])
-                        while ((replacement_field = replacement_field.substring(field_match[0].length)) !== '') {
-                            if ((field_match = re.key_access.exec(replacement_field)) !== null) {
-                                field_list.push(field_match[1])
-                            }
-                            else if ((field_match = re.index_access.exec(replacement_field)) !== null) {
-                                field_list.push(field_match[1])
-                            }
-                            else {
-                                throw new SyntaxError('[sprintf] failed to parse named argument key')
-                            }
-                        }
-                    }
-                    else {
-                        throw new SyntaxError('[sprintf] failed to parse named argument key')
-                    }
-                    match[2] = field_list
-                }
-                else {
-                    arg_names |= 2
-                }
-                if (arg_names === 3) {
-                    throw new Error('[sprintf] mixing positional and named placeholders is not (yet) supported')
-                }
-
-                parse_tree.push(
-                    {
-                        placeholder: match[0],
-                        param_no:    match[1],
-                        keys:        match[2],
-                        sign:        match[3],
-                        pad_char:    match[4],
-                        align:       match[5],
-                        width:       match[6],
-                        precision:   match[7],
-                        type:        match[8]
-                    }
-                )
-            }
-            else {
-                throw new SyntaxError('[sprintf] unexpected placeholder')
-            }
-            _fmt = _fmt.substring(match[0].length)
-        }
-        return sprintf_cache[fmt] = parse_tree
-    }
-
-    /**
-     * export to either browser or node.js
-     */
-    /* eslint-disable quote-props */
-    if (true) {
-        exports.sprintf = sprintf
-        exports.vsprintf = vsprintf
-    }
-    if (typeof window !== 'undefined') {
-        window['sprintf'] = sprintf
-        window['vsprintf'] = vsprintf
-
-        if (typeof define === 'function' && define['amd']) {
-            define(function() {
-                return {
-                    'sprintf': sprintf,
-                    'vsprintf': vsprintf
-                }
-            })
-        }
-    }
-    /* eslint-enable quote-props */
-}(); // eslint-disable-line
-
 
 /***/ }),
 
@@ -27124,9 +30781,6 @@ class LocalJWKSet {
             if (candidate && Array.isArray(jwk.key_ops)) {
                 candidate = jwk.key_ops.includes('verify');
             }
-            if (candidate && alg === 'EdDSA') {
-                candidate = jwk.crv === 'Ed25519' || jwk.crv === 'Ed448';
-            }
             if (candidate) {
                 switch (alg) {
                     case 'ES256':
@@ -27140,6 +30794,12 @@ class LocalJWKSet {
                         break;
                     case 'ES512':
                         candidate = jwk.crv === 'P-521';
+                        break;
+                    case 'Ed25519':
+                        candidate = jwk.crv === 'Ed25519';
+                        break;
+                    case 'EdDSA':
+                        candidate = jwk.crv === 'Ed25519' || jwk.crv === 'Ed448';
                         break;
                 }
             }
@@ -27213,7 +30873,7 @@ function isCloudflareWorkers() {
 let USER_AGENT;
 if (typeof navigator === 'undefined' || !navigator.userAgent?.startsWith?.('Mozilla/5.0 ')) {
     const NAME = 'jose';
-    const VERSION = 'v5.9.6';
+    const VERSION = 'v5.10.0';
     USER_AGENT = `${NAME}/${VERSION}`;
 }
 exports.jwksCache = Symbol();
@@ -28176,7 +31836,7 @@ async function importJWK(jwk, alg) {
             }
             return (0, base64url_js_1.decode)(jwk.k);
         case 'RSA':
-            if (jwk.oth !== undefined) {
+            if ('oth' in jwk && jwk.oth !== undefined) {
                 throw new errors_js_1.JOSENotSupported('RSA JWK "oth" (Other Primes Info) Parameter value is not supported');
             }
         case 'EC':
@@ -28524,6 +32184,11 @@ function checkSigCryptoKey(key, alg, ...usages) {
             if (key.algorithm.name !== 'Ed25519' && key.algorithm.name !== 'Ed448') {
                 throw unusable('Ed25519 or Ed448');
             }
+            break;
+        }
+        case 'Ed25519': {
+            if (!isAlgorithm(key.algorithm, 'Ed25519'))
+                throw unusable('Ed25519');
             break;
         }
         case 'ES256':
@@ -29674,6 +33339,7 @@ function dsaDigest(alg) {
         case 'RS512':
         case 'ES512':
             return 'sha512';
+        case 'Ed25519':
         case 'EdDSA':
             return undefined;
         default:
@@ -29974,6 +33640,8 @@ async function generateKeyPair(alg, options) {
             return generate('ec', { namedCurve: 'P-384' });
         case 'ES512':
             return generate('ec', { namedCurve: 'P-521' });
+        case 'Ed25519':
+            return generate('ed25519');
         case 'EdDSA': {
             switch (options?.crv) {
                 case undefined:
@@ -30288,6 +33956,11 @@ function keyForCrypto(alg, key) {
     }
     let options;
     switch (alg) {
+        case 'Ed25519':
+            if (asymmetricKeyType !== 'ed25519') {
+                throw new TypeError(`Invalid key for this operation, its asymmetricKeyType must be ed25519`);
+            }
+            break;
         case 'EdDSA':
             if (!['ed25519', 'ed448'].includes(asymmetricKeyType)) {
                 throw new TypeError('Invalid key for this operation, its asymmetricKeyType must be ed25519 or ed448');
@@ -30852,1369 +34525,6 @@ exports.JWSSignatureVerificationFailed = JWSSignatureVerificationFailed;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const runtime_js_1 = __nccwpck_require__(95527);
 exports["default"] = runtime_js_1.default;
-
-
-/***/ }),
-
-/***/ 95947:
-/***/ (function(module, exports) {
-
-(function(){
-
-    // Copyright (c) 2005  Tom Wu
-    // All Rights Reserved.
-    // See "LICENSE" for details.
-
-    // Basic JavaScript BN library - subset useful for RSA encryption.
-
-    // Bits per digit
-    var dbits;
-
-    // JavaScript engine analysis
-    var canary = 0xdeadbeefcafe;
-    var j_lm = ((canary&0xffffff)==0xefcafe);
-
-    // (public) Constructor
-    function BigInteger(a,b,c) {
-      if(a != null)
-        if("number" == typeof a) this.fromNumber(a,b,c);
-        else if(b == null && "string" != typeof a) this.fromString(a,256);
-        else this.fromString(a,b);
-    }
-
-    // return new, unset BigInteger
-    function nbi() { return new BigInteger(null); }
-
-    // am: Compute w_j += (x*this_i), propagate carries,
-    // c is initial carry, returns final carry.
-    // c < 3*dvalue, x < 2*dvalue, this_i < dvalue
-    // We need to select the fastest one that works in this environment.
-
-    // am1: use a single mult and divide to get the high bits,
-    // max digit bits should be 26 because
-    // max internal value = 2*dvalue^2-2*dvalue (< 2^53)
-    function am1(i,x,w,j,c,n) {
-      while(--n >= 0) {
-        var v = x*this[i++]+w[j]+c;
-        c = Math.floor(v/0x4000000);
-        w[j++] = v&0x3ffffff;
-      }
-      return c;
-    }
-    // am2 avoids a big mult-and-extract completely.
-    // Max digit bits should be <= 30 because we do bitwise ops
-    // on values up to 2*hdvalue^2-hdvalue-1 (< 2^31)
-    function am2(i,x,w,j,c,n) {
-      var xl = x&0x7fff, xh = x>>15;
-      while(--n >= 0) {
-        var l = this[i]&0x7fff;
-        var h = this[i++]>>15;
-        var m = xh*l+h*xl;
-        l = xl*l+((m&0x7fff)<<15)+w[j]+(c&0x3fffffff);
-        c = (l>>>30)+(m>>>15)+xh*h+(c>>>30);
-        w[j++] = l&0x3fffffff;
-      }
-      return c;
-    }
-    // Alternately, set max digit bits to 28 since some
-    // browsers slow down when dealing with 32-bit numbers.
-    function am3(i,x,w,j,c,n) {
-      var xl = x&0x3fff, xh = x>>14;
-      while(--n >= 0) {
-        var l = this[i]&0x3fff;
-        var h = this[i++]>>14;
-        var m = xh*l+h*xl;
-        l = xl*l+((m&0x3fff)<<14)+w[j]+c;
-        c = (l>>28)+(m>>14)+xh*h;
-        w[j++] = l&0xfffffff;
-      }
-      return c;
-    }
-    var inBrowser = typeof navigator !== "undefined";
-    if(inBrowser && j_lm && (navigator.appName == "Microsoft Internet Explorer")) {
-      BigInteger.prototype.am = am2;
-      dbits = 30;
-    }
-    else if(inBrowser && j_lm && (navigator.appName != "Netscape")) {
-      BigInteger.prototype.am = am1;
-      dbits = 26;
-    }
-    else { // Mozilla/Netscape seems to prefer am3
-      BigInteger.prototype.am = am3;
-      dbits = 28;
-    }
-
-    BigInteger.prototype.DB = dbits;
-    BigInteger.prototype.DM = ((1<<dbits)-1);
-    BigInteger.prototype.DV = (1<<dbits);
-
-    var BI_FP = 52;
-    BigInteger.prototype.FV = Math.pow(2,BI_FP);
-    BigInteger.prototype.F1 = BI_FP-dbits;
-    BigInteger.prototype.F2 = 2*dbits-BI_FP;
-
-    // Digit conversions
-    var BI_RM = "0123456789abcdefghijklmnopqrstuvwxyz";
-    var BI_RC = new Array();
-    var rr,vv;
-    rr = "0".charCodeAt(0);
-    for(vv = 0; vv <= 9; ++vv) BI_RC[rr++] = vv;
-    rr = "a".charCodeAt(0);
-    for(vv = 10; vv < 36; ++vv) BI_RC[rr++] = vv;
-    rr = "A".charCodeAt(0);
-    for(vv = 10; vv < 36; ++vv) BI_RC[rr++] = vv;
-
-    function int2char(n) { return BI_RM.charAt(n); }
-    function intAt(s,i) {
-      var c = BI_RC[s.charCodeAt(i)];
-      return (c==null)?-1:c;
-    }
-
-    // (protected) copy this to r
-    function bnpCopyTo(r) {
-      for(var i = this.t-1; i >= 0; --i) r[i] = this[i];
-      r.t = this.t;
-      r.s = this.s;
-    }
-
-    // (protected) set from integer value x, -DV <= x < DV
-    function bnpFromInt(x) {
-      this.t = 1;
-      this.s = (x<0)?-1:0;
-      if(x > 0) this[0] = x;
-      else if(x < -1) this[0] = x+this.DV;
-      else this.t = 0;
-    }
-
-    // return bigint initialized to value
-    function nbv(i) { var r = nbi(); r.fromInt(i); return r; }
-
-    // (protected) set from string and radix
-    function bnpFromString(s,b) {
-      var k;
-      if(b == 16) k = 4;
-      else if(b == 8) k = 3;
-      else if(b == 256) k = 8; // byte array
-      else if(b == 2) k = 1;
-      else if(b == 32) k = 5;
-      else if(b == 4) k = 2;
-      else { this.fromRadix(s,b); return; }
-      this.t = 0;
-      this.s = 0;
-      var i = s.length, mi = false, sh = 0;
-      while(--i >= 0) {
-        var x = (k==8)?s[i]&0xff:intAt(s,i);
-        if(x < 0) {
-          if(s.charAt(i) == "-") mi = true;
-          continue;
-        }
-        mi = false;
-        if(sh == 0)
-          this[this.t++] = x;
-        else if(sh+k > this.DB) {
-          this[this.t-1] |= (x&((1<<(this.DB-sh))-1))<<sh;
-          this[this.t++] = (x>>(this.DB-sh));
-        }
-        else
-          this[this.t-1] |= x<<sh;
-        sh += k;
-        if(sh >= this.DB) sh -= this.DB;
-      }
-      if(k == 8 && (s[0]&0x80) != 0) {
-        this.s = -1;
-        if(sh > 0) this[this.t-1] |= ((1<<(this.DB-sh))-1)<<sh;
-      }
-      this.clamp();
-      if(mi) BigInteger.ZERO.subTo(this,this);
-    }
-
-    // (protected) clamp off excess high words
-    function bnpClamp() {
-      var c = this.s&this.DM;
-      while(this.t > 0 && this[this.t-1] == c) --this.t;
-    }
-
-    // (public) return string representation in given radix
-    function bnToString(b) {
-      if(this.s < 0) return "-"+this.negate().toString(b);
-      var k;
-      if(b == 16) k = 4;
-      else if(b == 8) k = 3;
-      else if(b == 2) k = 1;
-      else if(b == 32) k = 5;
-      else if(b == 4) k = 2;
-      else return this.toRadix(b);
-      var km = (1<<k)-1, d, m = false, r = "", i = this.t;
-      var p = this.DB-(i*this.DB)%k;
-      if(i-- > 0) {
-        if(p < this.DB && (d = this[i]>>p) > 0) { m = true; r = int2char(d); }
-        while(i >= 0) {
-          if(p < k) {
-            d = (this[i]&((1<<p)-1))<<(k-p);
-            d |= this[--i]>>(p+=this.DB-k);
-          }
-          else {
-            d = (this[i]>>(p-=k))&km;
-            if(p <= 0) { p += this.DB; --i; }
-          }
-          if(d > 0) m = true;
-          if(m) r += int2char(d);
-        }
-      }
-      return m?r:"0";
-    }
-
-    // (public) -this
-    function bnNegate() { var r = nbi(); BigInteger.ZERO.subTo(this,r); return r; }
-
-    // (public) |this|
-    function bnAbs() { return (this.s<0)?this.negate():this; }
-
-    // (public) return + if this > a, - if this < a, 0 if equal
-    function bnCompareTo(a) {
-      var r = this.s-a.s;
-      if(r != 0) return r;
-      var i = this.t;
-      r = i-a.t;
-      if(r != 0) return (this.s<0)?-r:r;
-      while(--i >= 0) if((r=this[i]-a[i]) != 0) return r;
-      return 0;
-    }
-
-    // returns bit length of the integer x
-    function nbits(x) {
-      var r = 1, t;
-      if((t=x>>>16) != 0) { x = t; r += 16; }
-      if((t=x>>8) != 0) { x = t; r += 8; }
-      if((t=x>>4) != 0) { x = t; r += 4; }
-      if((t=x>>2) != 0) { x = t; r += 2; }
-      if((t=x>>1) != 0) { x = t; r += 1; }
-      return r;
-    }
-
-    // (public) return the number of bits in "this"
-    function bnBitLength() {
-      if(this.t <= 0) return 0;
-      return this.DB*(this.t-1)+nbits(this[this.t-1]^(this.s&this.DM));
-    }
-
-    // (protected) r = this << n*DB
-    function bnpDLShiftTo(n,r) {
-      var i;
-      for(i = this.t-1; i >= 0; --i) r[i+n] = this[i];
-      for(i = n-1; i >= 0; --i) r[i] = 0;
-      r.t = this.t+n;
-      r.s = this.s;
-    }
-
-    // (protected) r = this >> n*DB
-    function bnpDRShiftTo(n,r) {
-      for(var i = n; i < this.t; ++i) r[i-n] = this[i];
-      r.t = Math.max(this.t-n,0);
-      r.s = this.s;
-    }
-
-    // (protected) r = this << n
-    function bnpLShiftTo(n,r) {
-      var bs = n%this.DB;
-      var cbs = this.DB-bs;
-      var bm = (1<<cbs)-1;
-      var ds = Math.floor(n/this.DB), c = (this.s<<bs)&this.DM, i;
-      for(i = this.t-1; i >= 0; --i) {
-        r[i+ds+1] = (this[i]>>cbs)|c;
-        c = (this[i]&bm)<<bs;
-      }
-      for(i = ds-1; i >= 0; --i) r[i] = 0;
-      r[ds] = c;
-      r.t = this.t+ds+1;
-      r.s = this.s;
-      r.clamp();
-    }
-
-    // (protected) r = this >> n
-    function bnpRShiftTo(n,r) {
-      r.s = this.s;
-      var ds = Math.floor(n/this.DB);
-      if(ds >= this.t) { r.t = 0; return; }
-      var bs = n%this.DB;
-      var cbs = this.DB-bs;
-      var bm = (1<<bs)-1;
-      r[0] = this[ds]>>bs;
-      for(var i = ds+1; i < this.t; ++i) {
-        r[i-ds-1] |= (this[i]&bm)<<cbs;
-        r[i-ds] = this[i]>>bs;
-      }
-      if(bs > 0) r[this.t-ds-1] |= (this.s&bm)<<cbs;
-      r.t = this.t-ds;
-      r.clamp();
-    }
-
-    // (protected) r = this - a
-    function bnpSubTo(a,r) {
-      var i = 0, c = 0, m = Math.min(a.t,this.t);
-      while(i < m) {
-        c += this[i]-a[i];
-        r[i++] = c&this.DM;
-        c >>= this.DB;
-      }
-      if(a.t < this.t) {
-        c -= a.s;
-        while(i < this.t) {
-          c += this[i];
-          r[i++] = c&this.DM;
-          c >>= this.DB;
-        }
-        c += this.s;
-      }
-      else {
-        c += this.s;
-        while(i < a.t) {
-          c -= a[i];
-          r[i++] = c&this.DM;
-          c >>= this.DB;
-        }
-        c -= a.s;
-      }
-      r.s = (c<0)?-1:0;
-      if(c < -1) r[i++] = this.DV+c;
-      else if(c > 0) r[i++] = c;
-      r.t = i;
-      r.clamp();
-    }
-
-    // (protected) r = this * a, r != this,a (HAC 14.12)
-    // "this" should be the larger one if appropriate.
-    function bnpMultiplyTo(a,r) {
-      var x = this.abs(), y = a.abs();
-      var i = x.t;
-      r.t = i+y.t;
-      while(--i >= 0) r[i] = 0;
-      for(i = 0; i < y.t; ++i) r[i+x.t] = x.am(0,y[i],r,i,0,x.t);
-      r.s = 0;
-      r.clamp();
-      if(this.s != a.s) BigInteger.ZERO.subTo(r,r);
-    }
-
-    // (protected) r = this^2, r != this (HAC 14.16)
-    function bnpSquareTo(r) {
-      var x = this.abs();
-      var i = r.t = 2*x.t;
-      while(--i >= 0) r[i] = 0;
-      for(i = 0; i < x.t-1; ++i) {
-        var c = x.am(i,x[i],r,2*i,0,1);
-        if((r[i+x.t]+=x.am(i+1,2*x[i],r,2*i+1,c,x.t-i-1)) >= x.DV) {
-          r[i+x.t] -= x.DV;
-          r[i+x.t+1] = 1;
-        }
-      }
-      if(r.t > 0) r[r.t-1] += x.am(i,x[i],r,2*i,0,1);
-      r.s = 0;
-      r.clamp();
-    }
-
-    // (protected) divide this by m, quotient and remainder to q, r (HAC 14.20)
-    // r != q, this != m.  q or r may be null.
-    function bnpDivRemTo(m,q,r) {
-      var pm = m.abs();
-      if(pm.t <= 0) return;
-      var pt = this.abs();
-      if(pt.t < pm.t) {
-        if(q != null) q.fromInt(0);
-        if(r != null) this.copyTo(r);
-        return;
-      }
-      if(r == null) r = nbi();
-      var y = nbi(), ts = this.s, ms = m.s;
-      var nsh = this.DB-nbits(pm[pm.t-1]);   // normalize modulus
-      if(nsh > 0) { pm.lShiftTo(nsh,y); pt.lShiftTo(nsh,r); }
-      else { pm.copyTo(y); pt.copyTo(r); }
-      var ys = y.t;
-      var y0 = y[ys-1];
-      if(y0 == 0) return;
-      var yt = y0*(1<<this.F1)+((ys>1)?y[ys-2]>>this.F2:0);
-      var d1 = this.FV/yt, d2 = (1<<this.F1)/yt, e = 1<<this.F2;
-      var i = r.t, j = i-ys, t = (q==null)?nbi():q;
-      y.dlShiftTo(j,t);
-      if(r.compareTo(t) >= 0) {
-        r[r.t++] = 1;
-        r.subTo(t,r);
-      }
-      BigInteger.ONE.dlShiftTo(ys,t);
-      t.subTo(y,y);  // "negative" y so we can replace sub with am later
-      while(y.t < ys) y[y.t++] = 0;
-      while(--j >= 0) {
-        // Estimate quotient digit
-        var qd = (r[--i]==y0)?this.DM:Math.floor(r[i]*d1+(r[i-1]+e)*d2);
-        if((r[i]+=y.am(0,qd,r,j,0,ys)) < qd) {   // Try it out
-          y.dlShiftTo(j,t);
-          r.subTo(t,r);
-          while(r[i] < --qd) r.subTo(t,r);
-        }
-      }
-      if(q != null) {
-        r.drShiftTo(ys,q);
-        if(ts != ms) BigInteger.ZERO.subTo(q,q);
-      }
-      r.t = ys;
-      r.clamp();
-      if(nsh > 0) r.rShiftTo(nsh,r); // Denormalize remainder
-      if(ts < 0) BigInteger.ZERO.subTo(r,r);
-    }
-
-    // (public) this mod a
-    function bnMod(a) {
-      var r = nbi();
-      this.abs().divRemTo(a,null,r);
-      if(this.s < 0 && r.compareTo(BigInteger.ZERO) > 0) a.subTo(r,r);
-      return r;
-    }
-
-    // Modular reduction using "classic" algorithm
-    function Classic(m) { this.m = m; }
-    function cConvert(x) {
-      if(x.s < 0 || x.compareTo(this.m) >= 0) return x.mod(this.m);
-      else return x;
-    }
-    function cRevert(x) { return x; }
-    function cReduce(x) { x.divRemTo(this.m,null,x); }
-    function cMulTo(x,y,r) { x.multiplyTo(y,r); this.reduce(r); }
-    function cSqrTo(x,r) { x.squareTo(r); this.reduce(r); }
-
-    Classic.prototype.convert = cConvert;
-    Classic.prototype.revert = cRevert;
-    Classic.prototype.reduce = cReduce;
-    Classic.prototype.mulTo = cMulTo;
-    Classic.prototype.sqrTo = cSqrTo;
-
-    // (protected) return "-1/this % 2^DB"; useful for Mont. reduction
-    // justification:
-    //         xy == 1 (mod m)
-    //         xy =  1+km
-    //   xy(2-xy) = (1+km)(1-km)
-    // x[y(2-xy)] = 1-k^2m^2
-    // x[y(2-xy)] == 1 (mod m^2)
-    // if y is 1/x mod m, then y(2-xy) is 1/x mod m^2
-    // should reduce x and y(2-xy) by m^2 at each step to keep size bounded.
-    // JS multiply "overflows" differently from C/C++, so care is needed here.
-    function bnpInvDigit() {
-      if(this.t < 1) return 0;
-      var x = this[0];
-      if((x&1) == 0) return 0;
-      var y = x&3;       // y == 1/x mod 2^2
-      y = (y*(2-(x&0xf)*y))&0xf; // y == 1/x mod 2^4
-      y = (y*(2-(x&0xff)*y))&0xff;   // y == 1/x mod 2^8
-      y = (y*(2-(((x&0xffff)*y)&0xffff)))&0xffff;    // y == 1/x mod 2^16
-      // last step - calculate inverse mod DV directly;
-      // assumes 16 < DB <= 32 and assumes ability to handle 48-bit ints
-      y = (y*(2-x*y%this.DV))%this.DV;       // y == 1/x mod 2^dbits
-      // we really want the negative inverse, and -DV < y < DV
-      return (y>0)?this.DV-y:-y;
-    }
-
-    // Montgomery reduction
-    function Montgomery(m) {
-      this.m = m;
-      this.mp = m.invDigit();
-      this.mpl = this.mp&0x7fff;
-      this.mph = this.mp>>15;
-      this.um = (1<<(m.DB-15))-1;
-      this.mt2 = 2*m.t;
-    }
-
-    // xR mod m
-    function montConvert(x) {
-      var r = nbi();
-      x.abs().dlShiftTo(this.m.t,r);
-      r.divRemTo(this.m,null,r);
-      if(x.s < 0 && r.compareTo(BigInteger.ZERO) > 0) this.m.subTo(r,r);
-      return r;
-    }
-
-    // x/R mod m
-    function montRevert(x) {
-      var r = nbi();
-      x.copyTo(r);
-      this.reduce(r);
-      return r;
-    }
-
-    // x = x/R mod m (HAC 14.32)
-    function montReduce(x) {
-      while(x.t <= this.mt2) // pad x so am has enough room later
-        x[x.t++] = 0;
-      for(var i = 0; i < this.m.t; ++i) {
-        // faster way of calculating u0 = x[i]*mp mod DV
-        var j = x[i]&0x7fff;
-        var u0 = (j*this.mpl+(((j*this.mph+(x[i]>>15)*this.mpl)&this.um)<<15))&x.DM;
-        // use am to combine the multiply-shift-add into one call
-        j = i+this.m.t;
-        x[j] += this.m.am(0,u0,x,i,0,this.m.t);
-        // propagate carry
-        while(x[j] >= x.DV) { x[j] -= x.DV; x[++j]++; }
-      }
-      x.clamp();
-      x.drShiftTo(this.m.t,x);
-      if(x.compareTo(this.m) >= 0) x.subTo(this.m,x);
-    }
-
-    // r = "x^2/R mod m"; x != r
-    function montSqrTo(x,r) { x.squareTo(r); this.reduce(r); }
-
-    // r = "xy/R mod m"; x,y != r
-    function montMulTo(x,y,r) { x.multiplyTo(y,r); this.reduce(r); }
-
-    Montgomery.prototype.convert = montConvert;
-    Montgomery.prototype.revert = montRevert;
-    Montgomery.prototype.reduce = montReduce;
-    Montgomery.prototype.mulTo = montMulTo;
-    Montgomery.prototype.sqrTo = montSqrTo;
-
-    // (protected) true iff this is even
-    function bnpIsEven() { return ((this.t>0)?(this[0]&1):this.s) == 0; }
-
-    // (protected) this^e, e < 2^32, doing sqr and mul with "r" (HAC 14.79)
-    function bnpExp(e,z) {
-      if(e > 0xffffffff || e < 1) return BigInteger.ONE;
-      var r = nbi(), r2 = nbi(), g = z.convert(this), i = nbits(e)-1;
-      g.copyTo(r);
-      while(--i >= 0) {
-        z.sqrTo(r,r2);
-        if((e&(1<<i)) > 0) z.mulTo(r2,g,r);
-        else { var t = r; r = r2; r2 = t; }
-      }
-      return z.revert(r);
-    }
-
-    // (public) this^e % m, 0 <= e < 2^32
-    function bnModPowInt(e,m) {
-      var z;
-      if(e < 256 || m.isEven()) z = new Classic(m); else z = new Montgomery(m);
-      return this.exp(e,z);
-    }
-
-    // protected
-    BigInteger.prototype.copyTo = bnpCopyTo;
-    BigInteger.prototype.fromInt = bnpFromInt;
-    BigInteger.prototype.fromString = bnpFromString;
-    BigInteger.prototype.clamp = bnpClamp;
-    BigInteger.prototype.dlShiftTo = bnpDLShiftTo;
-    BigInteger.prototype.drShiftTo = bnpDRShiftTo;
-    BigInteger.prototype.lShiftTo = bnpLShiftTo;
-    BigInteger.prototype.rShiftTo = bnpRShiftTo;
-    BigInteger.prototype.subTo = bnpSubTo;
-    BigInteger.prototype.multiplyTo = bnpMultiplyTo;
-    BigInteger.prototype.squareTo = bnpSquareTo;
-    BigInteger.prototype.divRemTo = bnpDivRemTo;
-    BigInteger.prototype.invDigit = bnpInvDigit;
-    BigInteger.prototype.isEven = bnpIsEven;
-    BigInteger.prototype.exp = bnpExp;
-
-    // public
-    BigInteger.prototype.toString = bnToString;
-    BigInteger.prototype.negate = bnNegate;
-    BigInteger.prototype.abs = bnAbs;
-    BigInteger.prototype.compareTo = bnCompareTo;
-    BigInteger.prototype.bitLength = bnBitLength;
-    BigInteger.prototype.mod = bnMod;
-    BigInteger.prototype.modPowInt = bnModPowInt;
-
-    // "constants"
-    BigInteger.ZERO = nbv(0);
-    BigInteger.ONE = nbv(1);
-
-    // Copyright (c) 2005-2009  Tom Wu
-    // All Rights Reserved.
-    // See "LICENSE" for details.
-
-    // Extended JavaScript BN functions, required for RSA private ops.
-
-    // Version 1.1: new BigInteger("0", 10) returns "proper" zero
-    // Version 1.2: square() API, isProbablePrime fix
-
-    // (public)
-    function bnClone() { var r = nbi(); this.copyTo(r); return r; }
-
-    // (public) return value as integer
-    function bnIntValue() {
-      if(this.s < 0) {
-        if(this.t == 1) return this[0]-this.DV;
-        else if(this.t == 0) return -1;
-      }
-      else if(this.t == 1) return this[0];
-      else if(this.t == 0) return 0;
-      // assumes 16 < DB < 32
-      return ((this[1]&((1<<(32-this.DB))-1))<<this.DB)|this[0];
-    }
-
-    // (public) return value as byte
-    function bnByteValue() { return (this.t==0)?this.s:(this[0]<<24)>>24; }
-
-    // (public) return value as short (assumes DB>=16)
-    function bnShortValue() { return (this.t==0)?this.s:(this[0]<<16)>>16; }
-
-    // (protected) return x s.t. r^x < DV
-    function bnpChunkSize(r) { return Math.floor(Math.LN2*this.DB/Math.log(r)); }
-
-    // (public) 0 if this == 0, 1 if this > 0
-    function bnSigNum() {
-      if(this.s < 0) return -1;
-      else if(this.t <= 0 || (this.t == 1 && this[0] <= 0)) return 0;
-      else return 1;
-    }
-
-    // (protected) convert to radix string
-    function bnpToRadix(b) {
-      if(b == null) b = 10;
-      if(this.signum() == 0 || b < 2 || b > 36) return "0";
-      var cs = this.chunkSize(b);
-      var a = Math.pow(b,cs);
-      var d = nbv(a), y = nbi(), z = nbi(), r = "";
-      this.divRemTo(d,y,z);
-      while(y.signum() > 0) {
-        r = (a+z.intValue()).toString(b).substr(1) + r;
-        y.divRemTo(d,y,z);
-      }
-      return z.intValue().toString(b) + r;
-    }
-
-    // (protected) convert from radix string
-    function bnpFromRadix(s,b) {
-      this.fromInt(0);
-      if(b == null) b = 10;
-      var cs = this.chunkSize(b);
-      var d = Math.pow(b,cs), mi = false, j = 0, w = 0;
-      for(var i = 0; i < s.length; ++i) {
-        var x = intAt(s,i);
-        if(x < 0) {
-          if(s.charAt(i) == "-" && this.signum() == 0) mi = true;
-          continue;
-        }
-        w = b*w+x;
-        if(++j >= cs) {
-          this.dMultiply(d);
-          this.dAddOffset(w,0);
-          j = 0;
-          w = 0;
-        }
-      }
-      if(j > 0) {
-        this.dMultiply(Math.pow(b,j));
-        this.dAddOffset(w,0);
-      }
-      if(mi) BigInteger.ZERO.subTo(this,this);
-    }
-
-    // (protected) alternate constructor
-    function bnpFromNumber(a,b,c) {
-      if("number" == typeof b) {
-        // new BigInteger(int,int,RNG)
-        if(a < 2) this.fromInt(1);
-        else {
-          this.fromNumber(a,c);
-          if(!this.testBit(a-1))    // force MSB set
-            this.bitwiseTo(BigInteger.ONE.shiftLeft(a-1),op_or,this);
-          if(this.isEven()) this.dAddOffset(1,0); // force odd
-          while(!this.isProbablePrime(b)) {
-            this.dAddOffset(2,0);
-            if(this.bitLength() > a) this.subTo(BigInteger.ONE.shiftLeft(a-1),this);
-          }
-        }
-      }
-      else {
-        // new BigInteger(int,RNG)
-        var x = new Array(), t = a&7;
-        x.length = (a>>3)+1;
-        b.nextBytes(x);
-        if(t > 0) x[0] &= ((1<<t)-1); else x[0] = 0;
-        this.fromString(x,256);
-      }
-    }
-
-    // (public) convert to bigendian byte array
-    function bnToByteArray() {
-      var i = this.t, r = new Array();
-      r[0] = this.s;
-      var p = this.DB-(i*this.DB)%8, d, k = 0;
-      if(i-- > 0) {
-        if(p < this.DB && (d = this[i]>>p) != (this.s&this.DM)>>p)
-          r[k++] = d|(this.s<<(this.DB-p));
-        while(i >= 0) {
-          if(p < 8) {
-            d = (this[i]&((1<<p)-1))<<(8-p);
-            d |= this[--i]>>(p+=this.DB-8);
-          }
-          else {
-            d = (this[i]>>(p-=8))&0xff;
-            if(p <= 0) { p += this.DB; --i; }
-          }
-          if((d&0x80) != 0) d |= -256;
-          if(k == 0 && (this.s&0x80) != (d&0x80)) ++k;
-          if(k > 0 || d != this.s) r[k++] = d;
-        }
-      }
-      return r;
-    }
-
-    function bnEquals(a) { return(this.compareTo(a)==0); }
-    function bnMin(a) { return(this.compareTo(a)<0)?this:a; }
-    function bnMax(a) { return(this.compareTo(a)>0)?this:a; }
-
-    // (protected) r = this op a (bitwise)
-    function bnpBitwiseTo(a,op,r) {
-      var i, f, m = Math.min(a.t,this.t);
-      for(i = 0; i < m; ++i) r[i] = op(this[i],a[i]);
-      if(a.t < this.t) {
-        f = a.s&this.DM;
-        for(i = m; i < this.t; ++i) r[i] = op(this[i],f);
-        r.t = this.t;
-      }
-      else {
-        f = this.s&this.DM;
-        for(i = m; i < a.t; ++i) r[i] = op(f,a[i]);
-        r.t = a.t;
-      }
-      r.s = op(this.s,a.s);
-      r.clamp();
-    }
-
-    // (public) this & a
-    function op_and(x,y) { return x&y; }
-    function bnAnd(a) { var r = nbi(); this.bitwiseTo(a,op_and,r); return r; }
-
-    // (public) this | a
-    function op_or(x,y) { return x|y; }
-    function bnOr(a) { var r = nbi(); this.bitwiseTo(a,op_or,r); return r; }
-
-    // (public) this ^ a
-    function op_xor(x,y) { return x^y; }
-    function bnXor(a) { var r = nbi(); this.bitwiseTo(a,op_xor,r); return r; }
-
-    // (public) this & ~a
-    function op_andnot(x,y) { return x&~y; }
-    function bnAndNot(a) { var r = nbi(); this.bitwiseTo(a,op_andnot,r); return r; }
-
-    // (public) ~this
-    function bnNot() {
-      var r = nbi();
-      for(var i = 0; i < this.t; ++i) r[i] = this.DM&~this[i];
-      r.t = this.t;
-      r.s = ~this.s;
-      return r;
-    }
-
-    // (public) this << n
-    function bnShiftLeft(n) {
-      var r = nbi();
-      if(n < 0) this.rShiftTo(-n,r); else this.lShiftTo(n,r);
-      return r;
-    }
-
-    // (public) this >> n
-    function bnShiftRight(n) {
-      var r = nbi();
-      if(n < 0) this.lShiftTo(-n,r); else this.rShiftTo(n,r);
-      return r;
-    }
-
-    // return index of lowest 1-bit in x, x < 2^31
-    function lbit(x) {
-      if(x == 0) return -1;
-      var r = 0;
-      if((x&0xffff) == 0) { x >>= 16; r += 16; }
-      if((x&0xff) == 0) { x >>= 8; r += 8; }
-      if((x&0xf) == 0) { x >>= 4; r += 4; }
-      if((x&3) == 0) { x >>= 2; r += 2; }
-      if((x&1) == 0) ++r;
-      return r;
-    }
-
-    // (public) returns index of lowest 1-bit (or -1 if none)
-    function bnGetLowestSetBit() {
-      for(var i = 0; i < this.t; ++i)
-        if(this[i] != 0) return i*this.DB+lbit(this[i]);
-      if(this.s < 0) return this.t*this.DB;
-      return -1;
-    }
-
-    // return number of 1 bits in x
-    function cbit(x) {
-      var r = 0;
-      while(x != 0) { x &= x-1; ++r; }
-      return r;
-    }
-
-    // (public) return number of set bits
-    function bnBitCount() {
-      var r = 0, x = this.s&this.DM;
-      for(var i = 0; i < this.t; ++i) r += cbit(this[i]^x);
-      return r;
-    }
-
-    // (public) true iff nth bit is set
-    function bnTestBit(n) {
-      var j = Math.floor(n/this.DB);
-      if(j >= this.t) return(this.s!=0);
-      return((this[j]&(1<<(n%this.DB)))!=0);
-    }
-
-    // (protected) this op (1<<n)
-    function bnpChangeBit(n,op) {
-      var r = BigInteger.ONE.shiftLeft(n);
-      this.bitwiseTo(r,op,r);
-      return r;
-    }
-
-    // (public) this | (1<<n)
-    function bnSetBit(n) { return this.changeBit(n,op_or); }
-
-    // (public) this & ~(1<<n)
-    function bnClearBit(n) { return this.changeBit(n,op_andnot); }
-
-    // (public) this ^ (1<<n)
-    function bnFlipBit(n) { return this.changeBit(n,op_xor); }
-
-    // (protected) r = this + a
-    function bnpAddTo(a,r) {
-      var i = 0, c = 0, m = Math.min(a.t,this.t);
-      while(i < m) {
-        c += this[i]+a[i];
-        r[i++] = c&this.DM;
-        c >>= this.DB;
-      }
-      if(a.t < this.t) {
-        c += a.s;
-        while(i < this.t) {
-          c += this[i];
-          r[i++] = c&this.DM;
-          c >>= this.DB;
-        }
-        c += this.s;
-      }
-      else {
-        c += this.s;
-        while(i < a.t) {
-          c += a[i];
-          r[i++] = c&this.DM;
-          c >>= this.DB;
-        }
-        c += a.s;
-      }
-      r.s = (c<0)?-1:0;
-      if(c > 0) r[i++] = c;
-      else if(c < -1) r[i++] = this.DV+c;
-      r.t = i;
-      r.clamp();
-    }
-
-    // (public) this + a
-    function bnAdd(a) { var r = nbi(); this.addTo(a,r); return r; }
-
-    // (public) this - a
-    function bnSubtract(a) { var r = nbi(); this.subTo(a,r); return r; }
-
-    // (public) this * a
-    function bnMultiply(a) { var r = nbi(); this.multiplyTo(a,r); return r; }
-
-    // (public) this^2
-    function bnSquare() { var r = nbi(); this.squareTo(r); return r; }
-
-    // (public) this / a
-    function bnDivide(a) { var r = nbi(); this.divRemTo(a,r,null); return r; }
-
-    // (public) this % a
-    function bnRemainder(a) { var r = nbi(); this.divRemTo(a,null,r); return r; }
-
-    // (public) [this/a,this%a]
-    function bnDivideAndRemainder(a) {
-      var q = nbi(), r = nbi();
-      this.divRemTo(a,q,r);
-      return new Array(q,r);
-    }
-
-    // (protected) this *= n, this >= 0, 1 < n < DV
-    function bnpDMultiply(n) {
-      this[this.t] = this.am(0,n-1,this,0,0,this.t);
-      ++this.t;
-      this.clamp();
-    }
-
-    // (protected) this += n << w words, this >= 0
-    function bnpDAddOffset(n,w) {
-      if(n == 0) return;
-      while(this.t <= w) this[this.t++] = 0;
-      this[w] += n;
-      while(this[w] >= this.DV) {
-        this[w] -= this.DV;
-        if(++w >= this.t) this[this.t++] = 0;
-        ++this[w];
-      }
-    }
-
-    // A "null" reducer
-    function NullExp() {}
-    function nNop(x) { return x; }
-    function nMulTo(x,y,r) { x.multiplyTo(y,r); }
-    function nSqrTo(x,r) { x.squareTo(r); }
-
-    NullExp.prototype.convert = nNop;
-    NullExp.prototype.revert = nNop;
-    NullExp.prototype.mulTo = nMulTo;
-    NullExp.prototype.sqrTo = nSqrTo;
-
-    // (public) this^e
-    function bnPow(e) { return this.exp(e,new NullExp()); }
-
-    // (protected) r = lower n words of "this * a", a.t <= n
-    // "this" should be the larger one if appropriate.
-    function bnpMultiplyLowerTo(a,n,r) {
-      var i = Math.min(this.t+a.t,n);
-      r.s = 0; // assumes a,this >= 0
-      r.t = i;
-      while(i > 0) r[--i] = 0;
-      var j;
-      for(j = r.t-this.t; i < j; ++i) r[i+this.t] = this.am(0,a[i],r,i,0,this.t);
-      for(j = Math.min(a.t,n); i < j; ++i) this.am(0,a[i],r,i,0,n-i);
-      r.clamp();
-    }
-
-    // (protected) r = "this * a" without lower n words, n > 0
-    // "this" should be the larger one if appropriate.
-    function bnpMultiplyUpperTo(a,n,r) {
-      --n;
-      var i = r.t = this.t+a.t-n;
-      r.s = 0; // assumes a,this >= 0
-      while(--i >= 0) r[i] = 0;
-      for(i = Math.max(n-this.t,0); i < a.t; ++i)
-        r[this.t+i-n] = this.am(n-i,a[i],r,0,0,this.t+i-n);
-      r.clamp();
-      r.drShiftTo(1,r);
-    }
-
-    // Barrett modular reduction
-    function Barrett(m) {
-      // setup Barrett
-      this.r2 = nbi();
-      this.q3 = nbi();
-      BigInteger.ONE.dlShiftTo(2*m.t,this.r2);
-      this.mu = this.r2.divide(m);
-      this.m = m;
-    }
-
-    function barrettConvert(x) {
-      if(x.s < 0 || x.t > 2*this.m.t) return x.mod(this.m);
-      else if(x.compareTo(this.m) < 0) return x;
-      else { var r = nbi(); x.copyTo(r); this.reduce(r); return r; }
-    }
-
-    function barrettRevert(x) { return x; }
-
-    // x = x mod m (HAC 14.42)
-    function barrettReduce(x) {
-      x.drShiftTo(this.m.t-1,this.r2);
-      if(x.t > this.m.t+1) { x.t = this.m.t+1; x.clamp(); }
-      this.mu.multiplyUpperTo(this.r2,this.m.t+1,this.q3);
-      this.m.multiplyLowerTo(this.q3,this.m.t+1,this.r2);
-      while(x.compareTo(this.r2) < 0) x.dAddOffset(1,this.m.t+1);
-      x.subTo(this.r2,x);
-      while(x.compareTo(this.m) >= 0) x.subTo(this.m,x);
-    }
-
-    // r = x^2 mod m; x != r
-    function barrettSqrTo(x,r) { x.squareTo(r); this.reduce(r); }
-
-    // r = x*y mod m; x,y != r
-    function barrettMulTo(x,y,r) { x.multiplyTo(y,r); this.reduce(r); }
-
-    Barrett.prototype.convert = barrettConvert;
-    Barrett.prototype.revert = barrettRevert;
-    Barrett.prototype.reduce = barrettReduce;
-    Barrett.prototype.mulTo = barrettMulTo;
-    Barrett.prototype.sqrTo = barrettSqrTo;
-
-    // (public) this^e % m (HAC 14.85)
-    function bnModPow(e,m) {
-      var i = e.bitLength(), k, r = nbv(1), z;
-      if(i <= 0) return r;
-      else if(i < 18) k = 1;
-      else if(i < 48) k = 3;
-      else if(i < 144) k = 4;
-      else if(i < 768) k = 5;
-      else k = 6;
-      if(i < 8)
-        z = new Classic(m);
-      else if(m.isEven())
-        z = new Barrett(m);
-      else
-        z = new Montgomery(m);
-
-      // precomputation
-      var g = new Array(), n = 3, k1 = k-1, km = (1<<k)-1;
-      g[1] = z.convert(this);
-      if(k > 1) {
-        var g2 = nbi();
-        z.sqrTo(g[1],g2);
-        while(n <= km) {
-          g[n] = nbi();
-          z.mulTo(g2,g[n-2],g[n]);
-          n += 2;
-        }
-      }
-
-      var j = e.t-1, w, is1 = true, r2 = nbi(), t;
-      i = nbits(e[j])-1;
-      while(j >= 0) {
-        if(i >= k1) w = (e[j]>>(i-k1))&km;
-        else {
-          w = (e[j]&((1<<(i+1))-1))<<(k1-i);
-          if(j > 0) w |= e[j-1]>>(this.DB+i-k1);
-        }
-
-        n = k;
-        while((w&1) == 0) { w >>= 1; --n; }
-        if((i -= n) < 0) { i += this.DB; --j; }
-        if(is1) {    // ret == 1, don't bother squaring or multiplying it
-          g[w].copyTo(r);
-          is1 = false;
-        }
-        else {
-          while(n > 1) { z.sqrTo(r,r2); z.sqrTo(r2,r); n -= 2; }
-          if(n > 0) z.sqrTo(r,r2); else { t = r; r = r2; r2 = t; }
-          z.mulTo(r2,g[w],r);
-        }
-
-        while(j >= 0 && (e[j]&(1<<i)) == 0) {
-          z.sqrTo(r,r2); t = r; r = r2; r2 = t;
-          if(--i < 0) { i = this.DB-1; --j; }
-        }
-      }
-      return z.revert(r);
-    }
-
-    // (public) gcd(this,a) (HAC 14.54)
-    function bnGCD(a) {
-      var x = (this.s<0)?this.negate():this.clone();
-      var y = (a.s<0)?a.negate():a.clone();
-      if(x.compareTo(y) < 0) { var t = x; x = y; y = t; }
-      var i = x.getLowestSetBit(), g = y.getLowestSetBit();
-      if(g < 0) return x;
-      if(i < g) g = i;
-      if(g > 0) {
-        x.rShiftTo(g,x);
-        y.rShiftTo(g,y);
-      }
-      while(x.signum() > 0) {
-        if((i = x.getLowestSetBit()) > 0) x.rShiftTo(i,x);
-        if((i = y.getLowestSetBit()) > 0) y.rShiftTo(i,y);
-        if(x.compareTo(y) >= 0) {
-          x.subTo(y,x);
-          x.rShiftTo(1,x);
-        }
-        else {
-          y.subTo(x,y);
-          y.rShiftTo(1,y);
-        }
-      }
-      if(g > 0) y.lShiftTo(g,y);
-      return y;
-    }
-
-    // (protected) this % n, n < 2^26
-    function bnpModInt(n) {
-      if(n <= 0) return 0;
-      var d = this.DV%n, r = (this.s<0)?n-1:0;
-      if(this.t > 0)
-        if(d == 0) r = this[0]%n;
-        else for(var i = this.t-1; i >= 0; --i) r = (d*r+this[i])%n;
-      return r;
-    }
-
-    // (public) 1/this % m (HAC 14.61)
-    function bnModInverse(m) {
-      var ac = m.isEven();
-      if((this.isEven() && ac) || m.signum() == 0) return BigInteger.ZERO;
-      var u = m.clone(), v = this.clone();
-      var a = nbv(1), b = nbv(0), c = nbv(0), d = nbv(1);
-      while(u.signum() != 0) {
-        while(u.isEven()) {
-          u.rShiftTo(1,u);
-          if(ac) {
-            if(!a.isEven() || !b.isEven()) { a.addTo(this,a); b.subTo(m,b); }
-            a.rShiftTo(1,a);
-          }
-          else if(!b.isEven()) b.subTo(m,b);
-          b.rShiftTo(1,b);
-        }
-        while(v.isEven()) {
-          v.rShiftTo(1,v);
-          if(ac) {
-            if(!c.isEven() || !d.isEven()) { c.addTo(this,c); d.subTo(m,d); }
-            c.rShiftTo(1,c);
-          }
-          else if(!d.isEven()) d.subTo(m,d);
-          d.rShiftTo(1,d);
-        }
-        if(u.compareTo(v) >= 0) {
-          u.subTo(v,u);
-          if(ac) a.subTo(c,a);
-          b.subTo(d,b);
-        }
-        else {
-          v.subTo(u,v);
-          if(ac) c.subTo(a,c);
-          d.subTo(b,d);
-        }
-      }
-      if(v.compareTo(BigInteger.ONE) != 0) return BigInteger.ZERO;
-      if(d.compareTo(m) >= 0) return d.subtract(m);
-      if(d.signum() < 0) d.addTo(m,d); else return d;
-      if(d.signum() < 0) return d.add(m); else return d;
-    }
-
-    var lowprimes = [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97,101,103,107,109,113,127,131,137,139,149,151,157,163,167,173,179,181,191,193,197,199,211,223,227,229,233,239,241,251,257,263,269,271,277,281,283,293,307,311,313,317,331,337,347,349,353,359,367,373,379,383,389,397,401,409,419,421,431,433,439,443,449,457,461,463,467,479,487,491,499,503,509,521,523,541,547,557,563,569,571,577,587,593,599,601,607,613,617,619,631,641,643,647,653,659,661,673,677,683,691,701,709,719,727,733,739,743,751,757,761,769,773,787,797,809,811,821,823,827,829,839,853,857,859,863,877,881,883,887,907,911,919,929,937,941,947,953,967,971,977,983,991,997];
-    var lplim = (1<<26)/lowprimes[lowprimes.length-1];
-
-    // (public) test primality with certainty >= 1-.5^t
-    function bnIsProbablePrime(t) {
-      var i, x = this.abs();
-      if(x.t == 1 && x[0] <= lowprimes[lowprimes.length-1]) {
-        for(i = 0; i < lowprimes.length; ++i)
-          if(x[0] == lowprimes[i]) return true;
-        return false;
-      }
-      if(x.isEven()) return false;
-      i = 1;
-      while(i < lowprimes.length) {
-        var m = lowprimes[i], j = i+1;
-        while(j < lowprimes.length && m < lplim) m *= lowprimes[j++];
-        m = x.modInt(m);
-        while(i < j) if(m%lowprimes[i++] == 0) return false;
-      }
-      return x.millerRabin(t);
-    }
-
-    // (protected) true if probably prime (HAC 4.24, Miller-Rabin)
-    function bnpMillerRabin(t) {
-      var n1 = this.subtract(BigInteger.ONE);
-      var k = n1.getLowestSetBit();
-      if(k <= 0) return false;
-      var r = n1.shiftRight(k);
-      t = (t+1)>>1;
-      if(t > lowprimes.length) t = lowprimes.length;
-      var a = nbi();
-      for(var i = 0; i < t; ++i) {
-        //Pick bases at random, instead of starting at 2
-        a.fromInt(lowprimes[Math.floor(Math.random()*lowprimes.length)]);
-        var y = a.modPow(r,this);
-        if(y.compareTo(BigInteger.ONE) != 0 && y.compareTo(n1) != 0) {
-          var j = 1;
-          while(j++ < k && y.compareTo(n1) != 0) {
-            y = y.modPowInt(2,this);
-            if(y.compareTo(BigInteger.ONE) == 0) return false;
-          }
-          if(y.compareTo(n1) != 0) return false;
-        }
-      }
-      return true;
-    }
-
-    // protected
-    BigInteger.prototype.chunkSize = bnpChunkSize;
-    BigInteger.prototype.toRadix = bnpToRadix;
-    BigInteger.prototype.fromRadix = bnpFromRadix;
-    BigInteger.prototype.fromNumber = bnpFromNumber;
-    BigInteger.prototype.bitwiseTo = bnpBitwiseTo;
-    BigInteger.prototype.changeBit = bnpChangeBit;
-    BigInteger.prototype.addTo = bnpAddTo;
-    BigInteger.prototype.dMultiply = bnpDMultiply;
-    BigInteger.prototype.dAddOffset = bnpDAddOffset;
-    BigInteger.prototype.multiplyLowerTo = bnpMultiplyLowerTo;
-    BigInteger.prototype.multiplyUpperTo = bnpMultiplyUpperTo;
-    BigInteger.prototype.modInt = bnpModInt;
-    BigInteger.prototype.millerRabin = bnpMillerRabin;
-
-    // public
-    BigInteger.prototype.clone = bnClone;
-    BigInteger.prototype.intValue = bnIntValue;
-    BigInteger.prototype.byteValue = bnByteValue;
-    BigInteger.prototype.shortValue = bnShortValue;
-    BigInteger.prototype.signum = bnSigNum;
-    BigInteger.prototype.toByteArray = bnToByteArray;
-    BigInteger.prototype.equals = bnEquals;
-    BigInteger.prototype.min = bnMin;
-    BigInteger.prototype.max = bnMax;
-    BigInteger.prototype.and = bnAnd;
-    BigInteger.prototype.or = bnOr;
-    BigInteger.prototype.xor = bnXor;
-    BigInteger.prototype.andNot = bnAndNot;
-    BigInteger.prototype.not = bnNot;
-    BigInteger.prototype.shiftLeft = bnShiftLeft;
-    BigInteger.prototype.shiftRight = bnShiftRight;
-    BigInteger.prototype.getLowestSetBit = bnGetLowestSetBit;
-    BigInteger.prototype.bitCount = bnBitCount;
-    BigInteger.prototype.testBit = bnTestBit;
-    BigInteger.prototype.setBit = bnSetBit;
-    BigInteger.prototype.clearBit = bnClearBit;
-    BigInteger.prototype.flipBit = bnFlipBit;
-    BigInteger.prototype.add = bnAdd;
-    BigInteger.prototype.subtract = bnSubtract;
-    BigInteger.prototype.multiply = bnMultiply;
-    BigInteger.prototype.divide = bnDivide;
-    BigInteger.prototype.remainder = bnRemainder;
-    BigInteger.prototype.divideAndRemainder = bnDivideAndRemainder;
-    BigInteger.prototype.modPow = bnModPow;
-    BigInteger.prototype.modInverse = bnModInverse;
-    BigInteger.prototype.pow = bnPow;
-    BigInteger.prototype.gcd = bnGCD;
-    BigInteger.prototype.isProbablePrime = bnIsProbablePrime;
-
-    // JSBN-specific extension
-    BigInteger.prototype.square = bnSquare;
-
-    // Expose the Barrett function
-    BigInteger.prototype.Barrett = Barrett
-
-    // BigInteger interfaces not implemented in jsbn:
-
-    // BigInteger(int signum, byte[] magnitude)
-    // double doubleValue()
-    // float floatValue()
-    // int hashCode()
-    // long longValue()
-    // static BigInteger valueOf(long val)
-
-    // Random number generator - requires a PRNG backend, e.g. prng4.js
-
-    // For best results, put code like
-    // <body onClick='rng_seed_time();' onKeyPress='rng_seed_time();'>
-    // in your main HTML document.
-
-    var rng_state;
-    var rng_pool;
-    var rng_pptr;
-
-    // Mix in a 32-bit integer into the pool
-    function rng_seed_int(x) {
-      rng_pool[rng_pptr++] ^= x & 255;
-      rng_pool[rng_pptr++] ^= (x >> 8) & 255;
-      rng_pool[rng_pptr++] ^= (x >> 16) & 255;
-      rng_pool[rng_pptr++] ^= (x >> 24) & 255;
-      if(rng_pptr >= rng_psize) rng_pptr -= rng_psize;
-    }
-
-    // Mix in the current time (w/milliseconds) into the pool
-    function rng_seed_time() {
-      rng_seed_int(new Date().getTime());
-    }
-
-    // Initialize the pool with junk if needed.
-    if(rng_pool == null) {
-      rng_pool = new Array();
-      rng_pptr = 0;
-      var t;
-      if(typeof window !== "undefined" && window.crypto) {
-        if (window.crypto.getRandomValues) {
-          // Use webcrypto if available
-          var ua = new Uint8Array(32);
-          window.crypto.getRandomValues(ua);
-          for(t = 0; t < 32; ++t)
-            rng_pool[rng_pptr++] = ua[t];
-        }
-        else if(navigator.appName == "Netscape" && navigator.appVersion < "5") {
-          // Extract entropy (256 bits) from NS4 RNG if available
-          var z = window.crypto.random(32);
-          for(t = 0; t < z.length; ++t)
-            rng_pool[rng_pptr++] = z.charCodeAt(t) & 255;
-        }
-      }
-      while(rng_pptr < rng_psize) {  // extract some randomness from Math.random()
-        t = Math.floor(65536 * Math.random());
-        rng_pool[rng_pptr++] = t >>> 8;
-        rng_pool[rng_pptr++] = t & 255;
-      }
-      rng_pptr = 0;
-      rng_seed_time();
-      //rng_seed_int(window.screenX);
-      //rng_seed_int(window.screenY);
-    }
-
-    function rng_get_byte() {
-      if(rng_state == null) {
-        rng_seed_time();
-        rng_state = prng_newstate();
-        rng_state.init(rng_pool);
-        for(rng_pptr = 0; rng_pptr < rng_pool.length; ++rng_pptr)
-          rng_pool[rng_pptr] = 0;
-        rng_pptr = 0;
-        //rng_pool = null;
-      }
-      // TODO: allow reseeding after first request
-      return rng_state.next();
-    }
-
-    function rng_get_bytes(ba) {
-      var i;
-      for(i = 0; i < ba.length; ++i) ba[i] = rng_get_byte();
-    }
-
-    function SecureRandom() {}
-
-    SecureRandom.prototype.nextBytes = rng_get_bytes;
-
-    // prng4.js - uses Arcfour as a PRNG
-
-    function Arcfour() {
-      this.i = 0;
-      this.j = 0;
-      this.S = new Array();
-    }
-
-    // Initialize arcfour context from key, an array of ints, each from [0..255]
-    function ARC4init(key) {
-      var i, j, t;
-      for(i = 0; i < 256; ++i)
-        this.S[i] = i;
-      j = 0;
-      for(i = 0; i < 256; ++i) {
-        j = (j + this.S[i] + key[i % key.length]) & 255;
-        t = this.S[i];
-        this.S[i] = this.S[j];
-        this.S[j] = t;
-      }
-      this.i = 0;
-      this.j = 0;
-    }
-
-    function ARC4next() {
-      var t;
-      this.i = (this.i + 1) & 255;
-      this.j = (this.j + this.S[this.i]) & 255;
-      t = this.S[this.i];
-      this.S[this.i] = this.S[this.j];
-      this.S[this.j] = t;
-      return this.S[(t + this.S[this.i]) & 255];
-    }
-
-    Arcfour.prototype.init = ARC4init;
-    Arcfour.prototype.next = ARC4next;
-
-    // Plug in your RNG constructor here
-    function prng_newstate() {
-      return new Arcfour();
-    }
-
-    // Pool size must be a multiple of 4 and greater than 32.
-    // An array of bytes the size of the pool will be passed to init()
-    var rng_psize = 256;
-
-    if (true) {
-        exports = module.exports = {
-            default: BigInteger,
-            BigInteger: BigInteger,
-            SecureRandom: SecureRandom,
-        };
-    } else {}
-
-}).call(this);
 
 
 /***/ }),
@@ -34596,8 +36906,7 @@ const fetch = async (url, opts) => {
       if (codings === 'deflate' || codings === 'x-deflate') {
         // handle the infamous raw deflate response from old servers
         // a hack for old IIS and Apache servers
-        const raw = res.pipe(new Minipass())
-        raw.once('data', chunk => {
+        res.once('data', chunk => {
           // see http://stackoverflow.com/questions/37519828
           const decoder = (chunk[0] & 0x0F) === 0x08
             ? new zlib.Inflate()
@@ -39046,6 +41355,9 @@ module.exports = safer
 /***/ 89379:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const ANY = Symbol('SemVer ANY')
 // hoisted class for cyclic dependency
 class Comparator {
@@ -39193,6 +41505,9 @@ const Range = __nccwpck_require__(96782)
 
 /***/ 96782:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const SPACE_CHARACTERS = /\s+/g
 
@@ -39449,6 +41764,7 @@ const isSatisfiable = (comparators, options) => {
 // already replaced the hyphen ranges
 // turn into a set of JUST comparators.
 const parseComparator = (comp, options) => {
+  comp = comp.replace(re[t.BUILD], '')
   debug('comp', comp, options)
   comp = replaceCarets(comp, options)
   debug('caret', comp)
@@ -39755,9 +42071,12 @@ const testSet = (set, version, options) => {
 /***/ 7163:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const debug = __nccwpck_require__(1159)
 const { MAX_LENGTH, MAX_SAFE_INTEGER } = __nccwpck_require__(45101)
-const { safeRe: re, safeSrc: src, t } = __nccwpck_require__(95471)
+const { safeRe: re, t } = __nccwpck_require__(95471)
 
 const parseOptions = __nccwpck_require__(70356)
 const { compareIdentifiers } = __nccwpck_require__(73348)
@@ -39866,11 +42185,25 @@ class SemVer {
       other = new SemVer(other, this.options)
     }
 
-    return (
-      compareIdentifiers(this.major, other.major) ||
-      compareIdentifiers(this.minor, other.minor) ||
-      compareIdentifiers(this.patch, other.patch)
-    )
+    if (this.major < other.major) {
+      return -1
+    }
+    if (this.major > other.major) {
+      return 1
+    }
+    if (this.minor < other.minor) {
+      return -1
+    }
+    if (this.minor > other.minor) {
+      return 1
+    }
+    if (this.patch < other.patch) {
+      return -1
+    }
+    if (this.patch > other.patch) {
+      return 1
+    }
+    return 0
   }
 
   comparePre (other) {
@@ -39939,8 +42272,7 @@ class SemVer {
       }
       // Avoid an invalid semver results
       if (identifier) {
-        const r = new RegExp(`^${this.options.loose ? src[t.PRERELEASELOOSE] : src[t.PRERELEASE]}$`)
-        const match = `-${identifier}`.match(r)
+        const match = `-${identifier}`.match(this.options.loose ? re[t.PRERELEASELOOSE] : re[t.PRERELEASE])
         if (!match || match[1] !== identifier) {
           throw new Error(`invalid identifier: ${identifier}`)
         }
@@ -40080,6 +42412,9 @@ module.exports = SemVer
 /***/ 1799:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const parse = __nccwpck_require__(16353)
 const clean = (version, options) => {
   const s = parse(version.trim().replace(/^[=v]+/, ''), options)
@@ -40092,6 +42427,9 @@ module.exports = clean
 
 /***/ 28646:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const eq = __nccwpck_require__(55082)
 const neq = __nccwpck_require__(4974)
@@ -40151,6 +42489,9 @@ module.exports = cmp
 
 /***/ 35385:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const SemVer = __nccwpck_require__(7163)
 const parse = __nccwpck_require__(16353)
@@ -40219,6 +42560,9 @@ module.exports = coerce
 /***/ 37648:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const SemVer = __nccwpck_require__(7163)
 const compareBuild = (a, b, loose) => {
   const versionA = new SemVer(a, loose)
@@ -40233,6 +42577,9 @@ module.exports = compareBuild
 /***/ 56874:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const compare = __nccwpck_require__(78469)
 const compareLoose = (a, b) => compare(a, b, true)
 module.exports = compareLoose
@@ -40242,6 +42589,9 @@ module.exports = compareLoose
 
 /***/ 78469:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const SemVer = __nccwpck_require__(7163)
 const compare = (a, b, loose) =>
@@ -40254,6 +42604,9 @@ module.exports = compare
 
 /***/ 70711:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const parse = __nccwpck_require__(16353)
 
@@ -40320,6 +42673,9 @@ module.exports = diff
 /***/ 55082:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const compare = __nccwpck_require__(78469)
 const eq = (a, b, loose) => compare(a, b, loose) === 0
 module.exports = eq
@@ -40329,6 +42685,9 @@ module.exports = eq
 
 /***/ 16599:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const compare = __nccwpck_require__(78469)
 const gt = (a, b, loose) => compare(a, b, loose) > 0
@@ -40340,6 +42699,9 @@ module.exports = gt
 /***/ 41236:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const compare = __nccwpck_require__(78469)
 const gte = (a, b, loose) => compare(a, b, loose) >= 0
 module.exports = gte
@@ -40349,6 +42711,9 @@ module.exports = gte
 
 /***/ 62338:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const SemVer = __nccwpck_require__(7163)
 
@@ -40376,6 +42741,9 @@ module.exports = inc
 /***/ 3872:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const compare = __nccwpck_require__(78469)
 const lt = (a, b, loose) => compare(a, b, loose) < 0
 module.exports = lt
@@ -40385,6 +42753,9 @@ module.exports = lt
 
 /***/ 56717:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const compare = __nccwpck_require__(78469)
 const lte = (a, b, loose) => compare(a, b, loose) <= 0
@@ -40396,6 +42767,9 @@ module.exports = lte
 /***/ 68511:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const SemVer = __nccwpck_require__(7163)
 const major = (a, loose) => new SemVer(a, loose).major
 module.exports = major
@@ -40405,6 +42779,9 @@ module.exports = major
 
 /***/ 32603:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const SemVer = __nccwpck_require__(7163)
 const minor = (a, loose) => new SemVer(a, loose).minor
@@ -40416,6 +42793,9 @@ module.exports = minor
 /***/ 4974:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const compare = __nccwpck_require__(78469)
 const neq = (a, b, loose) => compare(a, b, loose) !== 0
 module.exports = neq
@@ -40425,6 +42805,9 @@ module.exports = neq
 
 /***/ 16353:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const SemVer = __nccwpck_require__(7163)
 const parse = (version, options, throwErrors = false) => {
@@ -40449,6 +42832,9 @@ module.exports = parse
 /***/ 48756:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const SemVer = __nccwpck_require__(7163)
 const patch = (a, loose) => new SemVer(a, loose).patch
 module.exports = patch
@@ -40458,6 +42844,9 @@ module.exports = patch
 
 /***/ 15714:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const parse = __nccwpck_require__(16353)
 const prerelease = (version, options) => {
@@ -40472,6 +42861,9 @@ module.exports = prerelease
 /***/ 32173:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const compare = __nccwpck_require__(78469)
 const rcompare = (a, b, loose) => compare(b, a, loose)
 module.exports = rcompare
@@ -40482,6 +42874,9 @@ module.exports = rcompare
 /***/ 87192:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const compareBuild = __nccwpck_require__(37648)
 const rsort = (list, loose) => list.sort((a, b) => compareBuild(b, a, loose))
 module.exports = rsort
@@ -40491,6 +42886,9 @@ module.exports = rsort
 
 /***/ 68011:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const Range = __nccwpck_require__(96782)
 const satisfies = (version, range, options) => {
@@ -40509,6 +42907,9 @@ module.exports = satisfies
 /***/ 29872:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const compareBuild = __nccwpck_require__(37648)
 const sort = (list, loose) => list.sort((a, b) => compareBuild(a, b, loose))
 module.exports = sort
@@ -40518,6 +42919,9 @@ module.exports = sort
 
 /***/ 58780:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const parse = __nccwpck_require__(16353)
 const valid = (version, options) => {
@@ -40531,6 +42935,9 @@ module.exports = valid
 
 /***/ 62088:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 // just pre-load all the stuff that index.js lazily exports
 const internalRe = __nccwpck_require__(95471)
@@ -40628,6 +43035,9 @@ module.exports = {
 /***/ 45101:
 /***/ ((module) => {
 
+"use strict";
+
+
 // Note: this is the semver.org version of the spec that it implements
 // Not necessarily the package version of this code.
 const SEMVER_SPEC_VERSION = '2.0.0'
@@ -40670,6 +43080,9 @@ module.exports = {
 /***/ 1159:
 /***/ ((module) => {
 
+"use strict";
+
+
 const debug = (
   typeof process === 'object' &&
   process.env &&
@@ -40686,8 +43099,15 @@ module.exports = debug
 /***/ 73348:
 /***/ ((module) => {
 
+"use strict";
+
+
 const numeric = /^[0-9]+$/
 const compareIdentifiers = (a, b) => {
+  if (typeof a === 'number' && typeof b === 'number') {
+    return a === b ? 0 : a < b ? -1 : 1
+  }
+
   const anum = numeric.test(a)
   const bnum = numeric.test(b)
 
@@ -40715,6 +43135,9 @@ module.exports = {
 
 /***/ 61383:
 /***/ ((module) => {
+
+"use strict";
+
 
 class LRUCache {
   constructor () {
@@ -40763,6 +43186,9 @@ module.exports = LRUCache
 /***/ 70356:
 /***/ ((module) => {
 
+"use strict";
+
+
 // parse out just the options we care about
 const looseOption = Object.freeze({ loose: true })
 const emptyOpts = Object.freeze({ })
@@ -40784,6 +43210,9 @@ module.exports = parseOptions
 
 /***/ 95471:
 /***/ ((module, exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const {
   MAX_SAFE_COMPONENT_LENGTH,
@@ -40863,12 +43292,14 @@ createToken('MAINVERSIONLOOSE', `(${src[t.NUMERICIDENTIFIERLOOSE]})\\.` +
 
 // ## Pre-release Version Identifier
 // A numeric identifier, or a non-numeric identifier.
+// Non-numberic identifiers include numberic identifiers but can be longer.
+// Therefore non-numberic identifiers must go first.
 
-createToken('PRERELEASEIDENTIFIER', `(?:${src[t.NUMERICIDENTIFIER]
-}|${src[t.NONNUMERICIDENTIFIER]})`)
+createToken('PRERELEASEIDENTIFIER', `(?:${src[t.NONNUMERICIDENTIFIER]
+}|${src[t.NUMERICIDENTIFIER]})`)
 
-createToken('PRERELEASEIDENTIFIERLOOSE', `(?:${src[t.NUMERICIDENTIFIERLOOSE]
-}|${src[t.NONNUMERICIDENTIFIER]})`)
+createToken('PRERELEASEIDENTIFIERLOOSE', `(?:${src[t.NONNUMERICIDENTIFIER]
+}|${src[t.NUMERICIDENTIFIERLOOSE]})`)
 
 // ## Pre-release Version
 // Hyphen, followed by one or more dot-separated pre-release version
@@ -41011,6 +43442,9 @@ createToken('GTE0PRE', '^\\s*>=\\s*0\\.0\\.0-0\\s*$')
 /***/ 12276:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 // Determine if version is greater than all the versions possible in the range.
 const outside = __nccwpck_require__(10280)
 const gtr = (version, range, options) => outside(version, range, '>', options)
@@ -41021,6 +43455,9 @@ module.exports = gtr
 
 /***/ 23465:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const Range = __nccwpck_require__(96782)
 const intersects = (r1, r2, options) => {
@@ -41036,6 +43473,9 @@ module.exports = intersects
 /***/ 15213:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const outside = __nccwpck_require__(10280)
 // Determine if version is less than all the versions possible in the range
 const ltr = (version, range, options) => outside(version, range, '<', options)
@@ -41046,6 +43486,9 @@ module.exports = ltr
 
 /***/ 73193:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const SemVer = __nccwpck_require__(7163)
 const Range = __nccwpck_require__(96782)
@@ -41079,6 +43522,9 @@ module.exports = maxSatisfying
 /***/ 68595:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const SemVer = __nccwpck_require__(7163)
 const Range = __nccwpck_require__(96782)
 const minSatisfying = (versions, range, options) => {
@@ -41109,6 +43555,9 @@ module.exports = minSatisfying
 
 /***/ 51866:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const SemVer = __nccwpck_require__(7163)
 const Range = __nccwpck_require__(96782)
@@ -41177,6 +43626,9 @@ module.exports = minVersion
 
 /***/ 10280:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const SemVer = __nccwpck_require__(7163)
 const Comparator = __nccwpck_require__(89379)
@@ -41265,6 +43717,9 @@ module.exports = outside
 /***/ 82028:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 // given a set of versions and a range, create a "simplified" range
 // that includes the same versions that the original range does
 // If the original range is shorter than the simplified one, return that.
@@ -41318,6 +43773,9 @@ module.exports = (versions, range, options) => {
 
 /***/ 61489:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const Range = __nccwpck_require__(96782)
 const Comparator = __nccwpck_require__(89379)
@@ -41573,6 +44031,9 @@ module.exports = subset
 /***/ 54750:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const Range = __nccwpck_require__(96782)
 
 // Mostly just for testing and legacy API reasons
@@ -41587,6 +44048,9 @@ module.exports = toComparators
 
 /***/ 64737:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const Range = __nccwpck_require__(96782)
 const validRange = (range, options) => {
@@ -42995,9 +45459,21 @@ const socks_1 = __nccwpck_require__(42474);
 const agent_base_1 = __nccwpck_require__(98894);
 const debug_1 = __importDefault(__nccwpck_require__(2830));
 const dns = __importStar(__nccwpck_require__(72250));
+const net = __importStar(__nccwpck_require__(69278));
 const tls = __importStar(__nccwpck_require__(64756));
 const url_1 = __nccwpck_require__(87016);
 const debug = (0, debug_1.default)('socks-proxy-agent');
+const setServernameFromNonIpHost = (options) => {
+    if (options.servername === undefined &&
+        options.host &&
+        !net.isIP(options.host)) {
+        return {
+            ...options,
+            servername: options.host,
+        };
+    }
+    return options;
+};
 function parseSocksURL(url) {
     let lookup = false;
     let type = 5;
@@ -43113,11 +45589,9 @@ class SocksProxyAgent extends agent_base_1.Agent {
             // The proxy is connecting to a TLS server, so upgrade
             // this socket connection to a TLS connection.
             debug('Upgrading socket connection to TLS');
-            const servername = opts.servername || opts.host;
             const tlsSocket = tls.connect({
-                ...omit(opts, 'host', 'path', 'port'),
+                ...omit(setServernameFromNonIpHost(opts), 'host', 'path', 'port'),
                 socket,
-                servername,
             });
             tlsSocket.once('error', (error) => {
                 debug('Socket TLS error', error.message);
@@ -44175,6 +46649,7 @@ function validateCustomProxyAuth(proxy, options) {
 function isValidSocksRemoteHost(remoteHost) {
     return (remoteHost &&
         typeof remoteHost.host === 'string' &&
+        Buffer.byteLength(remoteHost.host) < 256 &&
         typeof remoteHost.port === 'number' &&
         remoteHost.port >= 0 &&
         remoteHost.port <= 65535);
@@ -44201,7 +46676,7 @@ function isValidTimeoutValue(value) {
 function ipv4ToInt32(ip) {
     const address = new ip_address_1.Address4(ip);
     // Convert the IPv4 address parts to an integer
-    return address.toArray().reduce((acc, part) => (acc << 8) + part, 0);
+    return address.toArray().reduce((acc, part) => (acc << 8) + part, 0) >>> 0;
 }
 exports.ipv4ToInt32 = ipv4ToInt32;
 function int32ToIpv4(int32) {
@@ -50684,7 +53159,7 @@ module.exports = {
 
 
 const { parseSetCookie } = __nccwpck_require__(8915)
-const { stringify, getHeadersList } = __nccwpck_require__(3834)
+const { stringify } = __nccwpck_require__(3834)
 const { webidl } = __nccwpck_require__(74222)
 const { Headers } = __nccwpck_require__(26349)
 
@@ -50760,14 +53235,13 @@ function getSetCookies (headers) {
 
   webidl.brandCheck(headers, Headers, { strict: false })
 
-  const cookies = getHeadersList(headers).cookies
+  const cookies = headers.getSetCookie()
 
   if (!cookies) {
     return []
   }
 
-  // In older versions of undici, cookies is a list of name:value.
-  return cookies.map((pair) => parseSetCookie(Array.isArray(pair) ? pair[1] : pair))
+  return cookies.map((pair) => parseSetCookie(pair))
 }
 
 /**
@@ -51195,14 +53669,15 @@ module.exports = {
 /***/ }),
 
 /***/ 3834:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+/***/ ((module) => {
 
 "use strict";
 
 
-const assert = __nccwpck_require__(42613)
-const { kHeadersList } = __nccwpck_require__(36443)
-
+/**
+ * @param {string} value
+ * @returns {boolean}
+ */
 function isCTLExcludingHtab (value) {
   if (value.length === 0) {
     return false
@@ -51463,31 +53938,13 @@ function stringify (cookie) {
   return out.join('; ')
 }
 
-let kHeadersListNode
-
-function getHeadersList (headers) {
-  if (headers[kHeadersList]) {
-    return headers[kHeadersList]
-  }
-
-  if (!kHeadersListNode) {
-    kHeadersListNode = Object.getOwnPropertySymbols(headers).find(
-      (symbol) => symbol.description === 'headers list'
-    )
-
-    assert(kHeadersListNode, 'Headers cannot be parsed')
-  }
-
-  const headersList = headers[kHeadersListNode]
-  assert(headersList)
-
-  return headersList
-}
-
 module.exports = {
   isCTLExcludingHtab,
-  stringify,
-  getHeadersList
+  validateCookieName,
+  validateCookiePath,
+  validateCookieValue,
+  toIMFDate,
+  stringify
 }
 
 
@@ -55491,6 +57948,7 @@ const {
   isValidHeaderName,
   isValidHeaderValue
 } = __nccwpck_require__(15523)
+const util = __nccwpck_require__(39023)
 const { webidl } = __nccwpck_require__(74222)
 const assert = __nccwpck_require__(42613)
 
@@ -56044,6 +58502,9 @@ Object.defineProperties(Headers.prototype, {
   [Symbol.toStringTag]: {
     value: 'Headers',
     configurable: true
+  },
+  [util.inspect.custom]: {
+    enumerable: false
   }
 })
 
@@ -65220,6 +67681,20 @@ class Pool extends PoolBase {
       ? { ...options.interceptors }
       : undefined
     this[kFactory] = factory
+
+    this.on('connectionError', (origin, targets, error) => {
+      // If a connection error occurs, we remove the client from the pool,
+      // and emit a connectionError event. They will not be re-used.
+      // Fixes https://github.com/nodejs/undici/issues/3895
+      for (const target of targets) {
+        // Do not use kRemoveClient here, as it will close the client,
+        // but the client cannot be closed in this state.
+        const idx = this[kClients].indexOf(target)
+        if (idx !== -1) {
+          this[kClients].splice(idx, 1)
+        }
+      }
+    })
   }
 
   [kGetDispatcher] () {
@@ -71202,1423 +73677,6 @@ exports.LRUCache = LRUCache;
 
 /***/ }),
 
-/***/ 81017:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.Glob = void 0;
-const minimatch_1 = __nccwpck_require__(85207);
-const node_url_1 = __nccwpck_require__(73136);
-const path_scurry_1 = __nccwpck_require__(16577);
-const pattern_js_1 = __nccwpck_require__(4041);
-const walker_js_1 = __nccwpck_require__(95049);
-// if no process global, just call it linux.
-// so we default to case-sensitive, / separators
-const defaultPlatform = (typeof process === 'object' &&
-    process &&
-    typeof process.platform === 'string') ?
-    process.platform
-    : 'linux';
-/**
- * An object that can perform glob pattern traversals.
- */
-class Glob {
-    absolute;
-    cwd;
-    root;
-    dot;
-    dotRelative;
-    follow;
-    ignore;
-    magicalBraces;
-    mark;
-    matchBase;
-    maxDepth;
-    nobrace;
-    nocase;
-    nodir;
-    noext;
-    noglobstar;
-    pattern;
-    platform;
-    realpath;
-    scurry;
-    stat;
-    signal;
-    windowsPathsNoEscape;
-    withFileTypes;
-    includeChildMatches;
-    /**
-     * The options provided to the constructor.
-     */
-    opts;
-    /**
-     * An array of parsed immutable {@link Pattern} objects.
-     */
-    patterns;
-    /**
-     * All options are stored as properties on the `Glob` object.
-     *
-     * See {@link GlobOptions} for full options descriptions.
-     *
-     * Note that a previous `Glob` object can be passed as the
-     * `GlobOptions` to another `Glob` instantiation to re-use settings
-     * and caches with a new pattern.
-     *
-     * Traversal functions can be called multiple times to run the walk
-     * again.
-     */
-    constructor(pattern, opts) {
-        /* c8 ignore start */
-        if (!opts)
-            throw new TypeError('glob options required');
-        /* c8 ignore stop */
-        this.withFileTypes = !!opts.withFileTypes;
-        this.signal = opts.signal;
-        this.follow = !!opts.follow;
-        this.dot = !!opts.dot;
-        this.dotRelative = !!opts.dotRelative;
-        this.nodir = !!opts.nodir;
-        this.mark = !!opts.mark;
-        if (!opts.cwd) {
-            this.cwd = '';
-        }
-        else if (opts.cwd instanceof URL || opts.cwd.startsWith('file://')) {
-            opts.cwd = (0, node_url_1.fileURLToPath)(opts.cwd);
-        }
-        this.cwd = opts.cwd || '';
-        this.root = opts.root;
-        this.magicalBraces = !!opts.magicalBraces;
-        this.nobrace = !!opts.nobrace;
-        this.noext = !!opts.noext;
-        this.realpath = !!opts.realpath;
-        this.absolute = opts.absolute;
-        this.includeChildMatches = opts.includeChildMatches !== false;
-        this.noglobstar = !!opts.noglobstar;
-        this.matchBase = !!opts.matchBase;
-        this.maxDepth =
-            typeof opts.maxDepth === 'number' ? opts.maxDepth : Infinity;
-        this.stat = !!opts.stat;
-        this.ignore = opts.ignore;
-        if (this.withFileTypes && this.absolute !== undefined) {
-            throw new Error('cannot set absolute and withFileTypes:true');
-        }
-        if (typeof pattern === 'string') {
-            pattern = [pattern];
-        }
-        this.windowsPathsNoEscape =
-            !!opts.windowsPathsNoEscape ||
-                opts.allowWindowsEscape ===
-                    false;
-        if (this.windowsPathsNoEscape) {
-            pattern = pattern.map(p => p.replace(/\\/g, '/'));
-        }
-        if (this.matchBase) {
-            if (opts.noglobstar) {
-                throw new TypeError('base matching requires globstar');
-            }
-            pattern = pattern.map(p => (p.includes('/') ? p : `./**/${p}`));
-        }
-        this.pattern = pattern;
-        this.platform = opts.platform || defaultPlatform;
-        this.opts = { ...opts, platform: this.platform };
-        if (opts.scurry) {
-            this.scurry = opts.scurry;
-            if (opts.nocase !== undefined &&
-                opts.nocase !== opts.scurry.nocase) {
-                throw new Error('nocase option contradicts provided scurry option');
-            }
-        }
-        else {
-            const Scurry = opts.platform === 'win32' ? path_scurry_1.PathScurryWin32
-                : opts.platform === 'darwin' ? path_scurry_1.PathScurryDarwin
-                    : opts.platform ? path_scurry_1.PathScurryPosix
-                        : path_scurry_1.PathScurry;
-            this.scurry = new Scurry(this.cwd, {
-                nocase: opts.nocase,
-                fs: opts.fs,
-            });
-        }
-        this.nocase = this.scurry.nocase;
-        // If you do nocase:true on a case-sensitive file system, then
-        // we need to use regexps instead of strings for non-magic
-        // path portions, because statting `aBc` won't return results
-        // for the file `AbC` for example.
-        const nocaseMagicOnly = this.platform === 'darwin' || this.platform === 'win32';
-        const mmo = {
-            // default nocase based on platform
-            ...opts,
-            dot: this.dot,
-            matchBase: this.matchBase,
-            nobrace: this.nobrace,
-            nocase: this.nocase,
-            nocaseMagicOnly,
-            nocomment: true,
-            noext: this.noext,
-            nonegate: true,
-            optimizationLevel: 2,
-            platform: this.platform,
-            windowsPathsNoEscape: this.windowsPathsNoEscape,
-            debug: !!this.opts.debug,
-        };
-        const mms = this.pattern.map(p => new minimatch_1.Minimatch(p, mmo));
-        const [matchSet, globParts] = mms.reduce((set, m) => {
-            set[0].push(...m.set);
-            set[1].push(...m.globParts);
-            return set;
-        }, [[], []]);
-        this.patterns = matchSet.map((set, i) => {
-            const g = globParts[i];
-            /* c8 ignore start */
-            if (!g)
-                throw new Error('invalid pattern object');
-            /* c8 ignore stop */
-            return new pattern_js_1.Pattern(set, g, 0, this.platform);
-        });
-    }
-    async walk() {
-        // Walkers always return array of Path objects, so we just have to
-        // coerce them into the right shape.  It will have already called
-        // realpath() if the option was set to do so, so we know that's cached.
-        // start out knowing the cwd, at least
-        return [
-            ...(await new walker_js_1.GlobWalker(this.patterns, this.scurry.cwd, {
-                ...this.opts,
-                maxDepth: this.maxDepth !== Infinity ?
-                    this.maxDepth + this.scurry.cwd.depth()
-                    : Infinity,
-                platform: this.platform,
-                nocase: this.nocase,
-                includeChildMatches: this.includeChildMatches,
-            }).walk()),
-        ];
-    }
-    walkSync() {
-        return [
-            ...new walker_js_1.GlobWalker(this.patterns, this.scurry.cwd, {
-                ...this.opts,
-                maxDepth: this.maxDepth !== Infinity ?
-                    this.maxDepth + this.scurry.cwd.depth()
-                    : Infinity,
-                platform: this.platform,
-                nocase: this.nocase,
-                includeChildMatches: this.includeChildMatches,
-            }).walkSync(),
-        ];
-    }
-    stream() {
-        return new walker_js_1.GlobStream(this.patterns, this.scurry.cwd, {
-            ...this.opts,
-            maxDepth: this.maxDepth !== Infinity ?
-                this.maxDepth + this.scurry.cwd.depth()
-                : Infinity,
-            platform: this.platform,
-            nocase: this.nocase,
-            includeChildMatches: this.includeChildMatches,
-        }).stream();
-    }
-    streamSync() {
-        return new walker_js_1.GlobStream(this.patterns, this.scurry.cwd, {
-            ...this.opts,
-            maxDepth: this.maxDepth !== Infinity ?
-                this.maxDepth + this.scurry.cwd.depth()
-                : Infinity,
-            platform: this.platform,
-            nocase: this.nocase,
-            includeChildMatches: this.includeChildMatches,
-        }).streamSync();
-    }
-    /**
-     * Default sync iteration function. Returns a Generator that
-     * iterates over the results.
-     */
-    iterateSync() {
-        return this.streamSync()[Symbol.iterator]();
-    }
-    [Symbol.iterator]() {
-        return this.iterateSync();
-    }
-    /**
-     * Default async iteration function. Returns an AsyncGenerator that
-     * iterates over the results.
-     */
-    iterate() {
-        return this.stream()[Symbol.asyncIterator]();
-    }
-    [Symbol.asyncIterator]() {
-        return this.iterate();
-    }
-}
-exports.Glob = Glob;
-//# sourceMappingURL=glob.js.map
-
-/***/ }),
-
-/***/ 66889:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.hasMagic = void 0;
-const minimatch_1 = __nccwpck_require__(85207);
-/**
- * Return true if the patterns provided contain any magic glob characters,
- * given the options provided.
- *
- * Brace expansion is not considered "magic" unless the `magicalBraces` option
- * is set, as brace expansion just turns one string into an array of strings.
- * So a pattern like `'x{a,b}y'` would return `false`, because `'xay'` and
- * `'xby'` both do not contain any magic glob characters, and it's treated the
- * same as if you had called it on `['xay', 'xby']`. When `magicalBraces:true`
- * is in the options, brace expansion _is_ treated as a pattern having magic.
- */
-const hasMagic = (pattern, options = {}) => {
-    if (!Array.isArray(pattern)) {
-        pattern = [pattern];
-    }
-    for (const p of pattern) {
-        if (new minimatch_1.Minimatch(p, options).hasMagic())
-            return true;
-    }
-    return false;
-};
-exports.hasMagic = hasMagic;
-//# sourceMappingURL=has-magic.js.map
-
-/***/ }),
-
-/***/ 4833:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-// give it a pattern, and it'll be able to tell you if
-// a given path should be ignored.
-// Ignoring a path ignores its children if the pattern ends in /**
-// Ignores are always parsed in dot:true mode
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.Ignore = void 0;
-const minimatch_1 = __nccwpck_require__(85207);
-const pattern_js_1 = __nccwpck_require__(4041);
-const defaultPlatform = (typeof process === 'object' &&
-    process &&
-    typeof process.platform === 'string') ?
-    process.platform
-    : 'linux';
-/**
- * Class used to process ignored patterns
- */
-class Ignore {
-    relative;
-    relativeChildren;
-    absolute;
-    absoluteChildren;
-    platform;
-    mmopts;
-    constructor(ignored, { nobrace, nocase, noext, noglobstar, platform = defaultPlatform, }) {
-        this.relative = [];
-        this.absolute = [];
-        this.relativeChildren = [];
-        this.absoluteChildren = [];
-        this.platform = platform;
-        this.mmopts = {
-            dot: true,
-            nobrace,
-            nocase,
-            noext,
-            noglobstar,
-            optimizationLevel: 2,
-            platform,
-            nocomment: true,
-            nonegate: true,
-        };
-        for (const ign of ignored)
-            this.add(ign);
-    }
-    add(ign) {
-        // this is a little weird, but it gives us a clean set of optimized
-        // minimatch matchers, without getting tripped up if one of them
-        // ends in /** inside a brace section, and it's only inefficient at
-        // the start of the walk, not along it.
-        // It'd be nice if the Pattern class just had a .test() method, but
-        // handling globstars is a bit of a pita, and that code already lives
-        // in minimatch anyway.
-        // Another way would be if maybe Minimatch could take its set/globParts
-        // as an option, and then we could at least just use Pattern to test
-        // for absolute-ness.
-        // Yet another way, Minimatch could take an array of glob strings, and
-        // a cwd option, and do the right thing.
-        const mm = new minimatch_1.Minimatch(ign, this.mmopts);
-        for (let i = 0; i < mm.set.length; i++) {
-            const parsed = mm.set[i];
-            const globParts = mm.globParts[i];
-            /* c8 ignore start */
-            if (!parsed || !globParts) {
-                throw new Error('invalid pattern object');
-            }
-            // strip off leading ./ portions
-            // https://github.com/isaacs/node-glob/issues/570
-            while (parsed[0] === '.' && globParts[0] === '.') {
-                parsed.shift();
-                globParts.shift();
-            }
-            /* c8 ignore stop */
-            const p = new pattern_js_1.Pattern(parsed, globParts, 0, this.platform);
-            const m = new minimatch_1.Minimatch(p.globString(), this.mmopts);
-            const children = globParts[globParts.length - 1] === '**';
-            const absolute = p.isAbsolute();
-            if (absolute)
-                this.absolute.push(m);
-            else
-                this.relative.push(m);
-            if (children) {
-                if (absolute)
-                    this.absoluteChildren.push(m);
-                else
-                    this.relativeChildren.push(m);
-            }
-        }
-    }
-    ignored(p) {
-        const fullpath = p.fullpath();
-        const fullpaths = `${fullpath}/`;
-        const relative = p.relative() || '.';
-        const relatives = `${relative}/`;
-        for (const m of this.relative) {
-            if (m.match(relative) || m.match(relatives))
-                return true;
-        }
-        for (const m of this.absolute) {
-            if (m.match(fullpath) || m.match(fullpaths))
-                return true;
-        }
-        return false;
-    }
-    childrenIgnored(p) {
-        const fullpath = p.fullpath() + '/';
-        const relative = (p.relative() || '.') + '/';
-        for (const m of this.relativeChildren) {
-            if (m.match(relative))
-                return true;
-        }
-        for (const m of this.absoluteChildren) {
-            if (m.match(fullpath))
-                return true;
-        }
-        return false;
-    }
-}
-exports.Ignore = Ignore;
-//# sourceMappingURL=ignore.js.map
-
-/***/ }),
-
-/***/ 67471:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.glob = exports.sync = exports.iterate = exports.iterateSync = exports.stream = exports.streamSync = exports.Ignore = exports.hasMagic = exports.Glob = exports.unescape = exports.escape = void 0;
-exports.globStreamSync = globStreamSync;
-exports.globStream = globStream;
-exports.globSync = globSync;
-exports.globIterateSync = globIterateSync;
-exports.globIterate = globIterate;
-const minimatch_1 = __nccwpck_require__(85207);
-const glob_js_1 = __nccwpck_require__(81017);
-const has_magic_js_1 = __nccwpck_require__(66889);
-var minimatch_2 = __nccwpck_require__(85207);
-Object.defineProperty(exports, "escape", ({ enumerable: true, get: function () { return minimatch_2.escape; } }));
-Object.defineProperty(exports, "unescape", ({ enumerable: true, get: function () { return minimatch_2.unescape; } }));
-var glob_js_2 = __nccwpck_require__(81017);
-Object.defineProperty(exports, "Glob", ({ enumerable: true, get: function () { return glob_js_2.Glob; } }));
-var has_magic_js_2 = __nccwpck_require__(66889);
-Object.defineProperty(exports, "hasMagic", ({ enumerable: true, get: function () { return has_magic_js_2.hasMagic; } }));
-var ignore_js_1 = __nccwpck_require__(4833);
-Object.defineProperty(exports, "Ignore", ({ enumerable: true, get: function () { return ignore_js_1.Ignore; } }));
-function globStreamSync(pattern, options = {}) {
-    return new glob_js_1.Glob(pattern, options).streamSync();
-}
-function globStream(pattern, options = {}) {
-    return new glob_js_1.Glob(pattern, options).stream();
-}
-function globSync(pattern, options = {}) {
-    return new glob_js_1.Glob(pattern, options).walkSync();
-}
-async function glob_(pattern, options = {}) {
-    return new glob_js_1.Glob(pattern, options).walk();
-}
-function globIterateSync(pattern, options = {}) {
-    return new glob_js_1.Glob(pattern, options).iterateSync();
-}
-function globIterate(pattern, options = {}) {
-    return new glob_js_1.Glob(pattern, options).iterate();
-}
-// aliases: glob.sync.stream() glob.stream.sync() glob.sync() etc
-exports.streamSync = globStreamSync;
-exports.stream = Object.assign(globStream, { sync: globStreamSync });
-exports.iterateSync = globIterateSync;
-exports.iterate = Object.assign(globIterate, {
-    sync: globIterateSync,
-});
-exports.sync = Object.assign(globSync, {
-    stream: globStreamSync,
-    iterate: globIterateSync,
-});
-exports.glob = Object.assign(glob_, {
-    glob: glob_,
-    globSync,
-    sync: exports.sync,
-    globStream,
-    stream: exports.stream,
-    globStreamSync,
-    streamSync: exports.streamSync,
-    globIterate,
-    iterate: exports.iterate,
-    globIterateSync,
-    iterateSync: exports.iterateSync,
-    Glob: glob_js_1.Glob,
-    hasMagic: has_magic_js_1.hasMagic,
-    escape: minimatch_1.escape,
-    unescape: minimatch_1.unescape,
-});
-exports.glob.glob = exports.glob;
-//# sourceMappingURL=index.js.map
-
-/***/ }),
-
-/***/ 4041:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-// this is just a very light wrapper around 2 arrays with an offset index
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.Pattern = void 0;
-const minimatch_1 = __nccwpck_require__(85207);
-const isPatternList = (pl) => pl.length >= 1;
-const isGlobList = (gl) => gl.length >= 1;
-/**
- * An immutable-ish view on an array of glob parts and their parsed
- * results
- */
-class Pattern {
-    #patternList;
-    #globList;
-    #index;
-    length;
-    #platform;
-    #rest;
-    #globString;
-    #isDrive;
-    #isUNC;
-    #isAbsolute;
-    #followGlobstar = true;
-    constructor(patternList, globList, index, platform) {
-        if (!isPatternList(patternList)) {
-            throw new TypeError('empty pattern list');
-        }
-        if (!isGlobList(globList)) {
-            throw new TypeError('empty glob list');
-        }
-        if (globList.length !== patternList.length) {
-            throw new TypeError('mismatched pattern list and glob list lengths');
-        }
-        this.length = patternList.length;
-        if (index < 0 || index >= this.length) {
-            throw new TypeError('index out of range');
-        }
-        this.#patternList = patternList;
-        this.#globList = globList;
-        this.#index = index;
-        this.#platform = platform;
-        // normalize root entries of absolute patterns on initial creation.
-        if (this.#index === 0) {
-            // c: => ['c:/']
-            // C:/ => ['C:/']
-            // C:/x => ['C:/', 'x']
-            // //host/share => ['//host/share/']
-            // //host/share/ => ['//host/share/']
-            // //host/share/x => ['//host/share/', 'x']
-            // /etc => ['/', 'etc']
-            // / => ['/']
-            if (this.isUNC()) {
-                // '' / '' / 'host' / 'share'
-                const [p0, p1, p2, p3, ...prest] = this.#patternList;
-                const [g0, g1, g2, g3, ...grest] = this.#globList;
-                if (prest[0] === '') {
-                    // ends in /
-                    prest.shift();
-                    grest.shift();
-                }
-                const p = [p0, p1, p2, p3, ''].join('/');
-                const g = [g0, g1, g2, g3, ''].join('/');
-                this.#patternList = [p, ...prest];
-                this.#globList = [g, ...grest];
-                this.length = this.#patternList.length;
-            }
-            else if (this.isDrive() || this.isAbsolute()) {
-                const [p1, ...prest] = this.#patternList;
-                const [g1, ...grest] = this.#globList;
-                if (prest[0] === '') {
-                    // ends in /
-                    prest.shift();
-                    grest.shift();
-                }
-                const p = p1 + '/';
-                const g = g1 + '/';
-                this.#patternList = [p, ...prest];
-                this.#globList = [g, ...grest];
-                this.length = this.#patternList.length;
-            }
-        }
-    }
-    /**
-     * The first entry in the parsed list of patterns
-     */
-    pattern() {
-        return this.#patternList[this.#index];
-    }
-    /**
-     * true of if pattern() returns a string
-     */
-    isString() {
-        return typeof this.#patternList[this.#index] === 'string';
-    }
-    /**
-     * true of if pattern() returns GLOBSTAR
-     */
-    isGlobstar() {
-        return this.#patternList[this.#index] === minimatch_1.GLOBSTAR;
-    }
-    /**
-     * true if pattern() returns a regexp
-     */
-    isRegExp() {
-        return this.#patternList[this.#index] instanceof RegExp;
-    }
-    /**
-     * The /-joined set of glob parts that make up this pattern
-     */
-    globString() {
-        return (this.#globString =
-            this.#globString ||
-                (this.#index === 0 ?
-                    this.isAbsolute() ?
-                        this.#globList[0] + this.#globList.slice(1).join('/')
-                        : this.#globList.join('/')
-                    : this.#globList.slice(this.#index).join('/')));
-    }
-    /**
-     * true if there are more pattern parts after this one
-     */
-    hasMore() {
-        return this.length > this.#index + 1;
-    }
-    /**
-     * The rest of the pattern after this part, or null if this is the end
-     */
-    rest() {
-        if (this.#rest !== undefined)
-            return this.#rest;
-        if (!this.hasMore())
-            return (this.#rest = null);
-        this.#rest = new Pattern(this.#patternList, this.#globList, this.#index + 1, this.#platform);
-        this.#rest.#isAbsolute = this.#isAbsolute;
-        this.#rest.#isUNC = this.#isUNC;
-        this.#rest.#isDrive = this.#isDrive;
-        return this.#rest;
-    }
-    /**
-     * true if the pattern represents a //unc/path/ on windows
-     */
-    isUNC() {
-        const pl = this.#patternList;
-        return this.#isUNC !== undefined ?
-            this.#isUNC
-            : (this.#isUNC =
-                this.#platform === 'win32' &&
-                    this.#index === 0 &&
-                    pl[0] === '' &&
-                    pl[1] === '' &&
-                    typeof pl[2] === 'string' &&
-                    !!pl[2] &&
-                    typeof pl[3] === 'string' &&
-                    !!pl[3]);
-    }
-    // pattern like C:/...
-    // split = ['C:', ...]
-    // XXX: would be nice to handle patterns like `c:*` to test the cwd
-    // in c: for *, but I don't know of a way to even figure out what that
-    // cwd is without actually chdir'ing into it?
-    /**
-     * True if the pattern starts with a drive letter on Windows
-     */
-    isDrive() {
-        const pl = this.#patternList;
-        return this.#isDrive !== undefined ?
-            this.#isDrive
-            : (this.#isDrive =
-                this.#platform === 'win32' &&
-                    this.#index === 0 &&
-                    this.length > 1 &&
-                    typeof pl[0] === 'string' &&
-                    /^[a-z]:$/i.test(pl[0]));
-    }
-    // pattern = '/' or '/...' or '/x/...'
-    // split = ['', ''] or ['', ...] or ['', 'x', ...]
-    // Drive and UNC both considered absolute on windows
-    /**
-     * True if the pattern is rooted on an absolute path
-     */
-    isAbsolute() {
-        const pl = this.#patternList;
-        return this.#isAbsolute !== undefined ?
-            this.#isAbsolute
-            : (this.#isAbsolute =
-                (pl[0] === '' && pl.length > 1) ||
-                    this.isDrive() ||
-                    this.isUNC());
-    }
-    /**
-     * consume the root of the pattern, and return it
-     */
-    root() {
-        const p = this.#patternList[0];
-        return (typeof p === 'string' && this.isAbsolute() && this.#index === 0) ?
-            p
-            : '';
-    }
-    /**
-     * Check to see if the current globstar pattern is allowed to follow
-     * a symbolic link.
-     */
-    checkFollowGlobstar() {
-        return !(this.#index === 0 ||
-            !this.isGlobstar() ||
-            !this.#followGlobstar);
-    }
-    /**
-     * Mark that the current globstar pattern is following a symbolic link
-     */
-    markFollowGlobstar() {
-        if (this.#index === 0 || !this.isGlobstar() || !this.#followGlobstar)
-            return false;
-        this.#followGlobstar = false;
-        return true;
-    }
-}
-exports.Pattern = Pattern;
-//# sourceMappingURL=pattern.js.map
-
-/***/ }),
-
-/***/ 48095:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-// synchronous utility for filtering entries and calculating subwalks
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.Processor = exports.SubWalks = exports.MatchRecord = exports.HasWalkedCache = void 0;
-const minimatch_1 = __nccwpck_require__(85207);
-/**
- * A cache of which patterns have been processed for a given Path
- */
-class HasWalkedCache {
-    store;
-    constructor(store = new Map()) {
-        this.store = store;
-    }
-    copy() {
-        return new HasWalkedCache(new Map(this.store));
-    }
-    hasWalked(target, pattern) {
-        return this.store.get(target.fullpath())?.has(pattern.globString());
-    }
-    storeWalked(target, pattern) {
-        const fullpath = target.fullpath();
-        const cached = this.store.get(fullpath);
-        if (cached)
-            cached.add(pattern.globString());
-        else
-            this.store.set(fullpath, new Set([pattern.globString()]));
-    }
-}
-exports.HasWalkedCache = HasWalkedCache;
-/**
- * A record of which paths have been matched in a given walk step,
- * and whether they only are considered a match if they are a directory,
- * and whether their absolute or relative path should be returned.
- */
-class MatchRecord {
-    store = new Map();
-    add(target, absolute, ifDir) {
-        const n = (absolute ? 2 : 0) | (ifDir ? 1 : 0);
-        const current = this.store.get(target);
-        this.store.set(target, current === undefined ? n : n & current);
-    }
-    // match, absolute, ifdir
-    entries() {
-        return [...this.store.entries()].map(([path, n]) => [
-            path,
-            !!(n & 2),
-            !!(n & 1),
-        ]);
-    }
-}
-exports.MatchRecord = MatchRecord;
-/**
- * A collection of patterns that must be processed in a subsequent step
- * for a given path.
- */
-class SubWalks {
-    store = new Map();
-    add(target, pattern) {
-        if (!target.canReaddir()) {
-            return;
-        }
-        const subs = this.store.get(target);
-        if (subs) {
-            if (!subs.find(p => p.globString() === pattern.globString())) {
-                subs.push(pattern);
-            }
-        }
-        else
-            this.store.set(target, [pattern]);
-    }
-    get(target) {
-        const subs = this.store.get(target);
-        /* c8 ignore start */
-        if (!subs) {
-            throw new Error('attempting to walk unknown path');
-        }
-        /* c8 ignore stop */
-        return subs;
-    }
-    entries() {
-        return this.keys().map(k => [k, this.store.get(k)]);
-    }
-    keys() {
-        return [...this.store.keys()].filter(t => t.canReaddir());
-    }
-}
-exports.SubWalks = SubWalks;
-/**
- * The class that processes patterns for a given path.
- *
- * Handles child entry filtering, and determining whether a path's
- * directory contents must be read.
- */
-class Processor {
-    hasWalkedCache;
-    matches = new MatchRecord();
-    subwalks = new SubWalks();
-    patterns;
-    follow;
-    dot;
-    opts;
-    constructor(opts, hasWalkedCache) {
-        this.opts = opts;
-        this.follow = !!opts.follow;
-        this.dot = !!opts.dot;
-        this.hasWalkedCache =
-            hasWalkedCache ? hasWalkedCache.copy() : new HasWalkedCache();
-    }
-    processPatterns(target, patterns) {
-        this.patterns = patterns;
-        const processingSet = patterns.map(p => [target, p]);
-        // map of paths to the magic-starting subwalks they need to walk
-        // first item in patterns is the filter
-        for (let [t, pattern] of processingSet) {
-            this.hasWalkedCache.storeWalked(t, pattern);
-            const root = pattern.root();
-            const absolute = pattern.isAbsolute() && this.opts.absolute !== false;
-            // start absolute patterns at root
-            if (root) {
-                t = t.resolve(root === '/' && this.opts.root !== undefined ?
-                    this.opts.root
-                    : root);
-                const rest = pattern.rest();
-                if (!rest) {
-                    this.matches.add(t, true, false);
-                    continue;
-                }
-                else {
-                    pattern = rest;
-                }
-            }
-            if (t.isENOENT())
-                continue;
-            let p;
-            let rest;
-            let changed = false;
-            while (typeof (p = pattern.pattern()) === 'string' &&
-                (rest = pattern.rest())) {
-                const c = t.resolve(p);
-                t = c;
-                pattern = rest;
-                changed = true;
-            }
-            p = pattern.pattern();
-            rest = pattern.rest();
-            if (changed) {
-                if (this.hasWalkedCache.hasWalked(t, pattern))
-                    continue;
-                this.hasWalkedCache.storeWalked(t, pattern);
-            }
-            // now we have either a final string for a known entry,
-            // more strings for an unknown entry,
-            // or a pattern starting with magic, mounted on t.
-            if (typeof p === 'string') {
-                // must not be final entry, otherwise we would have
-                // concatenated it earlier.
-                const ifDir = p === '..' || p === '' || p === '.';
-                this.matches.add(t.resolve(p), absolute, ifDir);
-                continue;
-            }
-            else if (p === minimatch_1.GLOBSTAR) {
-                // if no rest, match and subwalk pattern
-                // if rest, process rest and subwalk pattern
-                // if it's a symlink, but we didn't get here by way of a
-                // globstar match (meaning it's the first time THIS globstar
-                // has traversed a symlink), then we follow it. Otherwise, stop.
-                if (!t.isSymbolicLink() ||
-                    this.follow ||
-                    pattern.checkFollowGlobstar()) {
-                    this.subwalks.add(t, pattern);
-                }
-                const rp = rest?.pattern();
-                const rrest = rest?.rest();
-                if (!rest || ((rp === '' || rp === '.') && !rrest)) {
-                    // only HAS to be a dir if it ends in **/ or **/.
-                    // but ending in ** will match files as well.
-                    this.matches.add(t, absolute, rp === '' || rp === '.');
-                }
-                else {
-                    if (rp === '..') {
-                        // this would mean you're matching **/.. at the fs root,
-                        // and no thanks, I'm not gonna test that specific case.
-                        /* c8 ignore start */
-                        const tp = t.parent || t;
-                        /* c8 ignore stop */
-                        if (!rrest)
-                            this.matches.add(tp, absolute, true);
-                        else if (!this.hasWalkedCache.hasWalked(tp, rrest)) {
-                            this.subwalks.add(tp, rrest);
-                        }
-                    }
-                }
-            }
-            else if (p instanceof RegExp) {
-                this.subwalks.add(t, pattern);
-            }
-        }
-        return this;
-    }
-    subwalkTargets() {
-        return this.subwalks.keys();
-    }
-    child() {
-        return new Processor(this.opts, this.hasWalkedCache);
-    }
-    // return a new Processor containing the subwalks for each
-    // child entry, and a set of matches, and
-    // a hasWalkedCache that's a copy of this one
-    // then we're going to call
-    filterEntries(parent, entries) {
-        const patterns = this.subwalks.get(parent);
-        // put matches and entry walks into the results processor
-        const results = this.child();
-        for (const e of entries) {
-            for (const pattern of patterns) {
-                const absolute = pattern.isAbsolute();
-                const p = pattern.pattern();
-                const rest = pattern.rest();
-                if (p === minimatch_1.GLOBSTAR) {
-                    results.testGlobstar(e, pattern, rest, absolute);
-                }
-                else if (p instanceof RegExp) {
-                    results.testRegExp(e, p, rest, absolute);
-                }
-                else {
-                    results.testString(e, p, rest, absolute);
-                }
-            }
-        }
-        return results;
-    }
-    testGlobstar(e, pattern, rest, absolute) {
-        if (this.dot || !e.name.startsWith('.')) {
-            if (!pattern.hasMore()) {
-                this.matches.add(e, absolute, false);
-            }
-            if (e.canReaddir()) {
-                // if we're in follow mode or it's not a symlink, just keep
-                // testing the same pattern. If there's more after the globstar,
-                // then this symlink consumes the globstar. If not, then we can
-                // follow at most ONE symlink along the way, so we mark it, which
-                // also checks to ensure that it wasn't already marked.
-                if (this.follow || !e.isSymbolicLink()) {
-                    this.subwalks.add(e, pattern);
-                }
-                else if (e.isSymbolicLink()) {
-                    if (rest && pattern.checkFollowGlobstar()) {
-                        this.subwalks.add(e, rest);
-                    }
-                    else if (pattern.markFollowGlobstar()) {
-                        this.subwalks.add(e, pattern);
-                    }
-                }
-            }
-        }
-        // if the NEXT thing matches this entry, then also add
-        // the rest.
-        if (rest) {
-            const rp = rest.pattern();
-            if (typeof rp === 'string' &&
-                // dots and empty were handled already
-                rp !== '..' &&
-                rp !== '' &&
-                rp !== '.') {
-                this.testString(e, rp, rest.rest(), absolute);
-            }
-            else if (rp === '..') {
-                /* c8 ignore start */
-                const ep = e.parent || e;
-                /* c8 ignore stop */
-                this.subwalks.add(ep, rest);
-            }
-            else if (rp instanceof RegExp) {
-                this.testRegExp(e, rp, rest.rest(), absolute);
-            }
-        }
-    }
-    testRegExp(e, p, rest, absolute) {
-        if (!p.test(e.name))
-            return;
-        if (!rest) {
-            this.matches.add(e, absolute, false);
-        }
-        else {
-            this.subwalks.add(e, rest);
-        }
-    }
-    testString(e, p, rest, absolute) {
-        // should never happen?
-        if (!e.isNamed(p))
-            return;
-        if (!rest) {
-            this.matches.add(e, absolute, false);
-        }
-        else {
-            this.subwalks.add(e, rest);
-        }
-    }
-}
-exports.Processor = Processor;
-//# sourceMappingURL=processor.js.map
-
-/***/ }),
-
-/***/ 95049:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.GlobStream = exports.GlobWalker = exports.GlobUtil = void 0;
-/**
- * Single-use utility classes to provide functionality to the {@link Glob}
- * methods.
- *
- * @module
- */
-const minipass_1 = __nccwpck_require__(78275);
-const ignore_js_1 = __nccwpck_require__(4833);
-const processor_js_1 = __nccwpck_require__(48095);
-const makeIgnore = (ignore, opts) => typeof ignore === 'string' ? new ignore_js_1.Ignore([ignore], opts)
-    : Array.isArray(ignore) ? new ignore_js_1.Ignore(ignore, opts)
-        : ignore;
-/**
- * basic walking utilities that all the glob walker types use
- */
-class GlobUtil {
-    path;
-    patterns;
-    opts;
-    seen = new Set();
-    paused = false;
-    aborted = false;
-    #onResume = [];
-    #ignore;
-    #sep;
-    signal;
-    maxDepth;
-    includeChildMatches;
-    constructor(patterns, path, opts) {
-        this.patterns = patterns;
-        this.path = path;
-        this.opts = opts;
-        this.#sep = !opts.posix && opts.platform === 'win32' ? '\\' : '/';
-        this.includeChildMatches = opts.includeChildMatches !== false;
-        if (opts.ignore || !this.includeChildMatches) {
-            this.#ignore = makeIgnore(opts.ignore ?? [], opts);
-            if (!this.includeChildMatches &&
-                typeof this.#ignore.add !== 'function') {
-                const m = 'cannot ignore child matches, ignore lacks add() method.';
-                throw new Error(m);
-            }
-        }
-        // ignore, always set with maxDepth, but it's optional on the
-        // GlobOptions type
-        /* c8 ignore start */
-        this.maxDepth = opts.maxDepth || Infinity;
-        /* c8 ignore stop */
-        if (opts.signal) {
-            this.signal = opts.signal;
-            this.signal.addEventListener('abort', () => {
-                this.#onResume.length = 0;
-            });
-        }
-    }
-    #ignored(path) {
-        return this.seen.has(path) || !!this.#ignore?.ignored?.(path);
-    }
-    #childrenIgnored(path) {
-        return !!this.#ignore?.childrenIgnored?.(path);
-    }
-    // backpressure mechanism
-    pause() {
-        this.paused = true;
-    }
-    resume() {
-        /* c8 ignore start */
-        if (this.signal?.aborted)
-            return;
-        /* c8 ignore stop */
-        this.paused = false;
-        let fn = undefined;
-        while (!this.paused && (fn = this.#onResume.shift())) {
-            fn();
-        }
-    }
-    onResume(fn) {
-        if (this.signal?.aborted)
-            return;
-        /* c8 ignore start */
-        if (!this.paused) {
-            fn();
-        }
-        else {
-            /* c8 ignore stop */
-            this.#onResume.push(fn);
-        }
-    }
-    // do the requisite realpath/stat checking, and return the path
-    // to add or undefined to filter it out.
-    async matchCheck(e, ifDir) {
-        if (ifDir && this.opts.nodir)
-            return undefined;
-        let rpc;
-        if (this.opts.realpath) {
-            rpc = e.realpathCached() || (await e.realpath());
-            if (!rpc)
-                return undefined;
-            e = rpc;
-        }
-        const needStat = e.isUnknown() || this.opts.stat;
-        const s = needStat ? await e.lstat() : e;
-        if (this.opts.follow && this.opts.nodir && s?.isSymbolicLink()) {
-            const target = await s.realpath();
-            /* c8 ignore start */
-            if (target && (target.isUnknown() || this.opts.stat)) {
-                await target.lstat();
-            }
-            /* c8 ignore stop */
-        }
-        return this.matchCheckTest(s, ifDir);
-    }
-    matchCheckTest(e, ifDir) {
-        return (e &&
-            (this.maxDepth === Infinity || e.depth() <= this.maxDepth) &&
-            (!ifDir || e.canReaddir()) &&
-            (!this.opts.nodir || !e.isDirectory()) &&
-            (!this.opts.nodir ||
-                !this.opts.follow ||
-                !e.isSymbolicLink() ||
-                !e.realpathCached()?.isDirectory()) &&
-            !this.#ignored(e)) ?
-            e
-            : undefined;
-    }
-    matchCheckSync(e, ifDir) {
-        if (ifDir && this.opts.nodir)
-            return undefined;
-        let rpc;
-        if (this.opts.realpath) {
-            rpc = e.realpathCached() || e.realpathSync();
-            if (!rpc)
-                return undefined;
-            e = rpc;
-        }
-        const needStat = e.isUnknown() || this.opts.stat;
-        const s = needStat ? e.lstatSync() : e;
-        if (this.opts.follow && this.opts.nodir && s?.isSymbolicLink()) {
-            const target = s.realpathSync();
-            if (target && (target?.isUnknown() || this.opts.stat)) {
-                target.lstatSync();
-            }
-        }
-        return this.matchCheckTest(s, ifDir);
-    }
-    matchFinish(e, absolute) {
-        if (this.#ignored(e))
-            return;
-        // we know we have an ignore if this is false, but TS doesn't
-        if (!this.includeChildMatches && this.#ignore?.add) {
-            const ign = `${e.relativePosix()}/**`;
-            this.#ignore.add(ign);
-        }
-        const abs = this.opts.absolute === undefined ? absolute : this.opts.absolute;
-        this.seen.add(e);
-        const mark = this.opts.mark && e.isDirectory() ? this.#sep : '';
-        // ok, we have what we need!
-        if (this.opts.withFileTypes) {
-            this.matchEmit(e);
-        }
-        else if (abs) {
-            const abs = this.opts.posix ? e.fullpathPosix() : e.fullpath();
-            this.matchEmit(abs + mark);
-        }
-        else {
-            const rel = this.opts.posix ? e.relativePosix() : e.relative();
-            const pre = this.opts.dotRelative && !rel.startsWith('..' + this.#sep) ?
-                '.' + this.#sep
-                : '';
-            this.matchEmit(!rel ? '.' + mark : pre + rel + mark);
-        }
-    }
-    async match(e, absolute, ifDir) {
-        const p = await this.matchCheck(e, ifDir);
-        if (p)
-            this.matchFinish(p, absolute);
-    }
-    matchSync(e, absolute, ifDir) {
-        const p = this.matchCheckSync(e, ifDir);
-        if (p)
-            this.matchFinish(p, absolute);
-    }
-    walkCB(target, patterns, cb) {
-        /* c8 ignore start */
-        if (this.signal?.aborted)
-            cb();
-        /* c8 ignore stop */
-        this.walkCB2(target, patterns, new processor_js_1.Processor(this.opts), cb);
-    }
-    walkCB2(target, patterns, processor, cb) {
-        if (this.#childrenIgnored(target))
-            return cb();
-        if (this.signal?.aborted)
-            cb();
-        if (this.paused) {
-            this.onResume(() => this.walkCB2(target, patterns, processor, cb));
-            return;
-        }
-        processor.processPatterns(target, patterns);
-        // done processing.  all of the above is sync, can be abstracted out.
-        // subwalks is a map of paths to the entry filters they need
-        // matches is a map of paths to [absolute, ifDir] tuples.
-        let tasks = 1;
-        const next = () => {
-            if (--tasks === 0)
-                cb();
-        };
-        for (const [m, absolute, ifDir] of processor.matches.entries()) {
-            if (this.#ignored(m))
-                continue;
-            tasks++;
-            this.match(m, absolute, ifDir).then(() => next());
-        }
-        for (const t of processor.subwalkTargets()) {
-            if (this.maxDepth !== Infinity && t.depth() >= this.maxDepth) {
-                continue;
-            }
-            tasks++;
-            const childrenCached = t.readdirCached();
-            if (t.calledReaddir())
-                this.walkCB3(t, childrenCached, processor, next);
-            else {
-                t.readdirCB((_, entries) => this.walkCB3(t, entries, processor, next), true);
-            }
-        }
-        next();
-    }
-    walkCB3(target, entries, processor, cb) {
-        processor = processor.filterEntries(target, entries);
-        let tasks = 1;
-        const next = () => {
-            if (--tasks === 0)
-                cb();
-        };
-        for (const [m, absolute, ifDir] of processor.matches.entries()) {
-            if (this.#ignored(m))
-                continue;
-            tasks++;
-            this.match(m, absolute, ifDir).then(() => next());
-        }
-        for (const [target, patterns] of processor.subwalks.entries()) {
-            tasks++;
-            this.walkCB2(target, patterns, processor.child(), next);
-        }
-        next();
-    }
-    walkCBSync(target, patterns, cb) {
-        /* c8 ignore start */
-        if (this.signal?.aborted)
-            cb();
-        /* c8 ignore stop */
-        this.walkCB2Sync(target, patterns, new processor_js_1.Processor(this.opts), cb);
-    }
-    walkCB2Sync(target, patterns, processor, cb) {
-        if (this.#childrenIgnored(target))
-            return cb();
-        if (this.signal?.aborted)
-            cb();
-        if (this.paused) {
-            this.onResume(() => this.walkCB2Sync(target, patterns, processor, cb));
-            return;
-        }
-        processor.processPatterns(target, patterns);
-        // done processing.  all of the above is sync, can be abstracted out.
-        // subwalks is a map of paths to the entry filters they need
-        // matches is a map of paths to [absolute, ifDir] tuples.
-        let tasks = 1;
-        const next = () => {
-            if (--tasks === 0)
-                cb();
-        };
-        for (const [m, absolute, ifDir] of processor.matches.entries()) {
-            if (this.#ignored(m))
-                continue;
-            this.matchSync(m, absolute, ifDir);
-        }
-        for (const t of processor.subwalkTargets()) {
-            if (this.maxDepth !== Infinity && t.depth() >= this.maxDepth) {
-                continue;
-            }
-            tasks++;
-            const children = t.readdirSync();
-            this.walkCB3Sync(t, children, processor, next);
-        }
-        next();
-    }
-    walkCB3Sync(target, entries, processor, cb) {
-        processor = processor.filterEntries(target, entries);
-        let tasks = 1;
-        const next = () => {
-            if (--tasks === 0)
-                cb();
-        };
-        for (const [m, absolute, ifDir] of processor.matches.entries()) {
-            if (this.#ignored(m))
-                continue;
-            this.matchSync(m, absolute, ifDir);
-        }
-        for (const [target, patterns] of processor.subwalks.entries()) {
-            tasks++;
-            this.walkCB2Sync(target, patterns, processor.child(), next);
-        }
-        next();
-    }
-}
-exports.GlobUtil = GlobUtil;
-class GlobWalker extends GlobUtil {
-    matches = new Set();
-    constructor(patterns, path, opts) {
-        super(patterns, path, opts);
-    }
-    matchEmit(e) {
-        this.matches.add(e);
-    }
-    async walk() {
-        if (this.signal?.aborted)
-            throw this.signal.reason;
-        if (this.path.isUnknown()) {
-            await this.path.lstat();
-        }
-        await new Promise((res, rej) => {
-            this.walkCB(this.path, this.patterns, () => {
-                if (this.signal?.aborted) {
-                    rej(this.signal.reason);
-                }
-                else {
-                    res(this.matches);
-                }
-            });
-        });
-        return this.matches;
-    }
-    walkSync() {
-        if (this.signal?.aborted)
-            throw this.signal.reason;
-        if (this.path.isUnknown()) {
-            this.path.lstatSync();
-        }
-        // nothing for the callback to do, because this never pauses
-        this.walkCBSync(this.path, this.patterns, () => {
-            if (this.signal?.aborted)
-                throw this.signal.reason;
-        });
-        return this.matches;
-    }
-}
-exports.GlobWalker = GlobWalker;
-class GlobStream extends GlobUtil {
-    results;
-    constructor(patterns, path, opts) {
-        super(patterns, path, opts);
-        this.results = new minipass_1.Minipass({
-            signal: this.signal,
-            objectMode: true,
-        });
-        this.results.on('drain', () => this.resume());
-        this.results.on('resume', () => this.resume());
-    }
-    matchEmit(e) {
-        this.results.write(e);
-        if (!this.results.flowing)
-            this.pause();
-    }
-    stream() {
-        const target = this.path;
-        if (target.isUnknown()) {
-            target.lstat().then(() => {
-                this.walkCB(target, this.patterns, () => this.results.end());
-            });
-        }
-        else {
-            this.walkCB(target, this.patterns, () => this.results.end());
-        }
-        return this.results;
-    }
-    streamSync() {
-        if (this.path.isUnknown()) {
-            this.path.lstatSync();
-        }
-        this.walkCBSync(this.path, this.patterns, () => this.results.end());
-        return this.results;
-    }
-}
-exports.GlobStream = GlobStream;
-//# sourceMappingURL=walker.js.map
-
-/***/ }),
-
 /***/ 83193:
 /***/ ((__unused_webpack_module, exports) => {
 
@@ -74172,7 +75230,1424 @@ exports.LRUCache = LRUCache;
 
 /***/ }),
 
-/***/ 30013:
+/***/ 72981:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Glob = void 0;
+const minimatch_1 = __nccwpck_require__(91409);
+const node_url_1 = __nccwpck_require__(73136);
+const path_scurry_1 = __nccwpck_require__(16577);
+const pattern_js_1 = __nccwpck_require__(47813);
+const walker_js_1 = __nccwpck_require__(11157);
+// if no process global, just call it linux.
+// so we default to case-sensitive, / separators
+const defaultPlatform = (typeof process === 'object' &&
+    process &&
+    typeof process.platform === 'string') ?
+    process.platform
+    : 'linux';
+/**
+ * An object that can perform glob pattern traversals.
+ */
+class Glob {
+    absolute;
+    cwd;
+    root;
+    dot;
+    dotRelative;
+    follow;
+    ignore;
+    magicalBraces;
+    mark;
+    matchBase;
+    maxDepth;
+    nobrace;
+    nocase;
+    nodir;
+    noext;
+    noglobstar;
+    pattern;
+    platform;
+    realpath;
+    scurry;
+    stat;
+    signal;
+    windowsPathsNoEscape;
+    withFileTypes;
+    includeChildMatches;
+    /**
+     * The options provided to the constructor.
+     */
+    opts;
+    /**
+     * An array of parsed immutable {@link Pattern} objects.
+     */
+    patterns;
+    /**
+     * All options are stored as properties on the `Glob` object.
+     *
+     * See {@link GlobOptions} for full options descriptions.
+     *
+     * Note that a previous `Glob` object can be passed as the
+     * `GlobOptions` to another `Glob` instantiation to re-use settings
+     * and caches with a new pattern.
+     *
+     * Traversal functions can be called multiple times to run the walk
+     * again.
+     */
+    constructor(pattern, opts) {
+        /* c8 ignore start */
+        if (!opts)
+            throw new TypeError('glob options required');
+        /* c8 ignore stop */
+        this.withFileTypes = !!opts.withFileTypes;
+        this.signal = opts.signal;
+        this.follow = !!opts.follow;
+        this.dot = !!opts.dot;
+        this.dotRelative = !!opts.dotRelative;
+        this.nodir = !!opts.nodir;
+        this.mark = !!opts.mark;
+        if (!opts.cwd) {
+            this.cwd = '';
+        }
+        else if (opts.cwd instanceof URL || opts.cwd.startsWith('file://')) {
+            opts.cwd = (0, node_url_1.fileURLToPath)(opts.cwd);
+        }
+        this.cwd = opts.cwd || '';
+        this.root = opts.root;
+        this.magicalBraces = !!opts.magicalBraces;
+        this.nobrace = !!opts.nobrace;
+        this.noext = !!opts.noext;
+        this.realpath = !!opts.realpath;
+        this.absolute = opts.absolute;
+        this.includeChildMatches = opts.includeChildMatches !== false;
+        this.noglobstar = !!opts.noglobstar;
+        this.matchBase = !!opts.matchBase;
+        this.maxDepth =
+            typeof opts.maxDepth === 'number' ? opts.maxDepth : Infinity;
+        this.stat = !!opts.stat;
+        this.ignore = opts.ignore;
+        if (this.withFileTypes && this.absolute !== undefined) {
+            throw new Error('cannot set absolute and withFileTypes:true');
+        }
+        if (typeof pattern === 'string') {
+            pattern = [pattern];
+        }
+        this.windowsPathsNoEscape =
+            !!opts.windowsPathsNoEscape ||
+                opts.allowWindowsEscape ===
+                    false;
+        if (this.windowsPathsNoEscape) {
+            pattern = pattern.map(p => p.replace(/\\/g, '/'));
+        }
+        if (this.matchBase) {
+            if (opts.noglobstar) {
+                throw new TypeError('base matching requires globstar');
+            }
+            pattern = pattern.map(p => (p.includes('/') ? p : `./**/${p}`));
+        }
+        this.pattern = pattern;
+        this.platform = opts.platform || defaultPlatform;
+        this.opts = { ...opts, platform: this.platform };
+        if (opts.scurry) {
+            this.scurry = opts.scurry;
+            if (opts.nocase !== undefined &&
+                opts.nocase !== opts.scurry.nocase) {
+                throw new Error('nocase option contradicts provided scurry option');
+            }
+        }
+        else {
+            const Scurry = opts.platform === 'win32' ? path_scurry_1.PathScurryWin32
+                : opts.platform === 'darwin' ? path_scurry_1.PathScurryDarwin
+                    : opts.platform ? path_scurry_1.PathScurryPosix
+                        : path_scurry_1.PathScurry;
+            this.scurry = new Scurry(this.cwd, {
+                nocase: opts.nocase,
+                fs: opts.fs,
+            });
+        }
+        this.nocase = this.scurry.nocase;
+        // If you do nocase:true on a case-sensitive file system, then
+        // we need to use regexps instead of strings for non-magic
+        // path portions, because statting `aBc` won't return results
+        // for the file `AbC` for example.
+        const nocaseMagicOnly = this.platform === 'darwin' || this.platform === 'win32';
+        const mmo = {
+            // default nocase based on platform
+            ...opts,
+            dot: this.dot,
+            matchBase: this.matchBase,
+            nobrace: this.nobrace,
+            nocase: this.nocase,
+            nocaseMagicOnly,
+            nocomment: true,
+            noext: this.noext,
+            nonegate: true,
+            optimizationLevel: 2,
+            platform: this.platform,
+            windowsPathsNoEscape: this.windowsPathsNoEscape,
+            debug: !!this.opts.debug,
+        };
+        const mms = this.pattern.map(p => new minimatch_1.Minimatch(p, mmo));
+        const [matchSet, globParts] = mms.reduce((set, m) => {
+            set[0].push(...m.set);
+            set[1].push(...m.globParts);
+            return set;
+        }, [[], []]);
+        this.patterns = matchSet.map((set, i) => {
+            const g = globParts[i];
+            /* c8 ignore start */
+            if (!g)
+                throw new Error('invalid pattern object');
+            /* c8 ignore stop */
+            return new pattern_js_1.Pattern(set, g, 0, this.platform);
+        });
+    }
+    async walk() {
+        // Walkers always return array of Path objects, so we just have to
+        // coerce them into the right shape.  It will have already called
+        // realpath() if the option was set to do so, so we know that's cached.
+        // start out knowing the cwd, at least
+        return [
+            ...(await new walker_js_1.GlobWalker(this.patterns, this.scurry.cwd, {
+                ...this.opts,
+                maxDepth: this.maxDepth !== Infinity ?
+                    this.maxDepth + this.scurry.cwd.depth()
+                    : Infinity,
+                platform: this.platform,
+                nocase: this.nocase,
+                includeChildMatches: this.includeChildMatches,
+            }).walk()),
+        ];
+    }
+    walkSync() {
+        return [
+            ...new walker_js_1.GlobWalker(this.patterns, this.scurry.cwd, {
+                ...this.opts,
+                maxDepth: this.maxDepth !== Infinity ?
+                    this.maxDepth + this.scurry.cwd.depth()
+                    : Infinity,
+                platform: this.platform,
+                nocase: this.nocase,
+                includeChildMatches: this.includeChildMatches,
+            }).walkSync(),
+        ];
+    }
+    stream() {
+        return new walker_js_1.GlobStream(this.patterns, this.scurry.cwd, {
+            ...this.opts,
+            maxDepth: this.maxDepth !== Infinity ?
+                this.maxDepth + this.scurry.cwd.depth()
+                : Infinity,
+            platform: this.platform,
+            nocase: this.nocase,
+            includeChildMatches: this.includeChildMatches,
+        }).stream();
+    }
+    streamSync() {
+        return new walker_js_1.GlobStream(this.patterns, this.scurry.cwd, {
+            ...this.opts,
+            maxDepth: this.maxDepth !== Infinity ?
+                this.maxDepth + this.scurry.cwd.depth()
+                : Infinity,
+            platform: this.platform,
+            nocase: this.nocase,
+            includeChildMatches: this.includeChildMatches,
+        }).streamSync();
+    }
+    /**
+     * Default sync iteration function. Returns a Generator that
+     * iterates over the results.
+     */
+    iterateSync() {
+        return this.streamSync()[Symbol.iterator]();
+    }
+    [Symbol.iterator]() {
+        return this.iterateSync();
+    }
+    /**
+     * Default async iteration function. Returns an AsyncGenerator that
+     * iterates over the results.
+     */
+    iterate() {
+        return this.stream()[Symbol.asyncIterator]();
+    }
+    [Symbol.asyncIterator]() {
+        return this.iterate();
+    }
+}
+exports.Glob = Glob;
+//# sourceMappingURL=glob.js.map
+
+/***/ }),
+
+/***/ 45197:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.hasMagic = void 0;
+const minimatch_1 = __nccwpck_require__(91409);
+/**
+ * Return true if the patterns provided contain any magic glob characters,
+ * given the options provided.
+ *
+ * Brace expansion is not considered "magic" unless the `magicalBraces` option
+ * is set, as brace expansion just turns one string into an array of strings.
+ * So a pattern like `'x{a,b}y'` would return `false`, because `'xay'` and
+ * `'xby'` both do not contain any magic glob characters, and it's treated the
+ * same as if you had called it on `['xay', 'xby']`. When `magicalBraces:true`
+ * is in the options, brace expansion _is_ treated as a pattern having magic.
+ */
+const hasMagic = (pattern, options = {}) => {
+    if (!Array.isArray(pattern)) {
+        pattern = [pattern];
+    }
+    for (const p of pattern) {
+        if (new minimatch_1.Minimatch(p, options).hasMagic())
+            return true;
+    }
+    return false;
+};
+exports.hasMagic = hasMagic;
+//# sourceMappingURL=has-magic.js.map
+
+/***/ }),
+
+/***/ 5637:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+// give it a pattern, and it'll be able to tell you if
+// a given path should be ignored.
+// Ignoring a path ignores its children if the pattern ends in /**
+// Ignores are always parsed in dot:true mode
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Ignore = void 0;
+const minimatch_1 = __nccwpck_require__(91409);
+const pattern_js_1 = __nccwpck_require__(47813);
+const defaultPlatform = (typeof process === 'object' &&
+    process &&
+    typeof process.platform === 'string') ?
+    process.platform
+    : 'linux';
+/**
+ * Class used to process ignored patterns
+ */
+class Ignore {
+    relative;
+    relativeChildren;
+    absolute;
+    absoluteChildren;
+    platform;
+    mmopts;
+    constructor(ignored, { nobrace, nocase, noext, noglobstar, platform = defaultPlatform, }) {
+        this.relative = [];
+        this.absolute = [];
+        this.relativeChildren = [];
+        this.absoluteChildren = [];
+        this.platform = platform;
+        this.mmopts = {
+            dot: true,
+            nobrace,
+            nocase,
+            noext,
+            noglobstar,
+            optimizationLevel: 2,
+            platform,
+            nocomment: true,
+            nonegate: true,
+        };
+        for (const ign of ignored)
+            this.add(ign);
+    }
+    add(ign) {
+        // this is a little weird, but it gives us a clean set of optimized
+        // minimatch matchers, without getting tripped up if one of them
+        // ends in /** inside a brace section, and it's only inefficient at
+        // the start of the walk, not along it.
+        // It'd be nice if the Pattern class just had a .test() method, but
+        // handling globstars is a bit of a pita, and that code already lives
+        // in minimatch anyway.
+        // Another way would be if maybe Minimatch could take its set/globParts
+        // as an option, and then we could at least just use Pattern to test
+        // for absolute-ness.
+        // Yet another way, Minimatch could take an array of glob strings, and
+        // a cwd option, and do the right thing.
+        const mm = new minimatch_1.Minimatch(ign, this.mmopts);
+        for (let i = 0; i < mm.set.length; i++) {
+            const parsed = mm.set[i];
+            const globParts = mm.globParts[i];
+            /* c8 ignore start */
+            if (!parsed || !globParts) {
+                throw new Error('invalid pattern object');
+            }
+            // strip off leading ./ portions
+            // https://github.com/isaacs/node-glob/issues/570
+            while (parsed[0] === '.' && globParts[0] === '.') {
+                parsed.shift();
+                globParts.shift();
+            }
+            /* c8 ignore stop */
+            const p = new pattern_js_1.Pattern(parsed, globParts, 0, this.platform);
+            const m = new minimatch_1.Minimatch(p.globString(), this.mmopts);
+            const children = globParts[globParts.length - 1] === '**';
+            const absolute = p.isAbsolute();
+            if (absolute)
+                this.absolute.push(m);
+            else
+                this.relative.push(m);
+            if (children) {
+                if (absolute)
+                    this.absoluteChildren.push(m);
+                else
+                    this.relativeChildren.push(m);
+            }
+        }
+    }
+    ignored(p) {
+        const fullpath = p.fullpath();
+        const fullpaths = `${fullpath}/`;
+        const relative = p.relative() || '.';
+        const relatives = `${relative}/`;
+        for (const m of this.relative) {
+            if (m.match(relative) || m.match(relatives))
+                return true;
+        }
+        for (const m of this.absolute) {
+            if (m.match(fullpath) || m.match(fullpaths))
+                return true;
+        }
+        return false;
+    }
+    childrenIgnored(p) {
+        const fullpath = p.fullpath() + '/';
+        const relative = (p.relative() || '.') + '/';
+        for (const m of this.relativeChildren) {
+            if (m.match(relative))
+                return true;
+        }
+        for (const m of this.absoluteChildren) {
+            if (m.match(fullpath))
+                return true;
+        }
+        return false;
+    }
+}
+exports.Ignore = Ignore;
+//# sourceMappingURL=ignore.js.map
+
+/***/ }),
+
+/***/ 21363:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.glob = exports.sync = exports.iterate = exports.iterateSync = exports.stream = exports.streamSync = exports.Ignore = exports.hasMagic = exports.Glob = exports.unescape = exports.escape = void 0;
+exports.globStreamSync = globStreamSync;
+exports.globStream = globStream;
+exports.globSync = globSync;
+exports.globIterateSync = globIterateSync;
+exports.globIterate = globIterate;
+const minimatch_1 = __nccwpck_require__(91409);
+const glob_js_1 = __nccwpck_require__(72981);
+const has_magic_js_1 = __nccwpck_require__(45197);
+var minimatch_2 = __nccwpck_require__(91409);
+Object.defineProperty(exports, "escape", ({ enumerable: true, get: function () { return minimatch_2.escape; } }));
+Object.defineProperty(exports, "unescape", ({ enumerable: true, get: function () { return minimatch_2.unescape; } }));
+var glob_js_2 = __nccwpck_require__(72981);
+Object.defineProperty(exports, "Glob", ({ enumerable: true, get: function () { return glob_js_2.Glob; } }));
+var has_magic_js_2 = __nccwpck_require__(45197);
+Object.defineProperty(exports, "hasMagic", ({ enumerable: true, get: function () { return has_magic_js_2.hasMagic; } }));
+var ignore_js_1 = __nccwpck_require__(5637);
+Object.defineProperty(exports, "Ignore", ({ enumerable: true, get: function () { return ignore_js_1.Ignore; } }));
+function globStreamSync(pattern, options = {}) {
+    return new glob_js_1.Glob(pattern, options).streamSync();
+}
+function globStream(pattern, options = {}) {
+    return new glob_js_1.Glob(pattern, options).stream();
+}
+function globSync(pattern, options = {}) {
+    return new glob_js_1.Glob(pattern, options).walkSync();
+}
+async function glob_(pattern, options = {}) {
+    return new glob_js_1.Glob(pattern, options).walk();
+}
+function globIterateSync(pattern, options = {}) {
+    return new glob_js_1.Glob(pattern, options).iterateSync();
+}
+function globIterate(pattern, options = {}) {
+    return new glob_js_1.Glob(pattern, options).iterate();
+}
+// aliases: glob.sync.stream() glob.stream.sync() glob.sync() etc
+exports.streamSync = globStreamSync;
+exports.stream = Object.assign(globStream, { sync: globStreamSync });
+exports.iterateSync = globIterateSync;
+exports.iterate = Object.assign(globIterate, {
+    sync: globIterateSync,
+});
+exports.sync = Object.assign(globSync, {
+    stream: globStreamSync,
+    iterate: globIterateSync,
+});
+exports.glob = Object.assign(glob_, {
+    glob: glob_,
+    globSync,
+    sync: exports.sync,
+    globStream,
+    stream: exports.stream,
+    globStreamSync,
+    streamSync: exports.streamSync,
+    globIterate,
+    iterate: exports.iterate,
+    globIterateSync,
+    iterateSync: exports.iterateSync,
+    Glob: glob_js_1.Glob,
+    hasMagic: has_magic_js_1.hasMagic,
+    escape: minimatch_1.escape,
+    unescape: minimatch_1.unescape,
+});
+exports.glob.glob = exports.glob;
+//# sourceMappingURL=index.js.map
+
+/***/ }),
+
+/***/ 47813:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+// this is just a very light wrapper around 2 arrays with an offset index
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Pattern = void 0;
+const minimatch_1 = __nccwpck_require__(91409);
+const isPatternList = (pl) => pl.length >= 1;
+const isGlobList = (gl) => gl.length >= 1;
+/**
+ * An immutable-ish view on an array of glob parts and their parsed
+ * results
+ */
+class Pattern {
+    #patternList;
+    #globList;
+    #index;
+    length;
+    #platform;
+    #rest;
+    #globString;
+    #isDrive;
+    #isUNC;
+    #isAbsolute;
+    #followGlobstar = true;
+    constructor(patternList, globList, index, platform) {
+        if (!isPatternList(patternList)) {
+            throw new TypeError('empty pattern list');
+        }
+        if (!isGlobList(globList)) {
+            throw new TypeError('empty glob list');
+        }
+        if (globList.length !== patternList.length) {
+            throw new TypeError('mismatched pattern list and glob list lengths');
+        }
+        this.length = patternList.length;
+        if (index < 0 || index >= this.length) {
+            throw new TypeError('index out of range');
+        }
+        this.#patternList = patternList;
+        this.#globList = globList;
+        this.#index = index;
+        this.#platform = platform;
+        // normalize root entries of absolute patterns on initial creation.
+        if (this.#index === 0) {
+            // c: => ['c:/']
+            // C:/ => ['C:/']
+            // C:/x => ['C:/', 'x']
+            // //host/share => ['//host/share/']
+            // //host/share/ => ['//host/share/']
+            // //host/share/x => ['//host/share/', 'x']
+            // /etc => ['/', 'etc']
+            // / => ['/']
+            if (this.isUNC()) {
+                // '' / '' / 'host' / 'share'
+                const [p0, p1, p2, p3, ...prest] = this.#patternList;
+                const [g0, g1, g2, g3, ...grest] = this.#globList;
+                if (prest[0] === '') {
+                    // ends in /
+                    prest.shift();
+                    grest.shift();
+                }
+                const p = [p0, p1, p2, p3, ''].join('/');
+                const g = [g0, g1, g2, g3, ''].join('/');
+                this.#patternList = [p, ...prest];
+                this.#globList = [g, ...grest];
+                this.length = this.#patternList.length;
+            }
+            else if (this.isDrive() || this.isAbsolute()) {
+                const [p1, ...prest] = this.#patternList;
+                const [g1, ...grest] = this.#globList;
+                if (prest[0] === '') {
+                    // ends in /
+                    prest.shift();
+                    grest.shift();
+                }
+                const p = p1 + '/';
+                const g = g1 + '/';
+                this.#patternList = [p, ...prest];
+                this.#globList = [g, ...grest];
+                this.length = this.#patternList.length;
+            }
+        }
+    }
+    /**
+     * The first entry in the parsed list of patterns
+     */
+    pattern() {
+        return this.#patternList[this.#index];
+    }
+    /**
+     * true of if pattern() returns a string
+     */
+    isString() {
+        return typeof this.#patternList[this.#index] === 'string';
+    }
+    /**
+     * true of if pattern() returns GLOBSTAR
+     */
+    isGlobstar() {
+        return this.#patternList[this.#index] === minimatch_1.GLOBSTAR;
+    }
+    /**
+     * true if pattern() returns a regexp
+     */
+    isRegExp() {
+        return this.#patternList[this.#index] instanceof RegExp;
+    }
+    /**
+     * The /-joined set of glob parts that make up this pattern
+     */
+    globString() {
+        return (this.#globString =
+            this.#globString ||
+                (this.#index === 0 ?
+                    this.isAbsolute() ?
+                        this.#globList[0] + this.#globList.slice(1).join('/')
+                        : this.#globList.join('/')
+                    : this.#globList.slice(this.#index).join('/')));
+    }
+    /**
+     * true if there are more pattern parts after this one
+     */
+    hasMore() {
+        return this.length > this.#index + 1;
+    }
+    /**
+     * The rest of the pattern after this part, or null if this is the end
+     */
+    rest() {
+        if (this.#rest !== undefined)
+            return this.#rest;
+        if (!this.hasMore())
+            return (this.#rest = null);
+        this.#rest = new Pattern(this.#patternList, this.#globList, this.#index + 1, this.#platform);
+        this.#rest.#isAbsolute = this.#isAbsolute;
+        this.#rest.#isUNC = this.#isUNC;
+        this.#rest.#isDrive = this.#isDrive;
+        return this.#rest;
+    }
+    /**
+     * true if the pattern represents a //unc/path/ on windows
+     */
+    isUNC() {
+        const pl = this.#patternList;
+        return this.#isUNC !== undefined ?
+            this.#isUNC
+            : (this.#isUNC =
+                this.#platform === 'win32' &&
+                    this.#index === 0 &&
+                    pl[0] === '' &&
+                    pl[1] === '' &&
+                    typeof pl[2] === 'string' &&
+                    !!pl[2] &&
+                    typeof pl[3] === 'string' &&
+                    !!pl[3]);
+    }
+    // pattern like C:/...
+    // split = ['C:', ...]
+    // XXX: would be nice to handle patterns like `c:*` to test the cwd
+    // in c: for *, but I don't know of a way to even figure out what that
+    // cwd is without actually chdir'ing into it?
+    /**
+     * True if the pattern starts with a drive letter on Windows
+     */
+    isDrive() {
+        const pl = this.#patternList;
+        return this.#isDrive !== undefined ?
+            this.#isDrive
+            : (this.#isDrive =
+                this.#platform === 'win32' &&
+                    this.#index === 0 &&
+                    this.length > 1 &&
+                    typeof pl[0] === 'string' &&
+                    /^[a-z]:$/i.test(pl[0]));
+    }
+    // pattern = '/' or '/...' or '/x/...'
+    // split = ['', ''] or ['', ...] or ['', 'x', ...]
+    // Drive and UNC both considered absolute on windows
+    /**
+     * True if the pattern is rooted on an absolute path
+     */
+    isAbsolute() {
+        const pl = this.#patternList;
+        return this.#isAbsolute !== undefined ?
+            this.#isAbsolute
+            : (this.#isAbsolute =
+                (pl[0] === '' && pl.length > 1) ||
+                    this.isDrive() ||
+                    this.isUNC());
+    }
+    /**
+     * consume the root of the pattern, and return it
+     */
+    root() {
+        const p = this.#patternList[0];
+        return (typeof p === 'string' && this.isAbsolute() && this.#index === 0) ?
+            p
+            : '';
+    }
+    /**
+     * Check to see if the current globstar pattern is allowed to follow
+     * a symbolic link.
+     */
+    checkFollowGlobstar() {
+        return !(this.#index === 0 ||
+            !this.isGlobstar() ||
+            !this.#followGlobstar);
+    }
+    /**
+     * Mark that the current globstar pattern is following a symbolic link
+     */
+    markFollowGlobstar() {
+        if (this.#index === 0 || !this.isGlobstar() || !this.#followGlobstar)
+            return false;
+        this.#followGlobstar = false;
+        return true;
+    }
+}
+exports.Pattern = Pattern;
+//# sourceMappingURL=pattern.js.map
+
+/***/ }),
+
+/***/ 37843:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+// synchronous utility for filtering entries and calculating subwalks
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Processor = exports.SubWalks = exports.MatchRecord = exports.HasWalkedCache = void 0;
+const minimatch_1 = __nccwpck_require__(91409);
+/**
+ * A cache of which patterns have been processed for a given Path
+ */
+class HasWalkedCache {
+    store;
+    constructor(store = new Map()) {
+        this.store = store;
+    }
+    copy() {
+        return new HasWalkedCache(new Map(this.store));
+    }
+    hasWalked(target, pattern) {
+        return this.store.get(target.fullpath())?.has(pattern.globString());
+    }
+    storeWalked(target, pattern) {
+        const fullpath = target.fullpath();
+        const cached = this.store.get(fullpath);
+        if (cached)
+            cached.add(pattern.globString());
+        else
+            this.store.set(fullpath, new Set([pattern.globString()]));
+    }
+}
+exports.HasWalkedCache = HasWalkedCache;
+/**
+ * A record of which paths have been matched in a given walk step,
+ * and whether they only are considered a match if they are a directory,
+ * and whether their absolute or relative path should be returned.
+ */
+class MatchRecord {
+    store = new Map();
+    add(target, absolute, ifDir) {
+        const n = (absolute ? 2 : 0) | (ifDir ? 1 : 0);
+        const current = this.store.get(target);
+        this.store.set(target, current === undefined ? n : n & current);
+    }
+    // match, absolute, ifdir
+    entries() {
+        return [...this.store.entries()].map(([path, n]) => [
+            path,
+            !!(n & 2),
+            !!(n & 1),
+        ]);
+    }
+}
+exports.MatchRecord = MatchRecord;
+/**
+ * A collection of patterns that must be processed in a subsequent step
+ * for a given path.
+ */
+class SubWalks {
+    store = new Map();
+    add(target, pattern) {
+        if (!target.canReaddir()) {
+            return;
+        }
+        const subs = this.store.get(target);
+        if (subs) {
+            if (!subs.find(p => p.globString() === pattern.globString())) {
+                subs.push(pattern);
+            }
+        }
+        else
+            this.store.set(target, [pattern]);
+    }
+    get(target) {
+        const subs = this.store.get(target);
+        /* c8 ignore start */
+        if (!subs) {
+            throw new Error('attempting to walk unknown path');
+        }
+        /* c8 ignore stop */
+        return subs;
+    }
+    entries() {
+        return this.keys().map(k => [k, this.store.get(k)]);
+    }
+    keys() {
+        return [...this.store.keys()].filter(t => t.canReaddir());
+    }
+}
+exports.SubWalks = SubWalks;
+/**
+ * The class that processes patterns for a given path.
+ *
+ * Handles child entry filtering, and determining whether a path's
+ * directory contents must be read.
+ */
+class Processor {
+    hasWalkedCache;
+    matches = new MatchRecord();
+    subwalks = new SubWalks();
+    patterns;
+    follow;
+    dot;
+    opts;
+    constructor(opts, hasWalkedCache) {
+        this.opts = opts;
+        this.follow = !!opts.follow;
+        this.dot = !!opts.dot;
+        this.hasWalkedCache =
+            hasWalkedCache ? hasWalkedCache.copy() : new HasWalkedCache();
+    }
+    processPatterns(target, patterns) {
+        this.patterns = patterns;
+        const processingSet = patterns.map(p => [target, p]);
+        // map of paths to the magic-starting subwalks they need to walk
+        // first item in patterns is the filter
+        for (let [t, pattern] of processingSet) {
+            this.hasWalkedCache.storeWalked(t, pattern);
+            const root = pattern.root();
+            const absolute = pattern.isAbsolute() && this.opts.absolute !== false;
+            // start absolute patterns at root
+            if (root) {
+                t = t.resolve(root === '/' && this.opts.root !== undefined ?
+                    this.opts.root
+                    : root);
+                const rest = pattern.rest();
+                if (!rest) {
+                    this.matches.add(t, true, false);
+                    continue;
+                }
+                else {
+                    pattern = rest;
+                }
+            }
+            if (t.isENOENT())
+                continue;
+            let p;
+            let rest;
+            let changed = false;
+            while (typeof (p = pattern.pattern()) === 'string' &&
+                (rest = pattern.rest())) {
+                const c = t.resolve(p);
+                t = c;
+                pattern = rest;
+                changed = true;
+            }
+            p = pattern.pattern();
+            rest = pattern.rest();
+            if (changed) {
+                if (this.hasWalkedCache.hasWalked(t, pattern))
+                    continue;
+                this.hasWalkedCache.storeWalked(t, pattern);
+            }
+            // now we have either a final string for a known entry,
+            // more strings for an unknown entry,
+            // or a pattern starting with magic, mounted on t.
+            if (typeof p === 'string') {
+                // must not be final entry, otherwise we would have
+                // concatenated it earlier.
+                const ifDir = p === '..' || p === '' || p === '.';
+                this.matches.add(t.resolve(p), absolute, ifDir);
+                continue;
+            }
+            else if (p === minimatch_1.GLOBSTAR) {
+                // if no rest, match and subwalk pattern
+                // if rest, process rest and subwalk pattern
+                // if it's a symlink, but we didn't get here by way of a
+                // globstar match (meaning it's the first time THIS globstar
+                // has traversed a symlink), then we follow it. Otherwise, stop.
+                if (!t.isSymbolicLink() ||
+                    this.follow ||
+                    pattern.checkFollowGlobstar()) {
+                    this.subwalks.add(t, pattern);
+                }
+                const rp = rest?.pattern();
+                const rrest = rest?.rest();
+                if (!rest || ((rp === '' || rp === '.') && !rrest)) {
+                    // only HAS to be a dir if it ends in **/ or **/.
+                    // but ending in ** will match files as well.
+                    this.matches.add(t, absolute, rp === '' || rp === '.');
+                }
+                else {
+                    if (rp === '..') {
+                        // this would mean you're matching **/.. at the fs root,
+                        // and no thanks, I'm not gonna test that specific case.
+                        /* c8 ignore start */
+                        const tp = t.parent || t;
+                        /* c8 ignore stop */
+                        if (!rrest)
+                            this.matches.add(tp, absolute, true);
+                        else if (!this.hasWalkedCache.hasWalked(tp, rrest)) {
+                            this.subwalks.add(tp, rrest);
+                        }
+                    }
+                }
+            }
+            else if (p instanceof RegExp) {
+                this.subwalks.add(t, pattern);
+            }
+        }
+        return this;
+    }
+    subwalkTargets() {
+        return this.subwalks.keys();
+    }
+    child() {
+        return new Processor(this.opts, this.hasWalkedCache);
+    }
+    // return a new Processor containing the subwalks for each
+    // child entry, and a set of matches, and
+    // a hasWalkedCache that's a copy of this one
+    // then we're going to call
+    filterEntries(parent, entries) {
+        const patterns = this.subwalks.get(parent);
+        // put matches and entry walks into the results processor
+        const results = this.child();
+        for (const e of entries) {
+            for (const pattern of patterns) {
+                const absolute = pattern.isAbsolute();
+                const p = pattern.pattern();
+                const rest = pattern.rest();
+                if (p === minimatch_1.GLOBSTAR) {
+                    results.testGlobstar(e, pattern, rest, absolute);
+                }
+                else if (p instanceof RegExp) {
+                    results.testRegExp(e, p, rest, absolute);
+                }
+                else {
+                    results.testString(e, p, rest, absolute);
+                }
+            }
+        }
+        return results;
+    }
+    testGlobstar(e, pattern, rest, absolute) {
+        if (this.dot || !e.name.startsWith('.')) {
+            if (!pattern.hasMore()) {
+                this.matches.add(e, absolute, false);
+            }
+            if (e.canReaddir()) {
+                // if we're in follow mode or it's not a symlink, just keep
+                // testing the same pattern. If there's more after the globstar,
+                // then this symlink consumes the globstar. If not, then we can
+                // follow at most ONE symlink along the way, so we mark it, which
+                // also checks to ensure that it wasn't already marked.
+                if (this.follow || !e.isSymbolicLink()) {
+                    this.subwalks.add(e, pattern);
+                }
+                else if (e.isSymbolicLink()) {
+                    if (rest && pattern.checkFollowGlobstar()) {
+                        this.subwalks.add(e, rest);
+                    }
+                    else if (pattern.markFollowGlobstar()) {
+                        this.subwalks.add(e, pattern);
+                    }
+                }
+            }
+        }
+        // if the NEXT thing matches this entry, then also add
+        // the rest.
+        if (rest) {
+            const rp = rest.pattern();
+            if (typeof rp === 'string' &&
+                // dots and empty were handled already
+                rp !== '..' &&
+                rp !== '' &&
+                rp !== '.') {
+                this.testString(e, rp, rest.rest(), absolute);
+            }
+            else if (rp === '..') {
+                /* c8 ignore start */
+                const ep = e.parent || e;
+                /* c8 ignore stop */
+                this.subwalks.add(ep, rest);
+            }
+            else if (rp instanceof RegExp) {
+                this.testRegExp(e, rp, rest.rest(), absolute);
+            }
+        }
+    }
+    testRegExp(e, p, rest, absolute) {
+        if (!p.test(e.name))
+            return;
+        if (!rest) {
+            this.matches.add(e, absolute, false);
+        }
+        else {
+            this.subwalks.add(e, rest);
+        }
+    }
+    testString(e, p, rest, absolute) {
+        // should never happen?
+        if (!e.isNamed(p))
+            return;
+        if (!rest) {
+            this.matches.add(e, absolute, false);
+        }
+        else {
+            this.subwalks.add(e, rest);
+        }
+    }
+}
+exports.Processor = Processor;
+//# sourceMappingURL=processor.js.map
+
+/***/ }),
+
+/***/ 11157:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.GlobStream = exports.GlobWalker = exports.GlobUtil = void 0;
+/**
+ * Single-use utility classes to provide functionality to the {@link Glob}
+ * methods.
+ *
+ * @module
+ */
+const minipass_1 = __nccwpck_require__(78275);
+const ignore_js_1 = __nccwpck_require__(5637);
+const processor_js_1 = __nccwpck_require__(37843);
+const makeIgnore = (ignore, opts) => typeof ignore === 'string' ? new ignore_js_1.Ignore([ignore], opts)
+    : Array.isArray(ignore) ? new ignore_js_1.Ignore(ignore, opts)
+        : ignore;
+/**
+ * basic walking utilities that all the glob walker types use
+ */
+class GlobUtil {
+    path;
+    patterns;
+    opts;
+    seen = new Set();
+    paused = false;
+    aborted = false;
+    #onResume = [];
+    #ignore;
+    #sep;
+    signal;
+    maxDepth;
+    includeChildMatches;
+    constructor(patterns, path, opts) {
+        this.patterns = patterns;
+        this.path = path;
+        this.opts = opts;
+        this.#sep = !opts.posix && opts.platform === 'win32' ? '\\' : '/';
+        this.includeChildMatches = opts.includeChildMatches !== false;
+        if (opts.ignore || !this.includeChildMatches) {
+            this.#ignore = makeIgnore(opts.ignore ?? [], opts);
+            if (!this.includeChildMatches &&
+                typeof this.#ignore.add !== 'function') {
+                const m = 'cannot ignore child matches, ignore lacks add() method.';
+                throw new Error(m);
+            }
+        }
+        // ignore, always set with maxDepth, but it's optional on the
+        // GlobOptions type
+        /* c8 ignore start */
+        this.maxDepth = opts.maxDepth || Infinity;
+        /* c8 ignore stop */
+        if (opts.signal) {
+            this.signal = opts.signal;
+            this.signal.addEventListener('abort', () => {
+                this.#onResume.length = 0;
+            });
+        }
+    }
+    #ignored(path) {
+        return this.seen.has(path) || !!this.#ignore?.ignored?.(path);
+    }
+    #childrenIgnored(path) {
+        return !!this.#ignore?.childrenIgnored?.(path);
+    }
+    // backpressure mechanism
+    pause() {
+        this.paused = true;
+    }
+    resume() {
+        /* c8 ignore start */
+        if (this.signal?.aborted)
+            return;
+        /* c8 ignore stop */
+        this.paused = false;
+        let fn = undefined;
+        while (!this.paused && (fn = this.#onResume.shift())) {
+            fn();
+        }
+    }
+    onResume(fn) {
+        if (this.signal?.aborted)
+            return;
+        /* c8 ignore start */
+        if (!this.paused) {
+            fn();
+        }
+        else {
+            /* c8 ignore stop */
+            this.#onResume.push(fn);
+        }
+    }
+    // do the requisite realpath/stat checking, and return the path
+    // to add or undefined to filter it out.
+    async matchCheck(e, ifDir) {
+        if (ifDir && this.opts.nodir)
+            return undefined;
+        let rpc;
+        if (this.opts.realpath) {
+            rpc = e.realpathCached() || (await e.realpath());
+            if (!rpc)
+                return undefined;
+            e = rpc;
+        }
+        const needStat = e.isUnknown() || this.opts.stat;
+        const s = needStat ? await e.lstat() : e;
+        if (this.opts.follow && this.opts.nodir && s?.isSymbolicLink()) {
+            const target = await s.realpath();
+            /* c8 ignore start */
+            if (target && (target.isUnknown() || this.opts.stat)) {
+                await target.lstat();
+            }
+            /* c8 ignore stop */
+        }
+        return this.matchCheckTest(s, ifDir);
+    }
+    matchCheckTest(e, ifDir) {
+        return (e &&
+            (this.maxDepth === Infinity || e.depth() <= this.maxDepth) &&
+            (!ifDir || e.canReaddir()) &&
+            (!this.opts.nodir || !e.isDirectory()) &&
+            (!this.opts.nodir ||
+                !this.opts.follow ||
+                !e.isSymbolicLink() ||
+                !e.realpathCached()?.isDirectory()) &&
+            !this.#ignored(e)) ?
+            e
+            : undefined;
+    }
+    matchCheckSync(e, ifDir) {
+        if (ifDir && this.opts.nodir)
+            return undefined;
+        let rpc;
+        if (this.opts.realpath) {
+            rpc = e.realpathCached() || e.realpathSync();
+            if (!rpc)
+                return undefined;
+            e = rpc;
+        }
+        const needStat = e.isUnknown() || this.opts.stat;
+        const s = needStat ? e.lstatSync() : e;
+        if (this.opts.follow && this.opts.nodir && s?.isSymbolicLink()) {
+            const target = s.realpathSync();
+            if (target && (target?.isUnknown() || this.opts.stat)) {
+                target.lstatSync();
+            }
+        }
+        return this.matchCheckTest(s, ifDir);
+    }
+    matchFinish(e, absolute) {
+        if (this.#ignored(e))
+            return;
+        // we know we have an ignore if this is false, but TS doesn't
+        if (!this.includeChildMatches && this.#ignore?.add) {
+            const ign = `${e.relativePosix()}/**`;
+            this.#ignore.add(ign);
+        }
+        const abs = this.opts.absolute === undefined ? absolute : this.opts.absolute;
+        this.seen.add(e);
+        const mark = this.opts.mark && e.isDirectory() ? this.#sep : '';
+        // ok, we have what we need!
+        if (this.opts.withFileTypes) {
+            this.matchEmit(e);
+        }
+        else if (abs) {
+            const abs = this.opts.posix ? e.fullpathPosix() : e.fullpath();
+            this.matchEmit(abs + mark);
+        }
+        else {
+            const rel = this.opts.posix ? e.relativePosix() : e.relative();
+            const pre = this.opts.dotRelative && !rel.startsWith('..' + this.#sep) ?
+                '.' + this.#sep
+                : '';
+            this.matchEmit(!rel ? '.' + mark : pre + rel + mark);
+        }
+    }
+    async match(e, absolute, ifDir) {
+        const p = await this.matchCheck(e, ifDir);
+        if (p)
+            this.matchFinish(p, absolute);
+    }
+    matchSync(e, absolute, ifDir) {
+        const p = this.matchCheckSync(e, ifDir);
+        if (p)
+            this.matchFinish(p, absolute);
+    }
+    walkCB(target, patterns, cb) {
+        /* c8 ignore start */
+        if (this.signal?.aborted)
+            cb();
+        /* c8 ignore stop */
+        this.walkCB2(target, patterns, new processor_js_1.Processor(this.opts), cb);
+    }
+    walkCB2(target, patterns, processor, cb) {
+        if (this.#childrenIgnored(target))
+            return cb();
+        if (this.signal?.aborted)
+            cb();
+        if (this.paused) {
+            this.onResume(() => this.walkCB2(target, patterns, processor, cb));
+            return;
+        }
+        processor.processPatterns(target, patterns);
+        // done processing.  all of the above is sync, can be abstracted out.
+        // subwalks is a map of paths to the entry filters they need
+        // matches is a map of paths to [absolute, ifDir] tuples.
+        let tasks = 1;
+        const next = () => {
+            if (--tasks === 0)
+                cb();
+        };
+        for (const [m, absolute, ifDir] of processor.matches.entries()) {
+            if (this.#ignored(m))
+                continue;
+            tasks++;
+            this.match(m, absolute, ifDir).then(() => next());
+        }
+        for (const t of processor.subwalkTargets()) {
+            if (this.maxDepth !== Infinity && t.depth() >= this.maxDepth) {
+                continue;
+            }
+            tasks++;
+            const childrenCached = t.readdirCached();
+            if (t.calledReaddir())
+                this.walkCB3(t, childrenCached, processor, next);
+            else {
+                t.readdirCB((_, entries) => this.walkCB3(t, entries, processor, next), true);
+            }
+        }
+        next();
+    }
+    walkCB3(target, entries, processor, cb) {
+        processor = processor.filterEntries(target, entries);
+        let tasks = 1;
+        const next = () => {
+            if (--tasks === 0)
+                cb();
+        };
+        for (const [m, absolute, ifDir] of processor.matches.entries()) {
+            if (this.#ignored(m))
+                continue;
+            tasks++;
+            this.match(m, absolute, ifDir).then(() => next());
+        }
+        for (const [target, patterns] of processor.subwalks.entries()) {
+            tasks++;
+            this.walkCB2(target, patterns, processor.child(), next);
+        }
+        next();
+    }
+    walkCBSync(target, patterns, cb) {
+        /* c8 ignore start */
+        if (this.signal?.aborted)
+            cb();
+        /* c8 ignore stop */
+        this.walkCB2Sync(target, patterns, new processor_js_1.Processor(this.opts), cb);
+    }
+    walkCB2Sync(target, patterns, processor, cb) {
+        if (this.#childrenIgnored(target))
+            return cb();
+        if (this.signal?.aborted)
+            cb();
+        if (this.paused) {
+            this.onResume(() => this.walkCB2Sync(target, patterns, processor, cb));
+            return;
+        }
+        processor.processPatterns(target, patterns);
+        // done processing.  all of the above is sync, can be abstracted out.
+        // subwalks is a map of paths to the entry filters they need
+        // matches is a map of paths to [absolute, ifDir] tuples.
+        let tasks = 1;
+        const next = () => {
+            if (--tasks === 0)
+                cb();
+        };
+        for (const [m, absolute, ifDir] of processor.matches.entries()) {
+            if (this.#ignored(m))
+                continue;
+            this.matchSync(m, absolute, ifDir);
+        }
+        for (const t of processor.subwalkTargets()) {
+            if (this.maxDepth !== Infinity && t.depth() >= this.maxDepth) {
+                continue;
+            }
+            tasks++;
+            const children = t.readdirSync();
+            this.walkCB3Sync(t, children, processor, next);
+        }
+        next();
+    }
+    walkCB3Sync(target, entries, processor, cb) {
+        processor = processor.filterEntries(target, entries);
+        let tasks = 1;
+        const next = () => {
+            if (--tasks === 0)
+                cb();
+        };
+        for (const [m, absolute, ifDir] of processor.matches.entries()) {
+            if (this.#ignored(m))
+                continue;
+            this.matchSync(m, absolute, ifDir);
+        }
+        for (const [target, patterns] of processor.subwalks.entries()) {
+            tasks++;
+            this.walkCB2Sync(target, patterns, processor.child(), next);
+        }
+        next();
+    }
+}
+exports.GlobUtil = GlobUtil;
+class GlobWalker extends GlobUtil {
+    matches = new Set();
+    constructor(patterns, path, opts) {
+        super(patterns, path, opts);
+    }
+    matchEmit(e) {
+        this.matches.add(e);
+    }
+    async walk() {
+        if (this.signal?.aborted)
+            throw this.signal.reason;
+        if (this.path.isUnknown()) {
+            await this.path.lstat();
+        }
+        await new Promise((res, rej) => {
+            this.walkCB(this.path, this.patterns, () => {
+                if (this.signal?.aborted) {
+                    rej(this.signal.reason);
+                }
+                else {
+                    res(this.matches);
+                }
+            });
+        });
+        return this.matches;
+    }
+    walkSync() {
+        if (this.signal?.aborted)
+            throw this.signal.reason;
+        if (this.path.isUnknown()) {
+            this.path.lstatSync();
+        }
+        // nothing for the callback to do, because this never pauses
+        this.walkCBSync(this.path, this.patterns, () => {
+            if (this.signal?.aborted)
+                throw this.signal.reason;
+        });
+        return this.matches;
+    }
+}
+exports.GlobWalker = GlobWalker;
+class GlobStream extends GlobUtil {
+    results;
+    constructor(patterns, path, opts) {
+        super(patterns, path, opts);
+        this.results = new minipass_1.Minipass({
+            signal: this.signal,
+            objectMode: true,
+        });
+        this.results.on('drain', () => this.resume());
+        this.results.on('resume', () => this.resume());
+    }
+    matchEmit(e) {
+        this.results.write(e);
+        if (!this.results.flowing)
+            this.pause();
+    }
+    stream() {
+        const target = this.path;
+        if (target.isUnknown()) {
+            target.lstat().then(() => {
+                this.walkCB(target, this.patterns, () => this.results.end());
+            });
+        }
+        else {
+            this.walkCB(target, this.patterns, () => this.results.end());
+        }
+        return this.results;
+    }
+    streamSync() {
+        if (this.path.isUnknown()) {
+            this.path.lstatSync();
+        }
+        this.walkCBSync(this.path, this.patterns, () => this.results.end());
+        return this.results;
+    }
+}
+exports.GlobStream = GlobStream;
+//# sourceMappingURL=walker.js.map
+
+/***/ }),
+
+/***/ 8895:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -74193,7 +76668,7 @@ exports.assertValidPattern = assertValidPattern;
 
 /***/ }),
 
-/***/ 6215:
+/***/ 20857:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -74201,8 +76676,8 @@ exports.assertValidPattern = assertValidPattern;
 // parse a single path portion
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AST = void 0;
-const brace_expressions_js_1 = __nccwpck_require__(10038);
-const unescape_js_1 = __nccwpck_require__(18047);
+const brace_expressions_js_1 = __nccwpck_require__(65192);
+const unescape_js_1 = __nccwpck_require__(9829);
 const types = new Set(['!', '?', '+', '*', '@']);
 const isExtglobType = (c) => types.has(c);
 // Patterns that get prepended to bind to the start of either the
@@ -74792,7 +77267,7 @@ exports.AST = AST;
 
 /***/ }),
 
-/***/ 10038:
+/***/ 65192:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -74951,7 +77426,7 @@ exports.parseClass = parseClass;
 
 /***/ }),
 
-/***/ 96076:
+/***/ 76726:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -74980,7 +77455,7 @@ exports.escape = escape;
 
 /***/ }),
 
-/***/ 85207:
+/***/ 91409:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -74990,11 +77465,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.unescape = exports.escape = exports.AST = exports.Minimatch = exports.match = exports.makeRe = exports.braceExpand = exports.defaults = exports.filter = exports.GLOBSTAR = exports.sep = exports.minimatch = void 0;
-const brace_expansion_1 = __importDefault(__nccwpck_require__(45177));
-const assert_valid_pattern_js_1 = __nccwpck_require__(30013);
-const ast_js_1 = __nccwpck_require__(6215);
-const escape_js_1 = __nccwpck_require__(96076);
-const unescape_js_1 = __nccwpck_require__(18047);
+const brace_expansion_1 = __importDefault(__nccwpck_require__(68497));
+const assert_valid_pattern_js_1 = __nccwpck_require__(8895);
+const ast_js_1 = __nccwpck_require__(20857);
+const escape_js_1 = __nccwpck_require__(76726);
+const unescape_js_1 = __nccwpck_require__(9829);
 const minimatch = (p, pattern, options = {}) => {
     (0, assert_valid_pattern_js_1.assertValidPattern)(pattern);
     // shortcut: comments match nothing.
@@ -75989,11 +78464,11 @@ class Minimatch {
 }
 exports.Minimatch = Minimatch;
 /* c8 ignore start */
-var ast_js_2 = __nccwpck_require__(6215);
+var ast_js_2 = __nccwpck_require__(20857);
 Object.defineProperty(exports, "AST", ({ enumerable: true, get: function () { return ast_js_2.AST; } }));
-var escape_js_2 = __nccwpck_require__(96076);
+var escape_js_2 = __nccwpck_require__(76726);
 Object.defineProperty(exports, "escape", ({ enumerable: true, get: function () { return escape_js_2.escape; } }));
-var unescape_js_2 = __nccwpck_require__(18047);
+var unescape_js_2 = __nccwpck_require__(9829);
 Object.defineProperty(exports, "unescape", ({ enumerable: true, get: function () { return unescape_js_2.unescape; } }));
 /* c8 ignore stop */
 exports.minimatch.AST = ast_js_1.AST;
@@ -76004,7 +78479,7 @@ exports.minimatch.unescape = unescape_js_1.unescape;
 
 /***/ }),
 
-/***/ 18047:
+/***/ 9829:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -77205,32 +79680,72 @@ exports.constants = Object.freeze(Object.assign(Object.create(null), {
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.BrotliDecompress = exports.BrotliCompress = exports.Brotli = exports.Unzip = exports.InflateRaw = exports.DeflateRaw = exports.Gunzip = exports.Gzip = exports.Inflate = exports.Deflate = exports.Zlib = exports.ZlibError = exports.constants = void 0;
+exports.ZstdDecompress = exports.ZstdCompress = exports.BrotliDecompress = exports.BrotliCompress = exports.Unzip = exports.InflateRaw = exports.DeflateRaw = exports.Gunzip = exports.Gzip = exports.Inflate = exports.Deflate = exports.Zlib = exports.ZlibError = exports.constants = void 0;
 const assert_1 = __importDefault(__nccwpck_require__(42613));
 const buffer_1 = __nccwpck_require__(20181);
 const minipass_1 = __nccwpck_require__(78275);
-const zlib_1 = __importDefault(__nccwpck_require__(43106));
+const realZlib = __importStar(__nccwpck_require__(43106));
 const constants_js_1 = __nccwpck_require__(5474);
 var constants_js_2 = __nccwpck_require__(5474);
 Object.defineProperty(exports, "constants", ({ enumerable: true, get: function () { return constants_js_2.constants; } }));
 const OriginalBufferConcat = buffer_1.Buffer.concat;
+const desc = Object.getOwnPropertyDescriptor(buffer_1.Buffer, 'concat');
+const noop = (args) => args;
+const passthroughBufferConcat = desc?.writable === true || desc?.set !== undefined
+    ? (makeNoOp) => {
+        buffer_1.Buffer.concat = makeNoOp ? noop : OriginalBufferConcat;
+    }
+    : (_) => { };
 const _superWrite = Symbol('_superWrite');
 class ZlibError extends Error {
     code;
     errno;
-    constructor(err) {
-        super('zlib: ' + err.message);
+    constructor(err, origin) {
+        super('zlib: ' + err.message, { cause: err });
         this.code = err.code;
         this.errno = err.errno;
         /* c8 ignore next */
         if (!this.code)
             this.code = 'ZLIB_ERROR';
         this.message = 'zlib: ' + err.message;
-        Error.captureStackTrace(this, this.constructor);
+        Error.captureStackTrace(this, origin ?? this.constructor);
     }
     get name() {
         return 'ZlibError';
@@ -77271,15 +79786,19 @@ class ZlibBase extends minipass_1.Minipass {
         this.#finishFlushFlag = opts.finishFlush ?? 0;
         this.#fullFlushFlag = opts.fullFlushFlag ?? 0;
         /* c8 ignore stop */
+        //@ts-ignore
+        if (typeof realZlib[mode] !== 'function') {
+            throw new TypeError('Compression method not supported: ' + mode);
+        }
         // this will throw if any options are invalid for the class selected
         try {
             // @types/node doesn't know that it exports the classes, but they're there
             //@ts-ignore
-            this.#handle = new zlib_1.default[mode](opts);
+            this.#handle = new realZlib[mode](opts);
         }
         catch (er) {
             // make sure that all errors get decorated properly
-            throw new ZlibError(er);
+            throw new ZlibError(er, this.constructor);
         }
         this.#onError = err => {
             // no sense raising multiple errors, since we abort on the first one.
@@ -77365,7 +79884,7 @@ class ZlibBase extends minipass_1.Minipass {
         this.#handle.close = () => { };
         // It also calls `Buffer.concat()` at the end, which may be convenient
         // for some, but which we are not interested in as it slows us down.
-        buffer_1.Buffer.concat = args => args;
+        passthroughBufferConcat(true);
         let result = undefined;
         try {
             const flushFlag = typeof chunk[_flushFlag] === 'number'
@@ -77373,13 +79892,13 @@ class ZlibBase extends minipass_1.Minipass {
                 : this.#flushFlag;
             result = this.#handle._processChunk(chunk, flushFlag);
             // if we don't throw, reset it back how it was
-            buffer_1.Buffer.concat = OriginalBufferConcat;
+            passthroughBufferConcat(false);
         }
         catch (err) {
             // or if we do, put Buffer.concat() back before we emit error
             // Error events call into user code, which may call Buffer.concat()
-            buffer_1.Buffer.concat = OriginalBufferConcat;
-            this.#onError(new ZlibError(err));
+            passthroughBufferConcat(false);
+            this.#onError(new ZlibError(err, this.write));
         }
         finally {
             if (this.#handle) {
@@ -77398,7 +79917,7 @@ class ZlibBase extends minipass_1.Minipass {
             }
         }
         if (this.#handle)
-            this.#handle.on('error', er => this.#onError(new ZlibError(er)));
+            this.#handle.on('error', er => this.#onError(new ZlibError(er, this.write)));
         let writeReturn;
         if (result) {
             if (Array.isArray(result) && result.length > 0) {
@@ -77542,7 +80061,6 @@ class Brotli extends ZlibBase {
         super(opts, mode);
     }
 }
-exports.Brotli = Brotli;
 class BrotliCompress extends Brotli {
     constructor(opts) {
         super(opts, 'BrotliCompress');
@@ -77555,6 +80073,27 @@ class BrotliDecompress extends Brotli {
     }
 }
 exports.BrotliDecompress = BrotliDecompress;
+class Zstd extends ZlibBase {
+    constructor(opts, mode) {
+        opts = opts || {};
+        opts.flush = opts.flush || constants_js_1.constants.ZSTD_e_continue;
+        opts.finishFlush = opts.finishFlush || constants_js_1.constants.ZSTD_e_end;
+        opts.fullFlushFlag = constants_js_1.constants.ZSTD_e_flush;
+        super(opts, mode);
+    }
+}
+class ZstdCompress extends Zstd {
+    constructor(opts) {
+        super(opts, 'ZstdCompress');
+    }
+}
+exports.ZstdCompress = ZstdCompress;
+class ZstdDecompress extends Zstd {
+    constructor(opts) {
+        super(opts, 'ZstdDecompress');
+    }
+}
+exports.ZstdDecompress = ZstdDecompress;
 //# sourceMappingURL=index.js.map
 
 /***/ }),
@@ -81137,7 +83676,7 @@ exports.LRUCache = LRUCache;
 /***/ ((module) => {
 
 "use strict";
-module.exports = {"rE":"3.0.0"};
+module.exports = {"rE":"3.1.0"};
 
 /***/ }),
 
@@ -81225,7 +83764,7 @@ module.exports = /*#__PURE__*/JSON.parse('{"name":"make-fetch-happen","version":
 /***/ ((module) => {
 
 "use strict";
-module.exports = {"rE":"4.0.0"};
+module.exports = {"rE":"4.0.1"};
 
 /***/ })
 
